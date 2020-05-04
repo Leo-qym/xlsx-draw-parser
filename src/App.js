@@ -1,26 +1,23 @@
 import React from 'react';
-import logo from './logo.svg';
+import { setDev } from './config/setDev';
+import { Button } from '@material-ui/core';
+import { dropModal } from './components/dialogs/dragDropModal';
+import { loadFile } from './functions/fileLoader';
+import { spreadSheetParser } from './functions/spreadSheetParser';
 import './App.css';
+
+setDev();
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <Button onClick={()=>dropModal({callback: handleCallback})}>Load Spreadsheet</Button>
       </header>
     </div>
   );
 }
+
+function handleCallback(file) { loadFile(file, spreadSheetParser); }
 
 export default App;
