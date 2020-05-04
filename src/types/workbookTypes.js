@@ -19,12 +19,12 @@ export const workbookTypes = [
       },
       columnsMap: {
         position:   'A',
-        rank:       'C',
-        id:         'D',
-        seed:       'E',
-        lastName:   'F',
-        firstName:  'G',
-        club:       'I',
+        rank:       '',
+        id:         '',
+        seed:       '',
+        lastName:   '',
+        firstName:  '',
+        club:       '',
         rounds:     'K'
       },
       rowDefinitions: [

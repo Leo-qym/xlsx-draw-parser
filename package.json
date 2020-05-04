@@ -11,6 +11,7 @@
     "@types/node": "^13.13.4",
     "@types/react": "^16.9.34",
     "@types/react-dom": "^16.9.7",
+    "normalize-text": "^2.0.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-dropzone-uploader": "^2.11.0",
