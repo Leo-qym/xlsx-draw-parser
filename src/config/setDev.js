@@ -1,4 +1,4 @@
-import { findValueRefs, getCol, getRow } from '../functions/spreadSheetParser';
+import { findValueRefs, getCol, getRow } from 'functions/spreadSheetParser';
 
 export function setDev() {
     window.dev = {};

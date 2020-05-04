@@ -1,7 +1,7 @@
 import XLSX from 'xlsx';
-import { addDev } from '../config/setDev';
-import { workbookTypes } from '../types/workbookTypes';
-import { HEADER, FOOTER } from '../types/sheetElements';
+import { addDev } from 'config/setDev';
+import { workbookTypes } from 'types/workbookTypes';
+import { HEADER, FOOTER } from 'types/sheetElements';
 import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS } from '../types/sheetTypes';
 
 export function spreadSheetParser(file_content) {
