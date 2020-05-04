@@ -2,6 +2,7 @@ import XLSX from 'xlsx';
 import { addDev } from '../config/setDev';
 import { workbookTypes } from '../types/workbookTypes';
 import { HEADER, FOOTER } from '../types/sheetElements';
+import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS } from '../types/sheetTypes';
 
 export function spreadSheetParser(file_content) {
   const workbook = XLSX.read(file_content, { type: 'binary' });
@@ -18,7 +19,9 @@ export function spreadSheetParser(file_content) {
     sheets.forEach(sheetName => {
       const sheet = workbook.Sheets[sheetName];
       const sheetDefinition = identifySheet({sheetName, sheet, profile});
-      if (sheetDefinition) {
+      if (!sheetDefinition) {
+        console.log('sheetDefinition not found:', {sheetName})
+      } else if (sheetDefinition.type === KNOCKOUT) {
         const rowDefinitions = profile.rowDefinitions;
         const headerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: HEADER });
         const footerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: FOOTER });
@@ -28,6 +31,16 @@ export function spreadSheetParser(file_content) {
         const {range} = getPlayerRows({sheetName, sheet, profile, headerRow, footerRow});
         const message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
         console.log(message, 'color: yellow', range)
+      } else if (sheetDefinition.type === ROUND_ROBIN) {
+        const rowDefinitions = profile.rowDefinitions;
+        const headerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: HEADER });
+        const footerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: FOOTER });
+        const message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
+        console.log(message, 'color: yellow')
+        console.log({headerRowDefinition, footerRowDefinition})
+      } else if (sheetDefinition.type === PARTICIPANTS) {
+        const message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
+        console.log(message, 'color: yellow')
       } else {
         console.log('sheetDefinition not found:', {sheetName})
       }
@@ -70,7 +83,11 @@ function findRow({sheet, rowDefinition}) {
   if (!rowElements) return;
   const options = { lowerCase: true, remove: [':'] };
   const elementRows = [].concat(...rowElements
-    .map(element => findValueRefs(element, sheet, options).map(getRow))
+    .map(element => {
+      const valueRefs = findValueRefs(element, sheet, options);
+      // remove duplicate instances on the same row
+      return unique(valueRefs.map(getRow));
+    })
     .filter(f=>f.length));
   const valueCounts = instanceCount(elementRows);
   const elementInstances = Math.max(0, ...Object.values(valueCounts));
@@ -132,6 +149,7 @@ function maxInstance(values) {
 }
 function instanceCount(values) { return values.reduce((a, c) => { if (!a[c]) a[c] = 0; a[c]++; return a; }, {}); }
 function validRanking(value) { return /^\d+$/.test(value) || /^MR\d+$/.test(value); }
+function unique(arr) { return arr.filter((item, i, s) => s.lastIndexOf(item) === i); }
 // const inDrawColumns = (ref, round_columns) => round_columns.indexOf(ref[0]) >= 0;
 // const inDrawRows = (ref, range) => getRow(ref) >= +range[0] && getRow(ref) <= +range[1];
 function cellsContaining({sheet, term}) {

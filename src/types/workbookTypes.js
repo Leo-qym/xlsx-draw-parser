@@ -1,5 +1,5 @@
 import { HEADER, FOOTER } from './sheetElements';
-import { KNOCKOUT, ROUND_ROBIN } from './sheetTypes';
+import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS } from './sheetTypes';
 
 export const workbookTypes = [
   {
@@ -49,6 +49,26 @@ export const workbookTypes = [
           minimumElements: 7
         },
         {
+          type: HEADER,
+          id: 'singlesParticipants',
+          elements: [
+            'sor', 'családi név', 'keresztnév', 'egyesület', 'kódszám',
+            'aláírás', 'nevezési rangsor', 'elfogadási státusz',
+            'sorsolási rangsor', 'kiemelés'
+          ],
+          minimumElements: 8
+        },
+        {
+          type: HEADER,
+          id: 'doublesParticipants',
+          elements: [
+            'ssz.', 'családi név', 'keresztnév', 'egyesületi', 'kódszám',
+            '1. játékos ranglista', 'aláírás', '2. játékos ranglista',
+            'páros egyesített rangsora', 'kIemelés'
+          ],
+          minimumElements: 8
+        },
+        {
           type: FOOTER,
           id: 'drawFooter',
           elements: [
@@ -68,6 +88,14 @@ export const workbookTypes = [
         {
           type: ROUND_ROBIN,
           rowIds: ['roundRobinParticipants', 'drawFooter']
+        },
+        {
+          type: PARTICIPANTS,
+          rowIds: ['singlesParticipants']
+        },
+        {
+          type: PARTICIPANTS,
+          rowIds: ['doublesParticipants']
         }
       ],
       gaps: { draw:     { term: 'Round 1', gap: 0 } },
