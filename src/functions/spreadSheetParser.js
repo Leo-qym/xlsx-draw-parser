@@ -15,14 +15,32 @@ export function spreadSheetParser(file_content) {
     const profile = workbookType.profile;
     const sheetsToProcess = sheets.filter(sheet => workbookType.validSheet(sheet));
     addDev({sheetsToProcess})
-    sheetsToProcess.forEach(sheetName => {
+    sheets.forEach(sheetName => {
       const sheet = workbook.Sheets[sheetName];
-      const headerRow = findRow({sheet, profile, rowName: HEADER});
-      const footerRow = findRow({sheet, profile, rowName: FOOTER});
-      const {rows, range, finals, preround_rows} = getPlayerRows({sheetName, sheet, profile, headerRow, footerRow});
-      console.log({rows, range, finals, preround_rows })
+      const sheetDefinition = identifySheet({sheetName, sheet, profile});
+      if (sheetDefinition) {
+        const rowDefinitions = profile.rowDefinitions;
+        const headerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: HEADER });
+        const footerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: FOOTER });
+        // console.log({sheetName, sheetDefinition, headerRowDefinition, footerRowDefinition});
+        
+        const headerRow = findRow({sheet, rowDefinition: headerRowDefinition});
+        const footerRow = findRow({sheet, rowDefinition: footerRowDefinition});
+        const {range} = getPlayerRows({sheetName, sheet, profile, headerRow, footerRow});
+        console.log('range', range);
+      } else {
+        console.log('sheetDefinition not found:', {sheetName})
+      }
     });
   }
+}
+
+function findRowDefinition({rowDefinitions, rowIds, type}) {
+  return rowDefinitions.reduce((headerDefinition, currentDefinition) => {
+    if (currentDefinition.type !== type) return headerDefinition;
+    if (!rowIds.includes(currentDefinition.id)) return headerDefinition;
+    return currentDefinition;
+  }, undefined);
 }
 
 function identifyWorkbook({sheets}) {
@@ -34,8 +52,21 @@ function identifyWorkbook({sheets}) {
   }, undefined);
 }
 
-function findRow({sheet, profile, rowName}) {
-  const rowElements = profile.rows && profile.rows[rowName] && profile.rows[rowName].elements;
+function identifySheet({sheet, profile}) {
+  const sheetDefinitions = profile.sheetDefinitions;
+  const rowDefinitions = profile.rowDefinitions;
+  const rowIds = rowDefinitions.reduce((rowIds, rowDefinition) => {
+    const row = findRow({sheet, rowDefinition});
+    return row ? rowIds.concat(rowDefinition.id) : rowIds;
+  }, []).filter(f=>f);
+  return sheetDefinitions.reduce((sheetDefinition, currentDefinition) => {
+    const exactMatch = currentDefinition.rowIds.reduce((result, rowId) => rowIds.includes(rowId) && result, true );
+    return exactMatch ? currentDefinition : sheetDefinition;
+  }, undefined);
+}
+
+function findRow({sheet, rowDefinition}) {
+  const rowElements = rowDefinition && rowDefinition.elements;
   if (!rowElements) return;
   const options = { lowerCase: true, remove: [':'] };
   const elementRows = [].concat(...rowElements
@@ -43,7 +74,7 @@ function findRow({sheet, profile, rowName}) {
     .filter(f=>f.length));
   const valueCounts = instanceCount(elementRows);
   const elementInstances = Math.max(0, ...Object.values(valueCounts));
-  if (elementInstances >= profile.rows[rowName].minimumElements) {
+  if (elementInstances >= rowDefinition.minimumElements) {
     return Object.keys(valueCounts).reduce((p, c) => valueCounts[c] === elementInstances ? c : p, undefined);
   }
 }
@@ -130,8 +161,8 @@ function findGaps({sheet, term}) {
 
 function getPlayerRows({sheetName, sheet, profile, headerRow, footerRow}) {
   if (!profile) return { rows: [], preround_rows: [] };
-  let columns = getHeaderColumns({sheet, profile, headerRow});
-  console.log({columns});
+  const columns = getHeaderColumns({sheet, profile, headerRow});
+  const skipWords = profile.skipWords;
 
   const inRowBand = key => {
     const row = key && getRow(key);
@@ -151,20 +182,28 @@ function getPlayerRows({sheetName, sheet, profile, headerRow, footerRow}) {
   const filteredKeys = Object.keys(sheet).filter(inRowBand).filter(isSingleAlpha);
   const targetColumn = (key, column) => getCol(key) === columns[column];
 
+  const isNotSkipWord = key => {
+    const value = cellValue(sheet[key]);
+    const isSkipWord = (skipWords || [])
+      .map(skipWord=>skipWord.toLowerCase())
+      .includes(value.toLowerCase());
+    return !isSkipWord;
+  }
+
   let rr_result = [];
-  let player_names = filteredKeys.filter(key => targetColumn(key, 'players')).filter(isStringValue).map(getRow);
+  let playerNames = filteredKeys.filter(key => targetColumn(key, 'players')).filter(isStringValue).map(getRow);
   let firstNames = filteredKeys.filter(key => targetColumn(key, 'firstName')).filter(isStringValue).map(getRow);
   let lastNames = filteredKeys.filter(key => targetColumn(key, 'lastName')).filter(isStringValue).map(getRow);
-  let clubs = filteredKeys.filter(key => targetColumn(key, 'club')).filter(isStringValue).map(getRow);
+  let clubs = filteredKeys.filter(key => targetColumn(key, 'club')).filter(isStringValue).filter(isNotSkipWord).map(getRow);
   let ids = filteredKeys.filter(key => targetColumn(key, 'id')).filter(isStringValue).map(getRow);
   let seeds = filteredKeys.filter(key => targetColumn(key, 'seed')).filter(isNumericValue).map(getRow);
-  let drawPositions = filteredKeys.filter(key => targetColumn(key, 'position')).filter(isNumericValue).map(getRow);
+  let drawPositions = filteredKeys.filter(key => targetColumn(key, 'position')).map(getRow);
   let rankings = filteredKeys
     .filter(key => targetColumn(key, 'rank') && validRanking(cellValue(sheet[key]))).map(getRow);
     
   let finals;
   
-  console.log({ids, player_names, firstNames, lastNames, drawPositions, seeds, clubs, rankings});
+  console.log({ids, playerNames, firstNames, lastNames, drawPositions, seeds, clubs, rankings});
 
   // check whether this is Round Robin
   if (columns.rr_result) {
@@ -175,17 +214,19 @@ function getPlayerRows({sheetName, sheet, profile, headerRow, footerRow}) {
      rankings = rankings.filter(f => rr_result.indexOf(f) >= 0);
   }
 
-  let sources = [ids, seeds, firstNames, lastNames, drawPositions, rankings, rr_result];
+  let sources = [ids, seeds, firstNames, lastNames, drawPositions, rankings, clubs, rr_result];
 
   // Necessary for finding all player rows in TP Doubles Draws
-  if (profile.player_rows && profile.player_rows.player_names) {
+  /*
+  if (profile.playerRows && profile.playerRows.playerNames) {
      let additions = [];
-     player_names.forEach(f => {
+     playerNames.forEach(f => {
         // additions is just a counter
         if (cellValue(sheet[`${columns.players}${f}`]).toLowerCase() === 'bye') additions.push(f - 1); 
      });
-     sources.push(player_names);
+     sources.push(playerNames);
   }
+  */
 
   let rows = [].concat(...sources).filter((item, i, s) => s.lastIndexOf(item) === i).sort((a, b) => a - b);
 
@@ -202,7 +243,7 @@ function getPlayerRows({sheetName, sheet, profile, headerRow, footerRow}) {
            draw_rows = rows.filter(row => row > gap[0] && row < gap[1]);
         } else {
            // names that are within gap in round robin
-           finals = player_names.filter(row => row > gap[0] && row < gap[1]);
+           finals = playerNames.filter(row => row > gap[0] && row < gap[1]);
         }
 
         if (gaps.length > 1) {
@@ -215,7 +256,7 @@ function getPlayerRows({sheetName, sheet, profile, headerRow, footerRow}) {
 
   draw_rows = draw_rows || rows;
 
-  const startRows = sources.map(source => source[0]);
+  const startRows = sources.map(source => source[0]).filter(f=>f);
   const startRow = parseInt(maxInstance(startRows));
   let range = [startRow, draw_rows[draw_rows.length - 1]];
   

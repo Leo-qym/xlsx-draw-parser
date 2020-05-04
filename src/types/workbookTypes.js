@@ -1,48 +1,75 @@
+import { HEADER, FOOTER } from './sheetElements';
+import { KNOCKOUT, ROUND_ROBIN } from './sheetTypes';
+
 export const workbookTypes = [
   {
     organization: 'MTSZ', 
     mustContainSheetNames: ['Altalanos'],
     validSheet:  sheetName => {
-      const matchesStart = sheetName.length && ['F', 'L'].includes(sheetName[0]);
-      const matchesEnd = ['F', 'P', 'Q'].includes(sheetName[sheetName.length-1]);
-      return matchesStart && matchesEnd;
+      const knockout = /^[FL]{1}[1-8]{2}/.test(sheetName);
+      const roundRobin = /^[1-8]{1}\.*cs/.test(sheetName);
+      const rrPlayoff = /^[1-8]{1}\.*nap/.test(sheetName);
+      return knockout || (roundRobin || rrPlayoff);
     },
     profile: {
+      skipWords: ['umpire'],
       identification: {
-          includes: [],
-          sub_includes: []
+        includes: [],
+        sub_includes: []
       },
       columnsMap: {
-          position:   'A',
-          rank:       'C',
-          id:         'D',
-          seed:       'E',
-          lastName:   'F',
-          firstName:  'G',
-          club:       'I',
-          rounds:     'K'
+        position:   'A',
+        rank:       'C',
+        id:         'D',
+        seed:       'E',
+        lastName:   'F',
+        firstName:  'G',
+        club:       'I',
+        rounds:     'K'
       },
-      rows: {
-        header: {
-          defaultRow: 5,
+      rowDefinitions: [
+        {
+          type: HEADER,
+          id: 'knockoutParticipants',
           elements: [
             'rangs', 'rangsor', 'kód', 'kódszám',
-            'kiem', 'családi név', 'Keresztnév',
+            'kiem', 'családi név', 'keresztnév',
             'egyesület', 'döntő', '2. forduló'
           ],
           minimumElements: 5
         },
-        footer: {
-          defaultRow: null,
+        {
+          type: HEADER,
+          id: 'roundRobinParticipants',
+          elements: [
+            'kiem', 'kódszám', 'rangsor',
+            'vezetéknév', 'keresztnév', 'egyesület',
+            'helyezés', 'pontszám', 'bónusz'
+          ],
+          minimumElements: 7
+        },
+        {
+          type: FOOTER,
+          id: 'drawFooter',
           elements: [
             'rangsor', 'kiemeltek', 'alternatívok',
             'helyettesítik', 'sorsolás ideje',
-            'szerencés vesztes', 'sorsolás időpontja:',
+            'szerencés vesztes', 'sorsolás időpontja',
             'kiemelt párosok'
           ],
           minimumElements: 3
         }
-      },
+      ],
+      sheetDefinitions: [
+        {
+          type: KNOCKOUT,
+          rowIds: ['knockoutParticipants', 'drawFooter']
+        },
+        {
+          type: ROUND_ROBIN,
+          rowIds: ['roundRobinParticipants', 'drawFooter']
+        }
+      ],
       gaps: { draw:     { term: 'Round 1', gap: 0 } },
       headerColumns: [
           { attr: 'rank',       header: 'Rangs' },
@@ -56,7 +83,7 @@ export const workbookTypes = [
           { attr: 'rounds',     header: 'Döntő' },
           { attr: 'rounds',     header: '2. forduló' }
       ],
-      playerRows: { lastName: true, firstName: true }
+      playerRows: { playerNames: true, lastName: true, firstName: true }
     }
   },  
   {
