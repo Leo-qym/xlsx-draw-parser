@@ -22,12 +22,12 @@ export function spreadSheetParser(file_content) {
         const rowDefinitions = profile.rowDefinitions;
         const headerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: HEADER });
         const footerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: FOOTER });
-        // console.log({sheetName, sheetDefinition, headerRowDefinition, footerRowDefinition});
         
         const headerRow = findRow({sheet, rowDefinition: headerRowDefinition});
         const footerRow = findRow({sheet, rowDefinition: footerRowDefinition});
         const {range} = getPlayerRows({sheetName, sheet, profile, headerRow, footerRow});
-        console.log('range', range);
+        const message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
+        console.log(message, 'color: yellow', range)
       } else {
         console.log('sheetDefinition not found:', {sheetName})
       }
@@ -203,7 +203,7 @@ function getPlayerRows({sheetName, sheet, profile, headerRow, footerRow}) {
     
   let finals;
   
-  console.log({ids, playerNames, firstNames, lastNames, drawPositions, seeds, clubs, rankings});
+  // console.log({ids, playerNames, firstNames, lastNames, drawPositions, seeds, clubs, rankings});
 
   // check whether this is Round Robin
   if (columns.rr_result) {
