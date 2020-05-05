@@ -1,5 +1,6 @@
 import XLSX from 'xlsx';
 import { addDev } from 'config/setDev';
+import { xlsxStore } from 'stores/xlsxStore';
 import { workbookTypes } from 'types/workbookTypes';
 import { HEADER, FOOTER } from 'types/sheetElements';
 import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS } from '../types/sheetTypes';
@@ -10,14 +11,21 @@ import { findRow, getRow, getCol, findValueRefs } from 'functions/sheetAccess.js
 
 export function spreadSheetParser(file_content) {
   const workbook = XLSX.read(file_content, { type: 'binary' });
-  addDev({workbook});
-  console.log({workbook});
   
   const sheets = workbook.SheetNames;
   const workbookType = identifyWorkbook({sheets});
   if (workbookType) {
-    addDev({workbookType});
     const profile = workbookType.profile;
+    if (!profile) {
+      xlsxStore.dispatch({
+        type: 'toaster state',
+        payload: {
+          severity: 'error',
+          message: `Missing profile for ${workbookType.organization}`
+        }
+      });
+      return;
+    }
     const sheetsToProcess = sheets.filter(sheet => workbookType.validSheet(sheet));
     addDev({sheetsToProcess})
     sheets.forEach(sheetName => {

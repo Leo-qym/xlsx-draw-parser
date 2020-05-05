@@ -1,5 +1,8 @@
+import { xlsxStore } from 'stores/xlsxStore';
+
 export function setDev() {
     window.dev = {};
+    addDev({xlsxStore});
 }
 
 let ad_errors = 0;
