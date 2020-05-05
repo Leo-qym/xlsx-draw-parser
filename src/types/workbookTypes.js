@@ -12,7 +12,7 @@ export const workbookTypes = [
       return knockout || (roundRobin || rrPlayoff);
     },
     profile: {
-      skipWords: ['umpire'],
+      skipWords: ['umpire', '1 pont', '0'],
       identification: {
         includes: [],
         sub_includes: []
@@ -124,6 +124,91 @@ export const workbookTypes = [
       const validDrawSize = ['RR', '4', '8', '12', '16', '24', '32', '48', '64']
         .includes(sheetName.slice(nameLength - 2, nameLength));
       return (Singles || Doubles) && validDrawSize;
+    },
+    profile: {
+      skipWords: ['umpire'],
+      identification: {
+        includes: [],
+        sub_includes: []
+      },
+      columnsMap: {
+        position:   'A',
+        rank:       '',
+        id:         '',
+        seed:       '',
+        players:    '',
+        club:       '',
+        rounds:     'I'
+      },
+      rowDefinitions: [
+        {
+          type: HEADER,
+          id: 'knockoutParticipants',
+          elements: [
+            'rang', 'st.', 'nositelj', 'prezime, ime', 'klub',
+            '2.kolo', '1/2 finale', 'finale', 'pobjednik'
+          ],
+          minimumElements: 5
+        },
+        {
+          type: HEADER,
+          id: 'roundRobinParticipants',
+          elements: [
+          ],
+          minimumElements: 7
+        },
+        {
+          type: HEADER,
+          id: 'singlesParticipants',
+          elements: [
+          ],
+          minimumElements: 8
+        },
+        {
+          type: HEADER,
+          id: 'doublesParticipants',
+          elements: [
+          ],
+          minimumElements: 8
+        },
+        {
+          type: FOOTER,
+          id: 'drawFooter',
+          elements: [
+            'rang-lista', '#', 'nositelji',
+            'sretni gubitnici (LL)/zamjenjuje',
+            'datum/vrijeme ždrijeba'
+          ],
+          minimumElements: 3
+        }
+      ],
+      sheetDefinitions: [
+        {
+          type: KNOCKOUT,
+          rowIds: ['knockoutParticipants', 'drawFooter']
+        },
+        {
+          type: ROUND_ROBIN,
+          rowIds: ['roundRobinParticipants', 'drawFooter']
+        },
+        {
+          type: PARTICIPANTS,
+          rowIds: ['singlesParticipants']
+        },
+        {
+          type: PARTICIPANTS,
+          rowIds: ['doublesParticipants']
+        }
+      ],
+      gaps: { draw:     { term: 'Round 1', gap: 0 } },
+      headerColumns: [
+          { attr: 'rank',       header: 'Rang' },
+          { attr: 'seed',       header: 'Nositelj' },
+          { attr: 'players',    header: 'Prezime, Ime' },
+          { attr: 'club',       header: 'Klub' },
+          { attr: 'rounds',     header: '2.kolo' }
+      ],
+      playerRows: { playerNames: true, lastName: true, firstName: true }
     }
   }  
 ];

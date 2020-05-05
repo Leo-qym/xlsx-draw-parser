@@ -18,14 +18,18 @@ let players = [];
 
      let player = extractPlayer(row, draw_position);
 
-     if (['', 'bye', 'byebye'].indexOf(player.hash) >= 0) {
-        players.push(player);
-     } else if (['', 'bye', 'byebye'].indexOf(player.hash) < 0 && hasharray.indexOf(player.hash) < 0) {
-        hasharray.push(player.hash);
-        players.push(player);
+     if (['bye,', 'bye', 'byebye'].indexOf(player.hash) >= 0) {
+       players.push(player);
+     } else if (
+         ['', 'bye', 'byebye'].indexOf(player.hash) < 0 &&
+         hasharray.indexOf(player.hash) < 0 &&
+         player.first_name && player.last_name
+       ) {
+       hasharray.push(player.hash);
+       players.push(player);
      } else {
-        playoff3rd_rows.push(row);
-        playoff3rd.push(player);
+       playoff3rd_rows.push(row);
+       playoff3rd.push(player);
      }
   });
 

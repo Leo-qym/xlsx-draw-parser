@@ -33,20 +33,17 @@ export function getParticipantRows({sheet, profile, headerRow, footerRow, column
   }
 
   let rr_result = [];
-  let playerNames = filteredKeys.filter(key => targetColumn(key, 'players')).filter(isStringValue).map(getRow);
-  let firstNames = filteredKeys.filter(key => targetColumn(key, 'firstName')).filter(isStringValue).map(getRow);
-  let lastNames = filteredKeys.filter(key => targetColumn(key, 'lastName')).filter(isStringValue).map(getRow);
+  let playerNames = filteredKeys.filter(key => targetColumn(key, 'players')).filter(isStringValue).filter(isNotSkipWord).map(getRow);
+  let firstNames = filteredKeys.filter(key => targetColumn(key, 'firstName')).filter(isStringValue).filter(isNotSkipWord).map(getRow);
+  let lastNames = filteredKeys.filter(key => targetColumn(key, 'lastName')).filter(isStringValue).filter(isNotSkipWord).map(getRow);
   let clubs = filteredKeys.filter(key => targetColumn(key, 'club')).filter(isStringValue).filter(isNotSkipWord).map(getRow);
-  let ids = filteredKeys.filter(key => targetColumn(key, 'id')).filter(isStringValue).map(getRow);
+  let ids = filteredKeys.filter(key => targetColumn(key, 'id')).filter(isStringValue).filter(isNotSkipWord).map(getRow);
   let seeds = filteredKeys.filter(key => targetColumn(key, 'seed')).filter(isNumericValue).map(getRow);
   let drawPositions = filteredKeys.filter(key => targetColumn(key, 'position')).map(getRow);
-  let rankings = filteredKeys
-    .filter(key => targetColumn(key, 'rank') && validRanking(cellValue(sheet[key]))).map(getRow);
+  let rankings = filteredKeys.filter(key => targetColumn(key, 'rank') && validRanking(cellValue(sheet[key]))).map(getRow);
     
   let finals;
   
-  // console.log({ids, playerNames, firstNames, lastNames, drawPositions, seeds, clubs, rankings});
-
   // check whether this is Round Robin
   if (columns.rr_result) {
      rr_result = Object.keys(sheet)

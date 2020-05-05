@@ -68,8 +68,8 @@ export function roundData({sheet, columns, headerRow, profile, player_data, roun
 };
 
 // eslint-disable-next-line 
-const scoreMatching = /[\d\(]+[\d\.\(\)\[\]\\ \:\-\,\/O]+(Ret)?(ret)?(RET)?[\.]*$/;
-const outcomes = ['ret.', 'RET', 'DEF.', 'Def.', 'def.', 'BYE', 'w.o', 'w.o.', 'W.O', 'W.O.', 'wo.', 'WO', 'Abandoned'];
+export const scoreMatching = /[\d\(]+[\d\.\(\)\[\]\\ \:\-\,\/O]+(Ret)?(ret)?(RET)?[\.]*$/;
+export const matchOutcomes = ['ret.', 'RET', 'DEF.', 'Def.', 'def.', 'BYE', 'w.o', 'w.o.', 'W.O', 'W.O.', 'wo.', 'WO', 'Abandoned'];
 
 export function scoreOrPlayer({cell_value, players}) {
   // TODO: more robust way of handling 'nije igrano' or 'not recorded' situations
@@ -79,7 +79,7 @@ export function scoreOrPlayer({cell_value, players}) {
   if (draw_position) return true;
   let score = cell_value.match(scoreMatching);
   if (score && score[0] === cell_value) return true;
-  let ended = outcomes.map(ending => cell_value.toLowerCase().indexOf(ending.toLowerCase()) >= 0).reduce((a, b) => a || b);
+  let ended = matchOutcomes.map(ending => cell_value.toLowerCase().indexOf(ending.toLowerCase()) >= 0).reduce((a, b) => a || b);
   if (ended) return true;
 
   console.log('Not Score or Player:', cell_value);

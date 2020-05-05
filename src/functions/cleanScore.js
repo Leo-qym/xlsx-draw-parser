@@ -1,9 +1,3 @@
-export function normalizeScore(score) {
-  let clean_score = cleanScore.normalize(score);
-  if (clean_score) return clean_score.join(' ');
-  return score;
-};
-
 export const cleanScore = function() {
 
    // eslint-disable-next-line no-useless-escape
@@ -204,3 +198,9 @@ export const cleanScore = function() {
    return { walkout: wo, normalize, endedEarly };
  
 }();
+
+export function normalizeScore(score) {
+  let clean_score = cleanScore.normalize(score);
+  if (clean_score) return clean_score.join(' ');
+  return score;
+};

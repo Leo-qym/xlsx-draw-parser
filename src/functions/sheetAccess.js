@@ -1,3 +1,4 @@
+import { normalizeName } from 'normalize-text'
 import { unique, instanceCount } from 'functions/utilities';
 
 export function numberValue(sheet, reference) {
@@ -27,6 +28,7 @@ export function findValueRefs(searchText, sheet, options) {
   function transformValue(value) {
     if (options) {
       if (options.lowerCase) value = value.toLowerCase();
+      if (options.normalize) value = normalizeName(value);
       if (options.remove && Array.isArray(options.remove)) {
         options.remove.forEach(replace => {
           const re = new RegExp(replace,"g");
@@ -42,8 +44,10 @@ export function findValueRefs(searchText, sheet, options) {
 export function findRow({sheet, rowDefinition}) {
   const rowElements = rowDefinition && rowDefinition.elements;
   if (!rowElements) return;
-  const options = { lowerCase: true, remove: [':'] };
+  const options = { lowerCase: true, normalize: true, remove: [':'] };
   const elementRows = [].concat(...rowElements
+    .map(element => options.lowerCase ? element.toLowerCase() : element)
+    .map(element => options.normalize ? normalizeName(element) : element)
     .map(element => {
       const valueRefs = findValueRefs(element, sheet, options);
       // remove duplicate instances on the same row
