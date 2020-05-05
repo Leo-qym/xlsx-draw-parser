@@ -40,12 +40,12 @@ export function constructMatches({ rounds, players }) {
         let round_matches = [];
         let round_winners = [];
         round.forEach(match => {
-           let player = match.winners ? match.winners[0] : match.bye ? match.bye[0] : match.players[0];
+           let player = match.winners ? match.winners[0] : match.bye ? match.bye[0] : match.players && match.players[0];
            round_winners.push(player);
            round_matches.push(match);
         });
         let previous_round_players = rounds[index + 1].map(match => {
-           return match.winners ? match.winners[0] : match.bye ? match.bye[0] : match.players[0];
+           return match.winners ? match.winners[0] : match.bye ? match.bye[0] : match.players && match.players[0];
         });
         let eliminated_players = previous_round_players.filter(player => round_winners.indexOf(player) < 0);
         let draw_positions = players.map(m=>m.draw_position).filter((item, i, s) => s.lastIndexOf(item) === i).length;

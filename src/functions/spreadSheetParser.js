@@ -5,6 +5,7 @@ import { workbookTypes } from 'types/workbookTypes';
 import { HEADER, FOOTER } from 'types/sheetElements';
 import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS } from '../types/sheetTypes';
 
+import { tournamentDraw } from 'functions/constructDraw';
 import { getParticipantRows } from 'functions/getParticipantRows';
 import { extractDrawParticipants } from 'functions/extractDrawParticipants';
 import { findRow, getRow, getCol, findValueRefs } from 'functions/sheetAccess.js';
@@ -47,9 +48,16 @@ export function spreadSheetParser(file_content) {
         const headerRow = findRow({sheet, rowDefinition: headerRowDefinition});
         const footerRow = findRow({sheet, rowDefinition: footerRowDefinition});
         const columns = getHeaderColumns({sheet, profile, headerRow});
+        
         const {rows, range, finals, preround_rows} = getParticipantRows({sheet, profile, headerRow, footerRow, columns});
         const { players } = extractDrawParticipants({ sheet, headerRow, columns, rows, range, finals, preround_rows });
-        console.log({players});
+       
+        const gender = 'X';
+        const qualifying = false;
+        const player_data = { players, rows, range, finals, preround_rows };
+        const { rounds, matches, preround } = tournamentDraw({profile, sheet, columns, headerRow, gender, player_data, qualifying}) 
+        console.log({rounds, matches, preround});
+        
       } else if (sheetDefinition.type === ROUND_ROBIN) {
         message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
         

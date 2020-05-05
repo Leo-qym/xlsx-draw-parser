@@ -4,16 +4,21 @@ import { numArr, range, unique } from 'functions/utilities';
 import { constructMatches, constructPreroundMatches } from 'functions/matchConstruction';
 import { drawPosition, matchOutcomes, scoreMatching, scoreOrPlayer, roundData, roundColumns } from 'functions/drawFx';
 
-export function constructKnockOut({ sheet, gender, player_data, preround }) {
+export function constructKnockOut({ profile, sheet, columns, headerRow, gender, player_data, preround }) {
+   console.log({headerRow});
   let first_round;
   let rounds = [];
   let matches = [];
-  let round_data = roundData({sheet, player_data});
+  let round_data = roundData({profile, sheet, columns, player_data, headerRow});
   let players = player_data.players;
+
+  console.log({round_data});
   
   rounds = round_data.map(round => {
     let column_matches = columnMatches(sheet, round, players);
     let matches_with_results = column_matches.matches.filter(match => match.result);
+
+    console.log({column_matches});
 
     if (!matches_with_results.length) {
        // first_round necessary for situations where i.e. 32 draw used when 16 would suffice
@@ -52,13 +57,13 @@ export function constructKnockOut({ sheet, gender, player_data, preround }) {
   matches.forEach(match => match.winner_names = players.filter(f=>+f.draw_position === +match.winners[0]).map(p=>p.full_name));
   if (gender) matches.forEach(match => match.gender = gender);
 
-  preround = (player_data.preround.matches) ? constructPreroundMatches(rounds, player_data.preround, players, gender) : [];
+  preround = (player_data.preround && player_data.preround.matches) ? constructPreroundMatches(rounds, player_data.preround, players, gender) : [];
 
   if (player_data.playoff3rd && player_data.playoff3rd.length) {
     console.log('constructing 3rd place match');
 
     // 3rd place playoff column should be the first round result column
-    let result_column = roundColumns({sheet})[0];
+    let result_column = roundColumns({sheet, columns, headerRow})[0];
     // create a range from the minimum and maximum playoff rows
     let result_range = range(Math.min(...player_data.playoff3rd_rows), Math.max(...player_data.playoff3rd_rows) + 1);
     // accumulate all values for the result range and filter for score or player
@@ -69,14 +74,14 @@ export function constructKnockOut({ sheet, gender, player_data, preround }) {
     let players3rd = player_data.playoff3rd.map(player => { 
        return { 
           full_name: player.full_name, 
-          draw_position: drawPosition( { full_name: player.full_name, players })
+          draw_position: drawPosition( { value: player.full_name, players })
        };
     }).filter(f=>f.draw_position);
     // winner is the value that has a draw position
     let winners = result.map(cell_value => {
        return {
           full_name: cell_value,
-          draw_position: drawPosition({ full_name: cell_value, players })
+          draw_position: drawPosition({ value: cell_value, players })
        };
     }).filter(f=>f.draw_position);
     // winners are identified by their draw positions
@@ -105,6 +110,7 @@ export function constructKnockOut({ sheet, gender, player_data, preround }) {
        matches.push(match);
     }
   }
+  return { matches, rounds, preround };
 }
 
 function findEmbeddedRounds(rounds) {
@@ -120,7 +126,9 @@ function findEmbeddedRounds(rounds) {
            if (embedded_indices.length) {
               other_rounds = other_rounds.concat(...embedded_indices);
               embedded_rounds.push({ matches: embedded_indices.map(match_index => Object.assign({}, round.matches[match_index])) });
-              embedded_indices.forEach(match_index => round.matches[match_index].result = undefined);
+              embedded_indices.forEach(match_index => {
+                 if (round.matches[match_index]) round.matches[match_index].result = undefined
+              });
            }
         }
         // filter out embedded matches

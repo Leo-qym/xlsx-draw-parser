@@ -86,6 +86,7 @@ export function constructRoundRobin({ sheet, columns, gender, qualifying, player
        matches.push(match);
     }
  }
+ return { matches }
 }
 
 function findPlayerAtDrawPosition(players, start, goal, direction) {

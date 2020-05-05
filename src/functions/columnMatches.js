@@ -28,7 +28,7 @@ export function columnMatches(sheet, round, players) {
      // names used to keep track of duplicates, i.e. 'BYE' such that
      // a unique draw_position is returned for subsequent byes
      names.push(cell_value);
-     let draw_position = drawPosition({ full_name: cell_value, players, idx });
+     let draw_position = drawPosition({ value: cell_value, players, idx });
 
      // cell_value is a draw position => round winner(s)
      if (draw_position !== undefined) {

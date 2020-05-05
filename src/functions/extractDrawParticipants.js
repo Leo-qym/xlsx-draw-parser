@@ -35,7 +35,7 @@ let players = [];
 
   // rows from playoff round are excluded
   rows = rows.filter(row => playoff3rd_rows.indexOf(row) < 0);
-  range = [Math.min(...rows), Math.max(...rows)];
+  range = [Math.min(0, ...rows), Math.max(0, ...rows)];
 
   let preround = { rows: [], players: [] };
   preround_rows.forEach(row => {
@@ -49,7 +49,7 @@ let players = [];
 
   });
 
-  preround.range = [Math.min(...preround.rows), Math.max(...preround.rows)];
+  preround.range = [Math.min(0, ...preround.rows), Math.max(0, ...preround.rows)];
   let pdata = roundData({sheet, columns, headerRow, player_data: { players: preround.players, range: preround.range }});
 
   if (pdata[0] && pdata[0].column_references) {

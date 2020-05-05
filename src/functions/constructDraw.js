@@ -1,7 +1,7 @@
 import { constructRoundRobin } from "./constructRoundRobin";
 import { constructKnockOut } from "./constructKnockOut";
 
-export function tournamentDraw({sheet, columns, gender, player_data, qualifying}) {
+export function tournamentDraw({sheet, columns, headerRow, gender, player_data, qualifying}) {
   let rounds = [];
   let matches = [];
   let preround = [];
@@ -10,9 +10,9 @@ export function tournamentDraw({sheet, columns, gender, player_data, qualifying}
   let round_robin = players.length ? players.map(p=>p.rr_result !== undefined).reduce((a, b) => a || b) : false;
   
   if (round_robin) {
-      matches = constructRoundRobin({ sheet, columns, qualifying, gender, player_data});
+      ({ rounds, matches } = constructRoundRobin({ sheet, columns, headerRow, qualifying, gender, player_data}));
   } else {
-      matches = constructKnockOut({ sheet, gender, player_data});
+      ({ rounds, matches, preround } = constructKnockOut({ sheet, columns, headerRow, gender, player_data}));
   }
 
   let draw = { rounds, matches, preround };
