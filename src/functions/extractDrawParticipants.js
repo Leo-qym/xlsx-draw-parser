@@ -2,7 +2,7 @@ import { cellValue, numberValue } from 'functions/sheetAccess';
 import { columnMatches } from 'functions/columnMatches';
 import { roundData, nameHash, lastFirstI } from 'functions/drawFx';
 
-export function extractDrawParticipants({ sheet, headerRow, columns, rows, range, finals, preround_rows}) {
+export function extractDrawParticipants({ profile, sheet, headerRow, columns, rows, range, finals, preround_rows}) {
 let players = [];
   let playoff3rd = [];
   let playoff3rd_rows = [];
@@ -14,7 +14,10 @@ let players = [];
      let draw_position = numberValue(sheet, `${columns.position}${row}`);
 
      // MUST BE DOUBLES
-     if (!draw_position) draw_position = numberValue(sheet, `${columns.position}${row + 1}`);
+     if (!draw_position) {
+        const rowOffset = profile.doubles.drawPosition.rowOffset;
+        draw_position = numberValue(sheet, `${columns.position}${row + rowOffset}`);
+     }
 
      let player = extractPlayer(row, draw_position);
 

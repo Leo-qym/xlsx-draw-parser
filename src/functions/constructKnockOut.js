@@ -5,15 +5,12 @@ import { constructMatches, constructPreroundMatches } from 'functions/matchConst
 import { drawPosition, matchOutcomes, scoreMatching, scoreOrPlayer, roundData, roundColumns } from 'functions/drawFx';
 
 export function constructKnockOut({ profile, sheet, columns, headerRow, gender, player_data, preround }) {
-   console.log({headerRow});
   let first_round;
   let rounds = [];
   let matches = [];
   let round_data = roundData({profile, sheet, columns, player_data, headerRow});
   let players = player_data.players;
 
-  console.log({round_data});
-  
   rounds = round_data.map(round => {
     let column_matches = columnMatches(sheet, round, players);
     let matches_with_results = column_matches.matches.filter(match => match.result);

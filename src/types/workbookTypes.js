@@ -13,6 +13,11 @@ export const workbookTypes = [
     },
     profile: {
       skipWords: ['umpire', '1 pont', '0'],
+      doubles: {
+        drawPosition: {
+          rowOffset: -1, // missing drawPosition for doubles partner is no previous line
+        }
+      },
       identification: {
         includes: [],
         sub_includes: []
@@ -127,6 +132,11 @@ export const workbookTypes = [
     },
     profile: {
       skipWords: ['umpire'],
+      doubles: {
+        drawPosition: {
+          rowOffset: 1, // missing drawPosition for doubles partner is no next line
+        }
+      },
       identification: {
         includes: [],
         sub_includes: []

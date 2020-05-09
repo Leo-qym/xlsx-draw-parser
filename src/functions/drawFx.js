@@ -49,6 +49,7 @@ export function roundColumns({sheet, columns, headerRow}) {
 };
 
 export function roundData({sheet, columns, headerRow, profile, player_data, round_robin}) {
+  console.log({player_data})
   let rr_columns;
   let players = player_data.players;
   let round_columns = roundColumns({sheet, columns, headerRow});

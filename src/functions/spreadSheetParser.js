@@ -10,7 +10,7 @@ import { getParticipantRows } from 'functions/getParticipantRows';
 import { extractDrawParticipants } from 'functions/extractDrawParticipants';
 import { findRow, getRow, getCol, findValueRefs } from 'functions/sheetAccess.js';
 
-export function spreadSheetParser(file_content) {
+export function spreadSheetParser(file_content, sheetFilter) {
   const workbook = XLSX.read(file_content, { type: 'binary' });
   
   const sheets = workbook.SheetNames;
@@ -27,9 +27,14 @@ export function spreadSheetParser(file_content) {
       });
       return;
     }
-    const sheetsToProcess = sheets.filter(sheet => workbookType.validSheet(sheet));
-    addDev({sheetsToProcess})
-    sheets.forEach(sheetName => {
+    const sheetsToProcess = sheets
+      .filter(sheet => workbookType.validSheet(sheet))
+      .filter(sheet => !sheetFilter || sheet.includes(sheetFilter));
+    
+    console.clear();
+    console.log('%c Processing sheets...', 'color: lightgreen', sheetsToProcess);
+    
+    sheetsToProcess.forEach(sheetName => {
       let message = '';
       let color = 'cyan';
       
@@ -37,9 +42,11 @@ export function spreadSheetParser(file_content) {
       const sheetDefinition = identifySheet({sheetName, sheet, profile});
       if (!sheetDefinition) {
         message = `%c sheetDefinition not found: ${sheetName}`;
+        console.log(message, `color: ${color}`)
         color = 'yellow';
       } else if (sheetDefinition.type === KNOCKOUT) {
         message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
+        console.log(message, `color: ${color}`)
         
         const rowDefinitions = profile.rowDefinitions;
         const headerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: HEADER });
@@ -50,7 +57,7 @@ export function spreadSheetParser(file_content) {
         const columns = getHeaderColumns({sheet, profile, headerRow});
         
         const {rows, range, finals, preround_rows} = getParticipantRows({sheet, profile, headerRow, footerRow, columns});
-        const { players } = extractDrawParticipants({ sheet, headerRow, columns, rows, range, finals, preround_rows });
+        const { players } = extractDrawParticipants({ profile, sheet, headerRow, columns, rows, range, finals, preround_rows });
        
         const gender = 'X';
         const qualifying = false;
@@ -60,6 +67,7 @@ export function spreadSheetParser(file_content) {
         
       } else if (sheetDefinition.type === ROUND_ROBIN) {
         message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
+        console.log(message, `color: ${color}`)
         
         const rowDefinitions = profile.rowDefinitions;
         const headerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: HEADER });
@@ -67,12 +75,12 @@ export function spreadSheetParser(file_content) {
         console.log({headerRowDefinition, footerRowDefinition})
       } else if (sheetDefinition.type === PARTICIPANTS) {
         message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
+        console.log(message, `color: ${color}`)
       } else {
         message = `%c sheetDefinition not found: ${sheetName}`;
+        console.log(message, `color: ${color}`)
         color = 'yellow'
       }
-      
-      console.log(message, `color: ${color}`)
     });
   }
 }
