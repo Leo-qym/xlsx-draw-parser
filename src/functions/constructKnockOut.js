@@ -1,18 +1,22 @@
 import { cellValue } from 'functions/sheetAccess';
 import { columnMatches } from 'functions/columnMatches';
-import { numArr, range, unique } from 'functions/utilities';
+import { numArr, range, unique, instanceCount } from 'functions/utilities';
 import { constructMatches, constructPreroundMatches } from 'functions/matchConstruction';
-import { drawPosition, matchOutcomes, scoreMatching, scoreOrPlayer, roundData, roundColumns } from 'functions/drawFx';
+import { getDrawPosition, matchOutcomes, scoreMatching, scoreOrPlayer, roundData, roundColumns } from 'functions/drawFx';
 
 export function constructKnockOut({ profile, sheet, columns, headerRow, gender, player_data, preround }) {
   let first_round;
   let rounds = [];
   let matches = [];
-  let round_data = roundData({profile, sheet, columns, player_data, headerRow});
-  let players = player_data.players;
+  const round_data = roundData({profile, sheet, columns, player_data, headerRow});
+  const players = player_data.players;
+  const drawPositions = players.map(p=>p.drawPosition);
+  const isDoubles = Math.max(...Object.values(instanceCount(drawPositions))) === 2;
+  const rowOffset = profile.doubles.drawPosition.rowOffset;
+  if (isDoubles) console.log('%c DOUBLES', 'color: yellow');
 
   rounds = round_data.map(round => {
-    let column_matches = columnMatches(sheet, round, players);
+    let column_matches = columnMatches({sheet, round, players, isDoubles, rowOffset});
     let matches_with_results = column_matches.matches.filter(match => match.result);
 
     console.log({column_matches});
@@ -39,19 +43,19 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
   rounds.reverse();
 
   if (first_round) {
-    let filtered_players = players.filter(player => first_round.indexOf(player.draw_position) >= 0);
+    let filtered_players = players.filter(player => first_round.indexOf(player.drawPosition) >= 0);
     rounds = add1stRound(rounds, filtered_players);
   } else {
     rounds = add1stRound(rounds, players);
   }
   rounds = rounds.filter(round => round.filter(f => f.winners ? f.winners.length : true).length);
-  rounds = constructMatches({ rounds, players });
+  rounds = constructMatches({ rounds, players, isDoubles });
 
   // merge all rounds into list of matches
   matches = [].concat(...rounds).filter(f=>f.losers && f.result);
 
   // add player names to matches
-  matches.forEach(match => match.winner_names = players.filter(f=>+f.draw_position === +match.winners[0]).map(p=>p.full_name));
+  matches.forEach(match => match.winners = players.filter(f=>+f.drawPosition === +match.winners[0]));
   if (gender) matches.forEach(match => match.gender = gender);
 
   preround = (player_data.preround && player_data.preround.matches) ? constructPreroundMatches(rounds, player_data.preround, players, gender) : [];
@@ -71,19 +75,19 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
     let players3rd = player_data.playoff3rd.map(player => { 
        return { 
           full_name: player.full_name, 
-          draw_position: drawPosition( { value: player.full_name, players })
+          drawPosition: getDrawPosition( { value: player.full_name, players })
        };
-    }).filter(f=>f.draw_position);
+    }).filter(f=>f.drawPosition);
     // winner is the value that has a draw position
     let winners = result.map(cell_value => {
        return {
           full_name: cell_value,
-          draw_position: drawPosition({ value: cell_value, players })
+          drawPosition: getDrawPosition({ value: cell_value, players })
        };
-    }).filter(f=>f.draw_position);
+    }).filter(f=>f.drawPosition);
     // winners are identified by their draw positions
-    let winners_dp = winners.map(w => w.draw_position);
-    let losers = players3rd.filter(p => winners_dp.indexOf(p.draw_position) < 0);
+    let winners_dp = winners.map(w => w.drawPosition);
+    let losers = players3rd.filter(p => winners_dp.indexOf(p.drawPosition) < 0);
 
     // score is the value that matches regex for scores
     let score = result.filter(cell_value => {
@@ -96,10 +100,8 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
     });
     if (winners.length > 0 && score.length === 1) {
        let match = { 
-          winners: winners_dp, 
-          winner_names: winners.map(w => w.full_name), 
-          losers: losers.map(l => l.draw_position),
-          loser_names: losers.map(l => l.full_name),
+          winners, 
+          losers,
           result: score[0],
           round: 'PO3',
           gender: gender
@@ -183,11 +185,11 @@ function addByes(rounds, players) {
 function add1stRound(rounds, players) {
   // 1st round players are players without byes or wins 
   let winners = unique([].concat(...rounds.map(matches => [].concat(...matches.map(match => match.winners).filter(f=>f)))));
-  let notWinner = (draw_position) => winners.indexOf(draw_position) < 0;
-  let notBye = (draw_position) => !draw_byes[players.length] || draw_byes[players.length].indexOf(draw_position) < 0;
+  let notWinner = (drawPosition) => winners.indexOf(drawPosition) < 0;
+  let notBye = (drawPosition) => !draw_byes[players.length] || draw_byes[players.length].indexOf(drawPosition) < 0;
   let first_round_losers = players
-     .filter(player => notWinner(player.draw_position) && notBye(player.draw_position))
-     .map(m=>m.draw_position)
+     .filter(player => notWinner(player.drawPosition) && notBye(player.drawPosition))
+     .map(m=>m.drawPosition)
      .filter((item, i, s) => s.lastIndexOf(item) === i)
      .map(m => ({ players: [m] }) );
   rounds.push(first_round_losers);

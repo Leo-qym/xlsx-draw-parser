@@ -1,14 +1,15 @@
-import { drawPosition } from 'functions/drawFx';
+import { getDrawPosition } from 'functions/drawFx';
 import { normalizeScore } from 'functions/cleanScore';
 import { getRow, cellValue } from 'functions/sheetAccess';
 
-export function columnMatches(sheet, round, players) {
+export function columnMatches({sheet, round, players, isDoubles, rowOffset}) {
   let names = [];
   let matches = [];
   let winners = [];
   let last_draw_position;
   let round_occurrences = [];
-  let last_row_number = getRow(round.column_references[0]) - 1;
+  const offset = isDoubles ? rowOffset : 1;
+  let last_row_number = getRow(round.column_references[0]) - offset;
   round.column_references.forEach(reference => {
      // if row number not sequential => new match
      let this_row_number = getRow(reference);
@@ -18,6 +19,7 @@ export function columnMatches(sheet, round, players) {
            if (!round_occurrences[last_draw_position]) round_occurrences[last_draw_position] = [];
            round_occurrences[last_draw_position].push(matches.length);
         }
+        console.log({winners});
         matches.push({ winners });
         winners = [];
      }
@@ -26,14 +28,14 @@ export function columnMatches(sheet, round, players) {
      let cell_value = cellValue(sheet[reference]);
      let idx = names.filter(f => f === cell_value).length;
      // names used to keep track of duplicates, i.e. 'BYE' such that
-     // a unique draw_position is returned for subsequent byes
+     // a unique drawPosition is returned for subsequent byes
      names.push(cell_value);
-     let draw_position = drawPosition({ value: cell_value, players, idx });
+     let drawPosition = getDrawPosition({ value: cell_value, players, idx });
 
      // cell_value is a draw position => round winner(s)
-     if (draw_position !== undefined) {
-        last_draw_position = draw_position;
-        if (winners.indexOf(draw_position) < 0) winners.push(draw_position);
+     if (drawPosition !== undefined) {
+        last_draw_position = drawPosition;
+        if (winners.indexOf(drawPosition) < 0) winners.push(drawPosition);
      } else {
         // cell_value is not draw position => match score
         if (last_draw_position) {
@@ -47,6 +49,6 @@ export function columnMatches(sheet, round, players) {
   });
   // still winners => last column match had a bye
   if (winners.length) matches.push({ bye: winners });
-  round_occurrences = round_occurrences.map((indices, draw_position) => ({ draw_position, indices })).filter(f=>f);
+  round_occurrences = round_occurrences.map((indices, drawPosition) => ({ drawPosition, indices })).filter(f=>f);
   return { round_occurrences, matches };
 };

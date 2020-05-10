@@ -19,7 +19,7 @@ export function constructRoundRobin({ sheet, columns, gender, qualifying, player
     let player_result_referencess = result_references.filter(ref => +ref.slice(1) === +player_row);
     player_result_referencess.forEach(reference => {
        let result_column = reference[0];
-       let player_draw_position = players[player_index].draw_position;
+       let player_draw_position = players[player_index].drawPosition;
        let opponent_draw_position = rr_columns.indexOf(result_column) + 1;
        let direction = opponent_draw_position > player_draw_position ? 1 : -1;
        let opponent_index = findPlayerAtDrawPosition(players, player_index, opponent_draw_position, direction);
@@ -35,9 +35,9 @@ export function constructRoundRobin({ sheet, columns, gender, qualifying, player
           let round = 'RR' + (qualifying ? 'Q' : '') + players[winner].rr_result;
           if (match_winner) result = reverseScore(result);
           let match = { 
-             winner_names: [players[winner].full_name],
+             winners: [players[winner]],
              winner_draw_position,
-             loser_names: [players[loser].full_name],
+             losers: [players[loser]],
              loser_draw_position,
              gender: gender,
              round,
@@ -77,8 +77,8 @@ export function constructRoundRobin({ sheet, columns, gender, qualifying, player
     let loser = finalists.filter(f => +f !== +winner)[0];
     if (result) {
        let match = {
-          winner_names: [winner],
-          loser_names: [loser],
+          winner: [winner],
+          loser: [loser],
           round: 'RRF',
           result: normalizeScore(result),
           gender: gender
@@ -91,7 +91,7 @@ export function constructRoundRobin({ sheet, columns, gender, qualifying, player
 
 function findPlayerAtDrawPosition(players, start, goal, direction) {
    let index = start + direction;
-   while (players[index] && +players[index].draw_position !== +goal && index < players.length && index >= 0) { index += direction; }
+   while (players[index] && +players[index].drawPosition !== +goal && index < players.length && index >= 0) { index += direction; }
    if (!players[index]) return undefined;
    return index;
 };

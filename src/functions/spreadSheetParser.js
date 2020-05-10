@@ -1,5 +1,4 @@
 import XLSX from 'xlsx';
-import { addDev } from 'config/setDev';
 import { xlsxStore } from 'stores/xlsxStore';
 import { workbookTypes } from 'types/workbookTypes';
 import { HEADER, FOOTER } from 'types/sheetElements';
@@ -29,7 +28,7 @@ export function spreadSheetParser(file_content, sheetFilter) {
     }
     const sheetsToProcess = sheets
       .filter(sheet => workbookType.validSheet(sheet))
-      .filter(sheet => !sheetFilter || sheet.includes(sheetFilter));
+      .filter(sheet => !sheetFilter || sheet.toLowerCase().includes(sheetFilter.toLowerCase()));
     
     console.clear();
     console.log('%c Processing sheets...', 'color: lightgreen', sheetsToProcess);

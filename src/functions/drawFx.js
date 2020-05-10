@@ -2,8 +2,8 @@ import { normalizeName } from 'normalize-text'
 import { cellValue, getCol, getRow } from 'functions/sheetAccess';
 import { letterValue, unique } from 'functions/utilities';
 
-export function drawPosition({value, players, idx = 0}) {
-  // idx used in instances where there are multiple BYEs, such that they each have a unique draw_position
+export function getDrawPosition({value, players, idx = 0}) {
+  // idx used in instances where there are multiple BYEs, such that they each have a unique drawPosition
   let tournament_player = players
     .filter(player => {
       const fullNameMatch = player.full_name && normalizeName(player.full_name) === normalizeName(value)
@@ -14,7 +14,7 @@ export function drawPosition({value, players, idx = 0}) {
      // find player draw position by last name, first initial; for draws where first name omitted after first round
      tournament_player = players.filter(player => player.last_first_i && player.last_first_i === lastFirstI(value))[0];
   }
-  return tournament_player ? tournament_player.draw_position : undefined;
+  return tournament_player ? tournament_player.drawPosition : undefined;
 };
 
 export function lastFirstI(name) {
@@ -49,7 +49,6 @@ export function roundColumns({sheet, columns, headerRow}) {
 };
 
 export function roundData({sheet, columns, headerRow, profile, player_data, round_robin}) {
-  console.log({player_data})
   let rr_columns;
   let players = player_data.players;
   let round_columns = roundColumns({sheet, columns, headerRow});
@@ -89,14 +88,14 @@ export function scoreOrPlayer({cell_value, players}) {
   // TODO: more robust way of handling 'nije igrano' or 'not recorded' situations
   if (cell_value === 'not recorded') return true;
   // if (cell_value === 'nije igrano') return true; // really broken way of working around situation where final match not played
-  let draw_position = drawPosition({ value: cell_value, players });
-  if (draw_position) return true;
+  let drawPosition = getDrawPosition({ value: cell_value, players });
+  if (drawPosition) return true;
   let score = cell_value.match(scoreMatching);
   if (score && score[0] === cell_value) return true;
   let ended = matchOutcomes.map(ending => cell_value.toLowerCase().indexOf(ending.toLowerCase()) >= 0).reduce((a, b) => a || b);
   if (ended) return true;
 
-  console.log('Not Score or Player:', cell_value);
+  // console.log('Not Score or Player:', cell_value);
   return false;
 };
 

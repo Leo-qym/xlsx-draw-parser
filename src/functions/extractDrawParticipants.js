@@ -8,18 +8,20 @@ let players = [];
   let playoff3rd_rows = [];
   let hasharray = [];
   
-  let extract_seed = /\[(\d+)(\/\d+)?\]/;
+  let isDoubles = false;
+  const extract_seed = /\[(\d+)(\/\d+)?\]/;
+  const rowOffset = profile.doubles.drawPosition.rowOffset;
 
   rows.forEach(row => {
-     let draw_position = numberValue(sheet, `${columns.position}${row}`);
+     let drawPosition = numberValue(sheet, `${columns.position}${row}`);
 
-     // MUST BE DOUBLES
-     if (!draw_position) {
-        const rowOffset = profile.doubles.drawPosition.rowOffset;
-        draw_position = numberValue(sheet, `${columns.position}${row + rowOffset}`);
+     if (!drawPosition) {
+        // MUST BE DOUBLES
+        isDoubles = true;
+        drawPosition = numberValue(sheet, `${columns.position}${row + rowOffset}`);
      }
 
-     let player = extractPlayer(row, draw_position);
+     let player = extractPlayer({row, drawPosition, isDoubles});
 
      if (['bye,', 'bye', 'byebye'].indexOf(player.hash) >= 0) {
        players.push(player);
@@ -42,9 +44,9 @@ let players = [];
 
   let preround = { rows: [], players: [] };
   preround_rows.forEach(row => {
-     let draw_position = numberValue(sheet, `${columns.position}${row}`);
+     let drawPosition = numberValue(sheet, `${columns.position}${row}`);
 
-     let player = extractPlayer(row, draw_position);
+     let player = extractPlayer({row, drawPosition});
      if (player.hash) {
         preround.rows.push(row);
         preround.players.push(player);
@@ -57,14 +59,23 @@ let players = [];
 
   if (pdata[0] && pdata[0].column_references) {
      // there should be only one column of relevant data
-     preround.matches = columnMatches(sheet, pdata[0], preround.players).matches.filter(match => match.result);
+     preround.matches = columnMatches({
+        sheet,
+        round: pdata[0],
+        players: preround.players,
+        isDoubles,
+        rowOffset
+      }).matches.filter(match => match.result);
   }
 
   return { players, rows, playoff3rd, playoff3rd_rows, range, finals, preround };
 
-  function extractPlayer(row, draw_position) {
-     let player = { draw_position };
-     if (columns.seed) player.seed = numberValue(sheet, `${columns.seed}${row}`);
+  function extractPlayer({row, drawPosition, isDoubles}) {
+     let player = { drawPosition };
+     if (columns.seed) {
+        const seedRow = isDoubles ? row + rowOffset : row;
+        player.seed = numberValue(sheet, `${columns.seed}${seedRow}`);
+     }
 
      let firstName = cellValue(sheet[`${columns.firstName}${row}`]);
      let lastName = cellValue(sheet[`${columns.lastName}${row}`]);

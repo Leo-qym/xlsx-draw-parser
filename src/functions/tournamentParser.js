@@ -135,8 +135,8 @@ export const tournamentParser = function() {
       // TODO: more robust way of handling 'nije igrano' or 'not recorded' situations
       if (cell_value === 'not recorded') return true;
       // if (cell_value === 'nije igrano') return true; // really broken way of working around situation where final match not played
-      let draw_position = tp.drawPosition({ full_name: cell_value, players });
-      if (draw_position) return true;
+      let drawPosition = tp.drawPosition({ full_name: cell_value, players });
+      if (drawPosition) return true;
       let score = cell_value.match(tp.config.score);
       if (score && score[0] === cell_value) return true;
       let ended = tp.config.ended.map(ending => cell_value.toLowerCase().indexOf(ending.toLowerCase()) >= 0).reduce((a, b) => a || b);
@@ -310,12 +310,12 @@ export const tournamentParser = function() {
       let hasharray = [];
 
       rows.forEach(row => {
-         let draw_position = numberValue(sheet, `${columns.position}${row}`);
+         let drawPosition = numberValue(sheet, `${columns.position}${row}`);
 
          // MUST BE DOUBLES
-         if (!draw_position) draw_position = numberValue(sheet, `${columns.position}${row + 1}`);
+         if (!drawPosition) drawPosition = numberValue(sheet, `${columns.position}${row + 1}`);
 
-         let player = extractPlayer(row, draw_position);
+         let player = extractPlayer(row, drawPosition);
 
          if (['', 'bye', 'byebye'].indexOf(player.hash) >= 0) {
             players.push(player);
@@ -334,9 +334,9 @@ export const tournamentParser = function() {
 
       let preround = { rows: [], players: [] };
       preround_rows.forEach(row => {
-         let draw_position = numberValue(sheet, `${columns.position}${row}`);
+         let drawPosition = numberValue(sheet, `${columns.position}${row}`);
 
-         let player = extractPlayer(row, draw_position);
+         let player = extractPlayer(row, drawPosition);
          if (player.hash) {
             preround.rows.push(row);
             preround.players.push(player);
@@ -354,8 +354,8 @@ export const tournamentParser = function() {
 
       return { players, rows, playoff3rd, playoff3rd_rows, range, finals, preround };
 
-      function extractPlayer(row, draw_position) {
-         let player = { draw_position };
+      function extractPlayer(row, drawPosition) {
+         let player = { drawPosition };
          if (columns.seed) player.seed = numberValue(sheet, `${columns.seed}${row}`);
 
          let full_name = getValue(sheet, `${columns.players}${row}`);
@@ -380,13 +380,13 @@ export const tournamentParser = function() {
    };
 
    tp.drawPosition = ({full_name, players, idx = 0}) => {
-      // idx used in instances where there are multiple BYEs, such that they each have a unique draw_position
+      // idx used in instances where there are multiple BYEs, such that they each have a unique drawPosition
       let tournament_player = players.filter(player => player.full_name && stringFx.normalizeName(player.full_name) === stringFx.normalizeName(full_name))[idx];
       if (!tournament_player) {
          // find player draw position by last name, first initial; for draws where first name omitted after first round
          tournament_player = players.filter(player => player.last_first_i && player.last_first_i === lastFirstI(full_name))[0];
       }
-      return tournament_player ? tournament_player.draw_position : undefined;
+      return tournament_player ? tournament_player.drawPosition : undefined;
    };
 
    let columnMatches = (sheet, round, players) => {
@@ -413,14 +413,14 @@ export const tournamentParser = function() {
          let cell_value = tp.value(sheet[reference]);
          let idx = names.filter(f => f === cell_value).length;
          // names used to keep track of duplicates, i.e. 'BYE' such that
-         // a unique draw_position is returned for subsequent byes
+         // a unique drawPosition is returned for subsequent byes
          names.push(cell_value);
-         let draw_position = tp.drawPosition({ full_name: cell_value, players, idx });
+         let drawPosition = tp.drawPosition({ full_name: cell_value, players, idx });
 
          // cell_value is a draw position => round winner(s)
-         if (draw_position !== undefined) {
-            last_draw_position = draw_position;
-            if (winners.indexOf(draw_position) < 0) winners.push(draw_position);
+         if (drawPosition !== undefined) {
+            last_draw_position = drawPosition;
+            if (winners.indexOf(drawPosition) < 0) winners.push(drawPosition);
          } else {
             // cell_value is not draw position => match score
             if (last_draw_position) {
@@ -434,7 +434,7 @@ export const tournamentParser = function() {
       });
       // still winners => last column match had a bye
       if (winners.length) matches.push({ bye: winners });
-      round_occurrences = round_occurrences.map((indices, draw_position) => ({ draw_position, indices })).filter(f=>f);
+      round_occurrences = round_occurrences.map((indices, drawPosition) => ({ drawPosition, indices })).filter(f=>f);
       return { round_occurrences, matches };
    };
 
@@ -460,11 +460,11 @@ export const tournamentParser = function() {
    let add1stRound = (rounds, players) => {
       // 1st round players are players without byes or wins 
       let winners = unique([].concat(...rounds.map(matches => [].concat(...matches.map(match => match.winners).filter(f=>f)))));
-      let notWinner = (draw_position) => winners.indexOf(draw_position) < 0;
-      let notBye = (draw_position) => !draw_byes[players.length] || draw_byes[players.length].indexOf(draw_position) < 0;
+      let notWinner = (drawPosition) => winners.indexOf(drawPosition) < 0;
+      let notBye = (drawPosition) => !draw_byes[players.length] || draw_byes[players.length].indexOf(drawPosition) < 0;
       let first_round_losers = players
-         .filter(player => notWinner(player.draw_position) && notBye(player.draw_position))
-         .map(m=>m.draw_position)
+         .filter(player => notWinner(player.drawPosition) && notBye(player.drawPosition))
+         .map(m=>m.drawPosition)
          .filter((item, i, s) => s.lastIndexOf(item) === i)
          .map(m => ({ players: [m] }) );
       rounds.push(first_round_losers);
@@ -497,25 +497,25 @@ export const tournamentParser = function() {
    let constructPreroundMatches = (rounds, preround, players, gender) => {
       let round_winners = [];
       let round_name = main_draw_rounds[rounds.length - 1];
-      let draw_positions = preround.players.map(p => p.draw_position);
+      let draw_positions = preround.players.map(p => p.drawPosition);
 
       // draw position offset
       let dpo = Math.min(...draw_positions) - 1;
 
       preround.matches.forEach(match => round_winners.push(match.winners[0]));
-      let winning_players = preround.players.filter(player => round_winners.indexOf(player.draw_position) >= 0);
-      let eliminated_players = preround.players.filter(player => round_winners.indexOf(player.draw_position) < 0);
+      let winning_players = preround.players.filter(player => round_winners.indexOf(player.drawPosition) >= 0);
+      let eliminated_players = preround.players.filter(player => round_winners.indexOf(player.drawPosition) < 0);
       preround.matches.forEach((match, match_index) => {
 
          match.round_name = round_name;
          match.loser_names = [eliminated_players[match_index].full_name];
-         match.losers = [eliminated_players[match_index].draw_position - dpo];
+         match.losers = [eliminated_players[match_index].drawPosition - dpo];
          match.winner_names = [winning_players[match_index].full_name];
 
          let winner_data = winning_players[match_index];
          let winner_details = players.filter(p => p.full_name === winner_data.full_name).reduce((a, b) => a && b);
          if (!winner_details) alert('Pre-round Parsing Error');
-         if (winner_details) match.main_draw_position = [winner_details.draw_position];
+         if (winner_details) match.main_draw_position = [winner_details.drawPosition];
          if (gender) match.gender = gender;
       });
       return preround.matches;
@@ -542,13 +542,13 @@ export const tournamentParser = function() {
                return match.winners ? match.winners[0] : match.bye ? match.bye[0] : match.players[0];
             });
             let eliminated_players = previous_round_players.filter(player => round_winners.indexOf(player) < 0);
-            let draw_positions = players.map(m=>m.draw_position).filter((item, i, s) => s.lastIndexOf(item) === i).length;
+            let draw_positions = players.map(m=>m.drawPosition).filter((item, i, s) => s.lastIndexOf(item) === i).length;
             let round_name = index + 2 < rounds.length || index < 3 ? main_draw_rounds[index] : `R${draw_positions}`;
             round_matches.forEach((match, match_index) => {
 
                match.round_name = draw_type === 'main' ? round_name : `Q${index || ''}`;
                match.losers = [eliminated_players[match_index]];
-               match.loser_names = players.filter(f=>+f.draw_position === +eliminated_players[match_index]).map(p=>p.full_name);
+               match.loser_names = players.filter(f=>+f.drawPosition === +eliminated_players[match_index]).map(p=>p.full_name);
             });
          }
       });
@@ -557,7 +557,7 @@ export const tournamentParser = function() {
 
    let findPlayerAtDrawPosition = (players, start, goal, direction) => {
       let index = start + direction;
-      while (players[index] && +players[index].draw_position !== +goal && index < players.length && index >= 0) { index += direction; }
+      while (players[index] && +players[index].drawPosition !== +goal && index < players.length && index >= 0) { index += direction; }
       if (!players[index]) return undefined;
       return index;
    };
@@ -620,7 +620,7 @@ export const tournamentParser = function() {
             let player_result_referencess = result_references.filter(ref => +ref.slice(1) === +player_row);
             player_result_referencess.forEach(reference => {
                let result_column = reference[0];
-               let player_draw_position = players[player_index].draw_position;
+               let player_draw_position = players[player_index].drawPosition;
                let opponent_draw_position = rr_columns.indexOf(result_column) + 1;
                let direction = opponent_draw_position > player_draw_position ? 1 : -1;
                let opponent_index = findPlayerAtDrawPosition(players, player_index, opponent_draw_position, direction);
@@ -719,7 +719,7 @@ export const tournamentParser = function() {
          rounds.reverse();
 
          if (first_round) {
-            let filtered_players = players.filter(player => first_round.indexOf(player.draw_position) >= 0);
+            let filtered_players = players.filter(player => first_round.indexOf(player.drawPosition) >= 0);
             rounds = add1stRound(rounds, filtered_players);
          } else {
             rounds = add1stRound(rounds, players);
@@ -731,7 +731,7 @@ export const tournamentParser = function() {
          matches = [].concat(...rounds).filter(f=>f.losers && f.result);
 
          // add player names to matches
-         matches.forEach(match => match.winner_names = players.filter(f=>+f.draw_position === +match.winners[0]).map(p=>p.full_name));
+         matches.forEach(match => match.winner_names = players.filter(f=>+f.drawPosition === +match.winners[0]).map(p=>p.full_name));
          if (gender) matches.forEach(match => match.gender = gender);
 
          preround = (player_data.preround.matches) ? constructPreroundMatches(rounds, player_data.preround, players, gender) : [];
@@ -751,19 +751,19 @@ export const tournamentParser = function() {
             let players3rd = player_data.playoff3rd.map(player => { 
                return { 
                   full_name: player.full_name, 
-                  draw_position: tp.drawPosition( { full_name: player.full_name, players })
+                  drawPosition: tp.drawPosition( { full_name: player.full_name, players })
                };
-            }).filter(f=>f.draw_position);
+            }).filter(f=>f.drawPosition);
             // winner is the value that has a draw position
             let winners = result.map(cell_value => {
                return {
                   full_name: cell_value,
-                  draw_position: tp.drawPosition({ full_name: cell_value, players })
+                  drawPosition: tp.drawPosition({ full_name: cell_value, players })
                };
-            }).filter(f=>f.draw_position);
+            }).filter(f=>f.drawPosition);
             // winners are identified by their draw positions
-            let winners_dp = winners.map(w => w.draw_position);
-            let losers = players3rd.filter(p => winners_dp.indexOf(p.draw_position) < 0);
+            let winners_dp = winners.map(w => w.drawPosition);
+            let losers = players3rd.filter(p => winners_dp.indexOf(p.drawPosition) < 0);
 
             // score is the value that matches regex for scores
             let score = result.filter(cell_value => {
@@ -778,7 +778,7 @@ export const tournamentParser = function() {
                let match = { 
                   winners: winners_dp, 
                   winner_names: winners.map(w => w.full_name), 
-                  losers: losers.map(l => l.draw_position),
+                  losers: losers.map(l => l.drawPosition),
                   loser_names: losers.map(l => l.full_name),
                   result: score[0],
                   round: 'PO3',
@@ -828,7 +828,7 @@ export const tournamentParser = function() {
          console.log('sheet name:', sheet_name, 'matches:', draw.matches.length, draw.matches);
          let playerData = (name) => players.filter(player => player.full_name === name)[0];
          let preroundPlayerData = (name) => player_data.preround.players.filter(player => player.full_name === name)[0];
-         let draw_positions = players.map(m=>m.draw_position).filter((item, i, s) => s.lastIndexOf(item) === i).length;
+         let draw_positions = players.map(m=>m.drawPosition).filter((item, i, s) => s.lastIndexOf(item) === i).length;
          // let round_robin = players.length ? players.map(p=>p.rr_result !== undefined).reduce((a, b) => a || b) : false;
 
          let consolation = sheet_name.indexOf('UT') >= 0;
@@ -872,9 +872,9 @@ export const tournamentParser = function() {
             tournament.code = tournament_code;
 
             players.forEach(player => {
-               if (player.draw_position > draw_positions) {
+               if (player.drawPosition > draw_positions) {
                   row.preround = true;
-                  player.draw_position = 'pre';
+                  player.drawPosition = 'pre';
                }
             });
 
@@ -892,7 +892,7 @@ export const tournamentParser = function() {
                teams: format === 'singles' ? [[0], [1]]: [[0, 1], [2, 3]],
                winner: 0
             });
-            let muid = [tuid, ...row.players.map(player => player.last_name + (player.club || player.ioc || '') + player.draw_position), row.round].join('');
+            let muid = [tuid, ...row.players.map(player => player.last_name + (player.club || player.ioc || '') + player.drawPosition), row.round].join('');
             row.muid = muid.split(' ').join('');
             if (players.length) rows.push(row);
          };
