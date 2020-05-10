@@ -1,5 +1,5 @@
 import { HEADER, FOOTER } from './sheetElements';
-import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS } from './sheetTypes';
+import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from './sheetTypes';
 
 export const workbookTypes = [
   {
@@ -9,7 +9,8 @@ export const workbookTypes = [
       const knockout = /^[FL]{1}[1-8]{2}/.test(sheetName);
       const roundRobin = /^[1-8]{1}\.*cs/.test(sheetName);
       const rrPlayoff = /^[1-8]{1}\.*nap/.test(sheetName);
-      return knockout || (roundRobin || rrPlayoff);
+      const tournamentInfo = /^altalanos/.test(sheetName.toLowerCase());
+      return knockout || (roundRobin || rrPlayoff || tournamentInfo);
     },
     profile: {
       skipWords: ['umpire', '1 pont', '0'],
@@ -83,9 +84,29 @@ export const workbookTypes = [
             'kiemelt párosok'
           ],
           minimumElements: 3
-        }
+        },
+        {
+          type: HEADER,
+          id: 'tournamentInfo',
+          elements: [
+            'a verseny dátuma (éééé.hh.nn)', 'város', 'versenybíró'
+          ],
+          minimumElements: 2
+        },
+        {
+          type: HEADER,
+          id: 'tournamentOrganization',
+          elements: [
+            'orvos neve', 'verseny rendezője','versenyigazgató'
+          ],
+          minimumElements: 2
+        },
       ],
       sheetDefinitions: [
+        {
+          type: INFORMATION,
+          rowIds: ['tournamentInfo', 'tournamentOrganization']
+        },
         {
           type: KNOCKOUT,
           rowIds: ['knockoutParticipants', 'drawFooter']
@@ -116,7 +137,17 @@ export const workbookTypes = [
           { attr: 'rounds',     header: 'Döntő' },
           { attr: 'rounds',     header: '2. forduló' }
       ],
-      playerRows: { playerNames: true, lastName: true, firstName: true }
+      playerRows: { playerNames: true, lastName: true, firstName: true },
+      tournamentInfo: [
+        { attribute: 'tournamentName', searchText: 'A verseny neve', rowOffset: 1 },
+        { attribute: 'dates', searchText: 'A verseny dátuma (éééé.hh.nn)', rowOffset: 1 },
+        { attribute: 'city', searchText: 'Város', rowOffset: 1 },
+        { attribute: 'referee', searchText: 'Versenybíró:', rowOffset: 1 },
+        { attribute: 'doctor', searchText: 'Orvos neve:', rowOffset: 1 },
+        { attribute: 'organizer', searchText: 'Verseny rendezője:', rowOffset: 1 },
+        { attribute: 'director', searchText: 'Versenyigazgató', rowOffset: 1 },
+        { attribute: 'category', searchText: 'Versenyszám 1', rowOffset: 1 },
+      ]
     }
   },  
   {

@@ -2,9 +2,10 @@ import XLSX from 'xlsx';
 import { xlsxStore } from 'stores/xlsxStore';
 import { workbookTypes } from 'types/workbookTypes';
 import { HEADER, FOOTER } from 'types/sheetElements';
-import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS } from '../types/sheetTypes';
+import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../types/sheetTypes';
 
 import { tournamentDraw } from 'functions/constructDraw';
+import { getTournamentInfo } from 'functions/tournamentInfo';
 import { getParticipantRows } from 'functions/getParticipantRows';
 import { extractDrawParticipants } from 'functions/extractDrawParticipants';
 import { findRow, getRow, getCol, findValueRefs } from 'functions/sheetAccess.js';
@@ -75,6 +76,12 @@ export function spreadSheetParser(file_content, sheetFilter) {
       } else if (sheetDefinition.type === PARTICIPANTS) {
         message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
         console.log(message, `color: ${color}`)
+      } else if (sheetDefinition.type === INFORMATION) {
+        message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
+        console.log(message, `color: ${color}`)
+
+        const tournamentInfo = getTournamentInfo({profile, sheet})
+        console.log({tournamentInfo});
       } else {
         message = `%c sheetDefinition not found: ${sheetName}`;
         console.log(message, `color: ${color}`)
@@ -108,10 +115,11 @@ function identifySheet({sheet, profile}) {
     const row = findRow({sheet, rowDefinition});
     return row ? rowIds.concat(rowDefinition.id) : rowIds;
   }, []).filter(f=>f);
-  return sheetDefinitions.reduce((sheetDefinition, currentDefinition) => {
+  const identifiedDefinition = sheetDefinitions.reduce((sheetDefinition, currentDefinition) => {
     const exactMatch = currentDefinition.rowIds.reduce((result, rowId) => rowIds.includes(rowId) && result, true );
     return exactMatch ? currentDefinition : sheetDefinition;
   }, undefined);
+  return identifiedDefinition;
 }
 
 // function confirms that header columns are in expected position
