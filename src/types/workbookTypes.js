@@ -146,8 +146,20 @@ export const workbookTypes = [
         { attribute: 'doctor', searchText: 'Orvos neve:', rowOffset: 1 },
         { attribute: 'organizer', searchText: 'Verseny rendezője:', rowOffset: 1 },
         { attribute: 'director', searchText: 'Versenyigazgató', rowOffset: 1 },
-        { attribute: 'category', searchText: 'Versenyszám 1', rowOffset: 1 },
-      ]
+        { attribute: 'categories', searchText: 'Versenyszám 1', rowOffset: 1, columnOffsets: [0,1,2,3,4] },
+      ],
+      dateParser: date => {
+        const splitDate = date.split('-');
+        const startDate = splitDate[0].split('.').join('-');
+        let result = { startDate };
+        if (splitDate[1]) {
+          const endSplit = splitDate[1].split('.');
+          const yearMonth = startDate.split('-').slice(0,3 - endSplit.length);
+          const endDate = [].concat(...yearMonth, ...endSplit).join('-');
+          result.endDate = endDate;
+        }
+        return result;
+      }
     }
   },  
   {

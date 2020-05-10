@@ -10,7 +10,8 @@ const initialState = {
     },
     severity: 'success',
     message: ''
-  }
+  },
+  tournamentRecord: {}
 };
 
 const createReducer = handlers => (state=initialState, action) => {

@@ -11,9 +11,15 @@ const setToasterState = (state, action) => produce(state, draftState => {
 })
 const setLoadingState = (state, action) => produce(state, draftState => { draftState.loadingState = action.payload; })
 
+const setTournamentRecord = (state, action) => produce(state, draftState => {
+  draftState.tournamentRecord = action.payload;
+})
+
 const rootProducer = {
     'toaster state': setToasterState,
     'loading state': setLoadingState,
+    
+    'set tournament record': setTournamentRecord
 };
 
 export default rootProducer;

@@ -4,6 +4,7 @@ import { workbookTypes } from 'types/workbookTypes';
 import { HEADER, FOOTER } from 'types/sheetElements';
 import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../types/sheetTypes';
 
+import { getDrawInfo } from 'functions/drawInfo';
 import { tournamentDraw } from 'functions/constructDraw';
 import { getTournamentInfo } from 'functions/tournamentInfo';
 import { getParticipantRows } from 'functions/getParticipantRows';
@@ -11,6 +12,9 @@ import { extractDrawParticipants } from 'functions/extractDrawParticipants';
 import { findRow, getRow, getCol, findValueRefs } from 'functions/sheetAccess.js';
 
 export function spreadSheetParser(file_content, sheetFilter) {
+  let tournamentRecord = {
+    draws: []
+  };
   const workbook = XLSX.read(file_content, { type: 'binary' });
   
   const sheets = workbook.SheetNames;
@@ -63,6 +67,10 @@ export function spreadSheetParser(file_content, sheetFilter) {
         const qualifying = false;
         const player_data = { players, rows, range, finals, preround_rows };
         const { rounds, matches, preround } = tournamentDraw({profile, sheet, columns, headerRow, gender, player_data, qualifying}) 
+        const { drawInfo } = getDrawInfo({profile, sheet});
+        
+        Object.assign(drawInfo, { matches });
+        tournamentRecord.draws.push({drawInfo});
         console.log({rounds, matches, preround});
         
       } else if (sheetDefinition.type === ROUND_ROBIN) {
@@ -81,7 +89,7 @@ export function spreadSheetParser(file_content, sheetFilter) {
         console.log(message, `color: ${color}`)
 
         const tournamentInfo = getTournamentInfo({profile, sheet})
-        console.log({tournamentInfo});
+        Object.assign(tournamentRecord, tournamentInfo);
       } else {
         message = `%c sheetDefinition not found: ${sheetName}`;
         console.log(message, `color: ${color}`)
@@ -89,6 +97,8 @@ export function spreadSheetParser(file_content, sheetFilter) {
       }
     });
   }
+
+  xlsxStore.dispatch({ type: 'set tournament record', payload: tournamentRecord });
 }
 
 function findRowDefinition({rowDefinitions, rowIds, type}) {
