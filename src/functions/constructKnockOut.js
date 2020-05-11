@@ -15,8 +15,8 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
   const rowOffset = profile.doubles.drawPosition.rowOffset;
   if (isDoubles) console.log('%c DOUBLES', 'color: yellow');
 
-  rounds = round_data.map(round => {
-    let column_matches = columnMatches({sheet, round, players, isDoubles, rowOffset});
+  rounds = round_data.map((round, roundIndex) => {
+    let column_matches = columnMatches({sheet, round, roundIndex, players, isDoubles, rowOffset});
     let matches_with_results = column_matches.matches.filter(match => match.result);
 
     console.log({column_matches});
@@ -56,7 +56,7 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
 
   // add player names to matches
   matches.forEach(match => match.winners = players.filter(f=>+f.drawPosition === +match.winners[0]));
-  if (gender) matches.forEach(match => match.gender = gender);
+  if (gender) { matches.forEach(match => match.gender = gender); }
 
   preround = (player_data.preround && player_data.preround.matches) ? constructPreroundMatches(rounds, player_data.preround, players, gender) : [];
 
@@ -115,11 +115,10 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
 function findEmbeddedRounds(rounds) {
   let embedded_rounds = [];
   rounds.forEach((round) => {
-     let embedded = round.round_occurrences.filter(f=>f.indices.length > 1).length;
+     const embedded = round.round_occurrences.filter(f=>f.indices.length > 1).length;
      if (embedded) {
         let other_rounds = [];
-        // let indices = [...Array(round.matches.length)].map((_, i) => i);
-        let indices = numArr(round.matches.length);
+        const indices = numArr(round.matches.length);
         for (let i=embedded; i > 0; i--) {
            let embedded_indices = findMiddles(indices, i);
            if (embedded_indices.length) {

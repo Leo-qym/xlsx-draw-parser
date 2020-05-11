@@ -13,7 +13,8 @@ export const workbookTypes = [
       return knockout || (roundRobin || rrPlayoff || tournamentInfo);
     },
     profile: {
-      skipWords: ['umpire', '1 pont', '0'],
+      skipWords: ['umpire', '0'],
+      skipExpressions: ['[0-9,/, ]+pont', 'umpire'],
       doubles: {
         drawPosition: {
           rowOffset: -1, // missing drawPosition for doubles partner is no previous line

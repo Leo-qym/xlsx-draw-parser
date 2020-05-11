@@ -33,9 +33,9 @@ export function constructMatches({ rounds, players, isDoubles }) {
   // really broken way of working around situation where final match not played
   // if (rounds[0][0].result === 'nije igrano') rounds = rounds.slice(1);
 
-  rounds.forEach((round, index) => {
-     if (+index + 2 === rounds.length) round = round.filter(player => player.bye === undefined);
-     if (index + 1 < rounds.length) {
+  rounds.forEach((round, roundIndex) => {
+     if (+roundIndex + 2 === rounds.length) round = round.filter(player => player.bye === undefined);
+     if (roundIndex + 1 < rounds.length) {
         let round_matches = [];
         let round_winners = [];
         round.forEach(match => {
@@ -43,17 +43,18 @@ export function constructMatches({ rounds, players, isDoubles }) {
            round_winners.push(drawPosition);
            round_matches.push(match);
         });
-        let previous_round_players = rounds[index + 1].map(match => {
+        let previous_round_players = rounds[roundIndex + 1].map(match => {
            return match.winners ? match.winners[0] : match.bye ? match.bye[0] : match.players && match.players[0];
         });
         let eliminatedDrawPositions = previous_round_players.filter(player => round_winners.indexOf(player) < 0);
         let draw_positions = players.map(m=>m.drawPosition).filter((item, i, s) => s.lastIndexOf(item) === i).length;
-        let round_name = index + 2 < rounds.length || index < 3 ? main_draw_rounds[index] : `R${draw_positions}`;
+        let round_name = roundIndex + 2 < rounds.length || roundIndex < 3 ? main_draw_rounds[roundIndex] : `R${draw_positions}`;
         round_matches.forEach((match, match_index) => {
            match.matchType = matchType;
-           match.roundNumber = index + 1;
+           match.roundNumber = rounds.length - roundIndex;
+           match.finishingRound = roundIndex + 1;
            match.roundPosition = match_index + 1;
-           match.roundName = draw_type === 'main' ? round_name : `Q${index || ''}`;
+           match.roundName = draw_type === 'main' ? round_name : `Q${roundIndex || ''}`;
            match.losers = players.filter(f=>+f.drawPosition === +eliminatedDrawPositions[match_index]);
         });
      }

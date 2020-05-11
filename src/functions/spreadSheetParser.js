@@ -62,14 +62,15 @@ export function spreadSheetParser(file_content, sheetFilter) {
         const {rows, range, finals, preround_rows} = getParticipantRows({sheet, profile, headerRow, footerRow, columns});
         const { players, isDoubles } = extractDrawParticipants({ profile, sheet, headerRow, columns, rows, range, finals, preround_rows });
         const drawType = isDoubles ? 'DOUBLES' : 'SINGES';
+        
+        const drawInfo = extractInfo({profile, sheet, infoClass: 'drawInfo'});
+        Object.assign(drawInfo, { drawType });
+        const gender = drawInfo.gender;
+        console.log({drawInfo})
 
-        const gender = 'X';
         const qualifying = false;
         const player_data = { players, rows, range, finals, preround_rows };
         const { rounds, matches, preround } = tournamentDraw({profile, sheet, columns, headerRow, gender, player_data, qualifying}) 
-        const drawInfo = extractInfo({profile, sheet, infoClass: 'drawInfo'});
-        Object.assign(drawInfo, { drawType });
-        console.log({drawInfo})
 
         Object.assign(drawInfo, { matches });
         tournamentRecord.draws.push({drawInfo});

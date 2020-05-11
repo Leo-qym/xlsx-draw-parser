@@ -5,6 +5,7 @@ import { getRow, getCol, cellsContaining, cellValue } from 'functions/sheetAcces
 export function getParticipantRows({sheet, profile, headerRow, footerRow, columns}) {
   if (!profile) return { rows: [], preround_rows: [] };
   const skipWords = profile.skipWords;
+  const skipExpressions = profile.skipExpressions;
 
   const inRowBand = key => {
     const row = key && getRow(key);
@@ -19,9 +20,21 @@ export function getParticipantRows({sheet, profile, headerRow, footerRow, column
     const value = cellValue(sheet[key]);
     return value && isNumeric(value);
   };
+  function isSkipExpression(value, expression) {
+   const re = new RegExp(expression,"g");
+   return value && re.test(value);
+  }
+  function isNotSkipExpression(key) {
+   const value = cellValue(sheet[key]);
+   const matchesExpression = skipExpressions.reduce((matchesExpression, expression) => {
+      return isSkipExpression(value, expression) ? true : matchesExpression;
+   }, false);
+   return !matchesExpression;
+  }
+
   // insure that the key is of the form [A-Z][#], not 'AA1', for example
   const isSingleAlpha = key => key && key.length > 1 && isNumeric(key[1]);
-  const filteredKeys = Object.keys(sheet).filter(inRowBand).filter(isSingleAlpha);
+  const filteredKeys = Object.keys(sheet).filter(inRowBand).filter(isSingleAlpha).filter(isNotSkipExpression);
   const targetColumn = (key, column) => getCol(key) === columns[column];
 
   const isNotSkipWord = key => {

@@ -2,7 +2,7 @@ import { getDrawPosition } from 'functions/drawFx';
 import { normalizeScore } from 'functions/cleanScore';
 import { getRow, cellValue } from 'functions/sheetAccess';
 
-export function columnMatches({sheet, round, players, isDoubles, rowOffset}) {
+export function columnMatches({sheet, round, roundIndex, players, isDoubles, rowOffset}) {
   let names = [];
   let matches = [];
   let winners = [];
@@ -26,10 +26,12 @@ export function columnMatches({sheet, round, players, isDoubles, rowOffset}) {
      last_row_number = this_row_number;
 
      let cell_value = cellValue(sheet[reference]);
-     let idx = names.filter(f => f === cell_value).length;
+     let idx = (roundIndex === 0 && names.filter(f => f === cell_value).length) || 0;
+     // only valid for FIRST ROUND? (roundIndex === 0)
      // names used to keep track of duplicates, i.e. 'BYE' such that
      // a unique drawPosition is returned for subsequent byes
      names.push(cell_value);
+     
      let drawPosition = getDrawPosition({ value: cell_value, players, idx });
 
      // cell_value is a draw position => round winner(s)
