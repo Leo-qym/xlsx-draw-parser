@@ -41,6 +41,18 @@ export function findValueRefs(searchText, sheet, options) {
   return Object.keys(sheet).filter(ref => transformValue(cellValue(sheet[ref])) === searchText);
 }
 
+export function getTargetValue({searchText, sheet, rowOffset=0, columnOffset=0, options}) {
+  const nameRefs = findValueRefs(searchText, sheet, options)
+  if (!Array.isArray(nameRefs) || nameRefs.length < 1) return '';
+  const row = getRow(nameRefs);
+  const targetRow = row + rowOffset;
+  const column = getCol(nameRefs[0]);
+  const targetColumn = String.fromCharCode(((column && column.charCodeAt()) || 0) + columnOffset);
+  const targetRef = `${targetColumn}${targetRow}`;
+  const value = cellValue(sheet[targetRef]);
+  return value;
+}
+
 export function findRow({sheet, rowDefinition}) {
   const rowElements = rowDefinition && rowDefinition.elements;
   if (!rowElements) return;

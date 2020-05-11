@@ -140,13 +140,23 @@ export const workbookTypes = [
       playerRows: { playerNames: true, lastName: true, firstName: true },
       tournamentInfo: [
         { attribute: 'tournamentName', searchText: 'A verseny neve', rowOffset: 1 },
-        { attribute: 'dates', searchText: 'A verseny dátuma (éééé.hh.nn)', rowOffset: 1 },
+        { attribute: 'dates', searchText: 'A verseny dátuma (éééé.hh.nn)', rowOffset: 1, postProcessor: 'dateParser' },
         { attribute: 'city', searchText: 'Város', rowOffset: 1 },
         { attribute: 'referee', searchText: 'Versenybíró:', rowOffset: 1 },
         { attribute: 'doctor', searchText: 'Orvos neve:', rowOffset: 1 },
         { attribute: 'organizer', searchText: 'Verseny rendezője:', rowOffset: 1 },
         { attribute: 'director', searchText: 'Versenyigazgató', rowOffset: 1 },
         { attribute: 'categories', searchText: 'Versenyszám 1', rowOffset: 1, columnOffsets: [0,1,2,3,4] },
+      ],
+      drawInfo: [
+        { attribute: 'event', searchText: 'Versenyszám', rowOffset: 0, columnOffset: 4 },
+        { attribute: 'event', searchText: 'Versenyszám', rowOffset: 0, columnOffset: 5 },
+        { attribute: 'gender', searchText: 'Versenyszám', rowOffset: 0, columnOffset: 4, postProcessor: 'genderParser' },
+        { attribute: 'gender', searchText: 'Versenyszám', rowOffset: 0, columnOffset: 5, postProcessor: 'genderParser' },
+        { attribute: 'dates', searchText: 'Dátum', rowOffset: 1, postProcessor: 'dateParser' },
+        { attribute: 'city', searchText: 'Város', rowOffset: 1 },
+        { attribute: 'category', searchText: 'Kategória', rowOffset: 1 },
+        { attribute: 'referee', searchText: 'Versenybíró', rowOffset: 1 },
       ],
       dateParser: date => {
         const splitDate = date.split('-');
@@ -159,6 +169,11 @@ export const workbookTypes = [
           result.endDate = endDate;
         }
         return result;
+      },
+      genderParser: value => {
+        const male = /^F/.test(value);
+        const female = /^L/.test(value);
+        return { gender: male ? 'M' : female ? 'W' : 'X' };
       }
     }
   },  

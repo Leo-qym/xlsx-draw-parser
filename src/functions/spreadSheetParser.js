@@ -4,9 +4,8 @@ import { workbookTypes } from 'types/workbookTypes';
 import { HEADER, FOOTER } from 'types/sheetElements';
 import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../types/sheetTypes';
 
-import { getDrawInfo } from 'functions/drawInfo';
 import { tournamentDraw } from 'functions/constructDraw';
-import { getTournamentInfo } from 'functions/tournamentInfo';
+import { extractInfo } from 'functions/extractInfo';
 import { getParticipantRows } from 'functions/getParticipantRows';
 import { extractDrawParticipants } from 'functions/extractDrawParticipants';
 import { findRow, getRow, getCol, findValueRefs } from 'functions/sheetAccess.js';
@@ -51,24 +50,27 @@ export function spreadSheetParser(file_content, sheetFilter) {
       } else if (sheetDefinition.type === KNOCKOUT) {
         message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
         console.log(message, `color: ${color}`)
-        
+
         const rowDefinitions = profile.rowDefinitions;
         const headerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: HEADER });
         const footerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: FOOTER });
-        
+
         const headerRow = findRow({sheet, rowDefinition: headerRowDefinition});
         const footerRow = findRow({sheet, rowDefinition: footerRowDefinition});
         const columns = getHeaderColumns({sheet, profile, headerRow});
-        
+
         const {rows, range, finals, preround_rows} = getParticipantRows({sheet, profile, headerRow, footerRow, columns});
-        const { players } = extractDrawParticipants({ profile, sheet, headerRow, columns, rows, range, finals, preround_rows });
-       
+        const { players, isDoubles } = extractDrawParticipants({ profile, sheet, headerRow, columns, rows, range, finals, preround_rows });
+        const drawType = isDoubles ? 'DOUBLES' : 'SINGES';
+
         const gender = 'X';
         const qualifying = false;
         const player_data = { players, rows, range, finals, preround_rows };
         const { rounds, matches, preround } = tournamentDraw({profile, sheet, columns, headerRow, gender, player_data, qualifying}) 
-        const { drawInfo } = getDrawInfo({profile, sheet});
-        
+        const drawInfo = extractInfo({profile, sheet, infoClass: 'drawInfo'});
+        Object.assign(drawInfo, { drawType });
+        console.log({drawInfo})
+
         Object.assign(drawInfo, { matches });
         tournamentRecord.draws.push({drawInfo});
         console.log({rounds, matches, preround});
@@ -88,7 +90,7 @@ export function spreadSheetParser(file_content, sheetFilter) {
         message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
         console.log(message, `color: ${color}`)
 
-        const tournamentInfo = getTournamentInfo({profile, sheet})
+        const tournamentInfo = extractInfo({profile, sheet, infoClass: 'tournamentInfo'})
         Object.assign(tournamentRecord, tournamentInfo);
       } else {
         message = `%c sheetDefinition not found: ${sheetName}`;

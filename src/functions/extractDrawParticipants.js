@@ -3,16 +3,16 @@ import { columnMatches } from 'functions/columnMatches';
 import { roundData, nameHash, lastFirstI } from 'functions/drawFx';
 
 export function extractDrawParticipants({ profile, sheet, headerRow, columns, rows, range, finals, preround_rows}) {
-let players = [];
-  let playoff3rd = [];
-  let playoff3rd_rows = [];
-  let hasharray = [];
-  
-  let isDoubles = false;
-  const extract_seed = /\[(\d+)(\/\d+)?\]/;
-  const rowOffset = profile.doubles.drawPosition.rowOffset;
+   let players = [];
+   let playoff3rd = [];
+   let playoff3rd_rows = [];
+   let hasharray = [];
 
-  rows.forEach(row => {
+   let isDoubles = false;
+   const extract_seed = /\[(\d+)(\/\d+)?\]/;
+   const rowOffset = profile.doubles.drawPosition.rowOffset;
+
+   rows.forEach(row => {
      let drawPosition = numberValue(sheet, `${columns.position}${row}`);
 
      if (!drawPosition) {
@@ -68,7 +68,7 @@ let players = [];
       }).matches.filter(match => match.result);
   }
 
-  return { players, rows, playoff3rd, playoff3rd_rows, range, finals, preround };
+  return { players, rows, playoff3rd, playoff3rd_rows, range, finals, preround, isDoubles };
 
   function extractPlayer({row, drawPosition, isDoubles}) {
      let player = { drawPosition };
