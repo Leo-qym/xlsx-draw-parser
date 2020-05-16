@@ -126,23 +126,23 @@ export const tournamentParser = function() {
       if (!isNaN(value) && value < 16) return true;
       let extraneous = tp.profiles[tp.profile].extraneous;
       if (extraneous && extraneous.starts_with) {
-         let cell_value = tp.value(sheet[ref]) + '';
-         return extraneous.starts_with.map(s => cell_value.toLowerCase().indexOf(s) === 0).reduce((a, b) => (a || b));
+         let cellValue = tp.value(sheet[ref]) + '';
+         return extraneous.starts_with.map(s => cellValue.toLowerCase().indexOf(s) === 0).reduce((a, b) => (a || b));
       }
    };
 
-   let scoreOrPlayer = ({cell_value, players}) => {
+   let scoreOrPlayer = ({cellValue, players}) => {
       // TODO: more robust way of handling 'nije igrano' or 'not recorded' situations
-      if (cell_value === 'not recorded') return true;
-      // if (cell_value === 'nije igrano') return true; // really broken way of working around situation where final match not played
-      let drawPosition = tp.drawPosition({ full_name: cell_value, players });
+      if (cellValue === 'not recorded') return true;
+      // if (cellValue === 'nije igrano') return true; // really broken way of working around situation where final match not played
+      let drawPosition = tp.drawPosition({ full_name: cellValue, players });
       if (drawPosition) return true;
-      let score = cell_value.match(tp.config.score);
-      if (score && score[0] === cell_value) return true;
-      let ended = tp.config.ended.map(ending => cell_value.toLowerCase().indexOf(ending.toLowerCase()) >= 0).reduce((a, b) => a || b);
+      let score = cellValue.match(tp.config.score);
+      if (score && score[0] === cellValue) return true;
+      let ended = tp.config.ended.map(ending => cellValue.toLowerCase().indexOf(ending.toLowerCase()) >= 0).reduce((a, b) => a || b);
       if (ended) return true;
 
-      if (tp.verbose) console.log('Not Score or Player:', cell_value);
+      if (tp.verbose) console.log('Not Score or Player:', cellValue);
       return false;
    };
 
@@ -269,7 +269,7 @@ export const tournamentParser = function() {
       return columns;
    };
 
-   tp.roundData = ({sheet, player_data, round_robin}) => {
+   tp.getRoundData = ({sheet, player_data, round_robin}) => {
       let rr_columns;
       let players = player_data.players;
       let round_columns = tp.roundColumns({sheet});
@@ -280,7 +280,7 @@ export const tournamentParser = function() {
          // .filter(ref => ['I29', 'I30'].indexOf(ref) < 0)
 
       let filtered_columns = round_columns.map(column => { 
-         let column_references = cell_references.filter(ref => ref[0] === column).filter(ref => scoreOrPlayer({ cell_value: tp.value(sheet[ref]), players }));
+         let column_references = cell_references.filter(ref => ref[0] === column).filter(ref => scoreOrPlayer({ cellValue: tp.value(sheet[ref]), players }));
          return { column, column_references };
       }).filter(f=>f.column_references.length);
 
@@ -290,7 +290,7 @@ export const tournamentParser = function() {
          let end = round_columns.indexOf(filtered_columns[filtered_columns.length - 1].column);
          let column_range = round_columns.slice(start, end);
          rr_columns = column_range.map(column => { 
-            let column_references = cell_references.filter(ref => ref[0] === column).filter(ref => scoreOrPlayer({ cell_value: tp.value(sheet[ref]), players }));
+            let column_references = cell_references.filter(ref => ref[0] === column).filter(ref => scoreOrPlayer({ cellValue: tp.value(sheet[ref]), players }));
             return { column, column_references };
          });
       }
@@ -345,7 +345,7 @@ export const tournamentParser = function() {
       });
 
       preround.range = [Math.min(...preround.rows), Math.max(...preround.rows)];
-      let pdata = tp.roundData({sheet, player_data: { players: preround.players, range: preround.range }});
+      let pdata = tp.getRoundData({sheet, player_data: { players: preround.players, range: preround.range }});
 
       if (pdata[0] && pdata[0].column_references) {
          // there should be only one column of relevant data
@@ -410,25 +410,25 @@ export const tournamentParser = function() {
          }
          last_row_number = this_row_number;
 
-         let cell_value = tp.value(sheet[reference]);
-         let idx = names.filter(f => f === cell_value).length;
+         let cellValue = tp.value(sheet[reference]);
+         let idx = names.filter(f => f === cellValue).length;
          // names used to keep track of duplicates, i.e. 'BYE' such that
          // a unique drawPosition is returned for subsequent byes
-         names.push(cell_value);
-         let drawPosition = tp.drawPosition({ full_name: cell_value, players, idx });
+         names.push(cellValue);
+         let drawPosition = tp.drawPosition({ full_name: cellValue, players, idx });
 
-         // cell_value is a draw position => round winner(s)
+         // cellValue is a draw position => round winner(s)
          if (drawPosition !== undefined) {
             last_draw_position = drawPosition;
             if (winners.indexOf(drawPosition) < 0) winners.push(drawPosition);
          } else {
-            // cell_value is not draw position => match score
+            // cellValue is not draw position => match score
             if (last_draw_position) {
                // keep track of how many times draw position occurs in column
                if (!round_occurrences[last_draw_position]) round_occurrences[last_draw_position] = [];
                round_occurrences[last_draw_position].push(matches.length);
             }
-            matches.push({ winners, result: tp.normalizeScore(cell_value) });
+            matches.push({ winners, result: tp.normalizeScore(cellValue) });
             winners = [];
          }
       });
@@ -613,7 +613,7 @@ export const tournamentParser = function() {
          let group_size = pi.length;
 
          // combine all cell references that are in result columns
-         let round_data = tp.roundData({sheet, player_data, round_robin: true}) || [];
+         let round_data = tp.getRoundData({sheet, player_data, round_robin: true}) || [];
          let rr_columns = round_data.map(m=>m.column).slice(0, group_size);
          let result_references = [].concat(...round_data.map((round, index) => index < group_size ? round.column_references : []));
          player_rows.forEach((player_row, player_index) => {
@@ -670,11 +670,11 @@ export const tournamentParser = function() {
                   if (!numeric) return false;
                   // do these values need to be coerced to ints?
                   return numeric[0] >= finals_range[0] && numeric[0] <= finals_range[finals_range.length - 1] && k[0] === finals_col;
-               }).filter(ref => scoreOrPlayer({ cell_value: tp.value(sheet[ref]), players }));
+               }).filter(ref => scoreOrPlayer({ cellValue: tp.value(sheet[ref]), players }));
                let finals_details = finals_cells.map(fc => tp.value(sheet[fc]));
                let finalists = player_data.finals
                   .map(row => getValue(sheet, `${columns.players}${row}`))
-                  .filter(player => scoreOrPlayer({ cell_value: player, players }));
+                  .filter(player => scoreOrPlayer({ cellValue: player, players }));
                let winner = finals_details.filter(f => finalists.indexOf(f) >= 0)[0];
                let result = finals_details.filter(f => finalists.indexOf(f) < 0)[0];
                let loser = finalists.filter(f => +f !== +winner)[0];
@@ -693,7 +693,7 @@ export const tournamentParser = function() {
 
       } else {
          let first_round;
-         let round_data = tp.roundData({sheet, player_data});
+         let round_data = tp.getRoundData({sheet, player_data});
          rounds = round_data.map(round => {
             let column_matches = getColumnMatches(sheet, round, players);
             let matches_with_results = column_matches.matches.filter(match => match.result);
@@ -746,7 +746,7 @@ export const tournamentParser = function() {
             // accumulate all values for the result range and filter for score or player
             let result = result_range.map(row => tp.value(sheet[`${result_column}${row}`]))
                .filter(f=>f)
-               .filter(cell_value => scoreOrPlayer({ cell_value, players }));
+               .filter(cellValue => scoreOrPlayer({ cellValue, players }));
             // 
             let players3rd = player_data.playoff3rd.map(player => { 
                return { 
@@ -755,10 +755,10 @@ export const tournamentParser = function() {
                };
             }).filter(f=>f.drawPosition);
             // winner is the value that has a draw position
-            let winners = result.map(cell_value => {
+            let winners = result.map(cellValue => {
                return {
-                  full_name: cell_value,
-                  drawPosition: tp.drawPosition({ full_name: cell_value, players })
+                  full_name: cellValue,
+                  drawPosition: tp.drawPosition({ full_name: cellValue, players })
                };
             }).filter(f=>f.drawPosition);
             // winners are identified by their draw positions
@@ -766,11 +766,11 @@ export const tournamentParser = function() {
             let losers = players3rd.filter(p => winners_dp.indexOf(p.drawPosition) < 0);
 
             // score is the value that matches regex for scores
-            let score = result.filter(cell_value => {
-               let s = cell_value.match(tp.config.score);
-               if (s && s[0] === cell_value) return true;
+            let score = result.filter(cellValue => {
+               let s = cellValue.match(tp.config.score);
+               if (s && s[0] === cellValue) return true;
 
-               let ended = tp.config.ended.map(ending => cell_value.toLowerCase().indexOf(ending.toLowerCase()) >= 0).reduce((a, b) => a || b);
+               let ended = tp.config.ended.map(ending => cellValue.toLowerCase().indexOf(ending.toLowerCase()) >= 0).reduce((a, b) => a || b);
                if (ended) return true;
                return false;
             });

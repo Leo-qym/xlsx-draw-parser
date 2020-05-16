@@ -57,31 +57,32 @@ export function roundColumns({sheet, columns, headerRow}) {
    return unique(round_columns).sort();
 };
 
-export function roundData({sheet, columns, headerRow, profile, player_data, round_robin, matchOutcomes}) {
+export function getRoundData({sheet, columns, headerRow, profile, player_data, round_robin, matchOutcomes}) {
   let rr_columns;
   let players = player_data.players;
   let round_columns = roundColumns({sheet, columns, headerRow});
   let range = player_data.range;
-  let cell_references = Object.keys(sheet)
+  let cellReferences = Object.keys(sheet)
      .filter(ref => inDrawColumns({ref, round_columns}) && inDrawRows(ref, range))
      .filter(ref => !extraneousData({profile, sheet, ref}));
 
   let filtered_columns = round_columns.map(column => { 
-   let column_references = cell_references.filter(ref => ref[0] === column)
-     .filter(ref => scoreOrPlayer({ cell_value: getCellValue(sheet[ref]), players, matchOutcomes }));
-   return { column, column_references };
+    let column_references = cellReferences.filter(ref => getCol(ref) === column)
+      .filter(ref => {
+         const cellValue = getCellValue(sheet[ref]);
+         return scoreOrPlayer({ cellValue, players, matchOutcomes });
+      });
+    return { column, column_references, cellReferences };
   }).filter(f=>f.column_references.length);
   
-  // console.log({round_columns, cell_references, filtered_columns})
-
   // work around for round robins with blank 'BYE' columns
   if (filtered_columns.length) {
      let start = round_columns.indexOf(filtered_columns[0].column);
      let end = round_columns.indexOf(filtered_columns[filtered_columns.length - 1].column);
      let column_range = round_columns.slice(start, end);
      rr_columns = column_range.map(column => { 
-      let column_references = cell_references.filter(ref => ref[0] === column)
-        .filter(ref => scoreOrPlayer({ cell_value: getCellValue(sheet[ref]), players, matchOutcomes }));
+      let column_references = cellReferences.filter(ref => ref[0] === column)
+        .filter(ref => scoreOrPlayer({ cellValue: getCellValue(sheet[ref]), players, matchOutcomes }));
       return { column, column_references };
      });
   }
@@ -92,15 +93,15 @@ export function roundData({sheet, columns, headerRow, profile, player_data, roun
 // eslint-disable-next-line 
 export const scoreMatching = /[\d\(]+[\d\.\(\)\[\]\\ \:\-\,\/O]+(Ret)?(ret)?(RET)?[\.]*$/;
 
-export function scoreOrPlayer({cell_value, players, matchOutcomes=[]}) {
+export function scoreOrPlayer({cellValue, players, matchOutcomes=[]}) {
   // TODO: more robust way of handling 'nije igrano' or 'not recorded' situations
-  if (cell_value === 'not recorded') return true;
-  // if (cell_value === 'nije igrano') return true; // really broken way of working around situation where final match not played
-  let drawPosition = getDrawPosition({ value: cell_value, players });
+  if (cellValue === 'not recorded') return true;
+  // if (cellValue === 'nije igrano') return true; // really broken way of working around situation where final match not played
+  let drawPosition = getDrawPosition({ value: cellValue, players });
   if (drawPosition) return true;
-  let score = cell_value.match(scoreMatching);
-  if (score && score[0] === cell_value) return true;
-  let ended = matchOutcomes.map(ending => cell_value.toLowerCase().indexOf(ending.toLowerCase()) >= 0).reduce((a, b) => a || b, undefined);
+  let score = cellValue.match(scoreMatching);
+  if (score && score[0] === cellValue) return true;
+  let ended = matchOutcomes.map(ending => cellValue.toLowerCase().indexOf(ending.toLowerCase()) >= 0).reduce((a, b) => a || b, undefined);
   if (ended) { return true; }
   return false;
 };
@@ -110,7 +111,7 @@ function extraneousData({profile, sheet, ref}) {
   if (!isNaN(value) && value < 16) return true;
   let extraneous = profile && profile.extraneous;
   if (extraneous && extraneous.starts_with) {
-     let cell_value = getCellValue(sheet[ref]) + '';
-     return extraneous.starts_with.map(s => cell_value.toLowerCase().indexOf(s) === 0).reduce((a, b) => (a || b));
+     let cellValue = getCellValue(sheet[ref]) + '';
+     return extraneous.starts_with.map(s => cellValue.toLowerCase().indexOf(s) === 0).reduce((a, b) => (a || b));
   }
 };

@@ -1,6 +1,6 @@
 import { getCellValue, numberValue } from 'functions/sheetAccess';
 import { getColumnMatches } from 'functions/columnMatches';
-import { roundData, nameHash, lastFirstI } from 'functions/drawFx';
+import { getRoundData, nameHash, lastFirstI } from 'functions/drawFx';
 
 export function extractDrawParticipants({ profile, sheet, headerRow, columns, rows, range, finals, preround_rows}) {
    let players = [];
@@ -62,7 +62,7 @@ export function extractDrawParticipants({ profile, sheet, headerRow, columns, ro
   });
 
   preround.range = [Math.min(0, ...preround.rows), Math.max(0, ...preround.rows)];
-  let pdata = roundData({sheet, columns, headerRow, player_data: { players: preround.players, range: preround.range }});
+  let pdata = getRoundData({sheet, columns, headerRow, player_data: { players: preround.players, range: preround.range }});
 
   if (pdata[0] && pdata[0].column_references) {
      // there should be only one column of relevant data

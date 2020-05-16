@@ -1,5 +1,5 @@
 import { unique } from 'functions/utilities';
-import { scoreOrPlayer, roundData } from 'functions/drawFx';
+import { scoreOrPlayer, getRoundData } from 'functions/drawFx';
 import { getCellValue } from 'functions/sheetAccess';
 import { normalizeScore } from 'functions/cleanScore';
 
@@ -12,7 +12,7 @@ export function constructRoundRobin({ profile, sheet, columns, gender, qualifyin
  let group_size = pi.length;
 
  // combine all cell references that are in result columns
- let round_data = roundData({sheet, player_data, round_robin: true}) || [];
+ let round_data = getRoundData({sheet, player_data, round_robin: true}) || [];
  let rr_columns = round_data.map(m=>m.column).slice(0, group_size);
  let result_references = [].concat(...round_data.map((round, index) => index < group_size ? round.column_references : []));
  player_rows.forEach((player_row, player_index) => {
@@ -68,11 +68,11 @@ export function constructRoundRobin({ profile, sheet, columns, gender, qualifyin
        if (!numeric) return false;
        // do these values need to be coerced to ints?
        return numeric[0] >= finals_range[0] && numeric[0] <= finals_range[finals_range.length - 1] && k[0] === finals_col;
-    }).filter(ref => scoreOrPlayer({ cell_value: getCellValue(sheet[ref]), players, matchOutcomes }));
+    }).filter(ref => scoreOrPlayer({ cellValue: getCellValue(sheet[ref]), players, matchOutcomes }));
     let finals_details = finals_cells.map(fc => getCellValue(sheet[fc]));
     let finalists = player_data.finals
        .map(row => getCellValue(sheet[`${columns.players}${row}`]))
-       .filter(player => scoreOrPlayer({ cell_value: player, players, matchOutcomes }));
+       .filter(player => scoreOrPlayer({ cellValue: player, players, matchOutcomes }));
     let winner = finals_details.filter(f => finalists.indexOf(f) >= 0)[0];
     let result = finals_details.filter(f => finalists.indexOf(f) < 0)[0];
     let loser = finalists.filter(f => +f !== +winner)[0];

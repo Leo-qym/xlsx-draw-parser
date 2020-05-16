@@ -2,7 +2,7 @@ import { getCellValue } from 'functions/sheetAccess';
 import { getColumnMatches } from 'functions/columnMatches';
 import { chunkArray, instanceCount, numArr, generateRange, unique, isPowerOf2 } from 'functions/utilities';
 import { constructMatches, constructPreroundMatches } from 'functions/matchConstruction';
-import { getDrawPosition, scoreMatching, scoreOrPlayer, roundData, roundColumns } from 'functions/drawFx';
+import { getDrawPosition, scoreMatching, scoreOrPlayer, getRoundData, roundColumns } from 'functions/drawFx';
 
 export function constructKnockOut({ profile, sheet, columns, headerRow, gender, player_data, preround }) {
    let first_round;
@@ -10,7 +10,7 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
    let matches = [];
  
    const matchOutcomes = profile.matchOutcomes;
-   const round_data = roundData({profile, sheet, columns, player_data, headerRow, matchOutcomes});
+   const round_data = getRoundData({profile, sheet, columns, player_data, headerRow, matchOutcomes});
    const players = player_data.players;
    const allDrawPositions = players.map(p=>p.drawPosition);
    const drawPositions = unique(allDrawPositions);
@@ -29,7 +29,7 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
    }
 
    rounds = round_data.map((round, roundIndex) => {
-      let column_matches = getColumnMatches({sheet, round, roundIndex, players, isDoubles, rowOffset, expectedMatchUps, expectedGroupings});
+      let column_matches = getColumnMatches({sheet, round, roundIndex, players, isDoubles, rowOffset, matchOutcomes, expectedGroupings});
       let matches_with_results = column_matches.matches.filter(match => match.result);
 
       if (!matches_with_results.length) {
@@ -83,7 +83,7 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
     // accumulate all values for the result range and filter for score or player
     let result = result_range.map(row => getCellValue(sheet[`${result_column}${row}`]))
        .filter(f=>f)
-       .filter(cell_value => scoreOrPlayer({ cell_value, players, matchOutcomes }));
+       .filter(cellValue => scoreOrPlayer({ cellValue, players, matchOutcomes }));
     // 
     let players3rd = player_data.playoff3rd.map(player => { 
        return { 
@@ -92,10 +92,10 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
        };
     }).filter(f=>f.drawPosition);
     // winner is the value that has a draw position
-    let winners = result.map(cell_value => {
+    let winners = result.map(cellValue => {
        return {
-          full_name: cell_value,
-          drawPosition: getDrawPosition({ value: cell_value, players })
+          full_name: cellValue,
+          drawPosition: getDrawPosition({ value: cellValue, players })
        };
     }).filter(f=>f.drawPosition);
     // winners are identified by their draw positions
@@ -103,11 +103,11 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
     let losers = players3rd.filter(p => winners_dp.indexOf(p.drawPosition) < 0);
 
     // score is the value that matches regex for scores
-    let score = result.filter(cell_value => {
-       let s = cell_value.match(scoreMatching);
-       if (s && s[0] === cell_value) return true;
+    let score = result.filter(cellValue => {
+       let s = cellValue.match(scoreMatching);
+       if (s && s[0] === cellValue) return true;
 
-       let ended = matchOutcomes.map(ending => cell_value.toLowerCase().indexOf(ending.toLowerCase()) >= 0).reduce((a, b) => a || b);
+       let ended = matchOutcomes.map(ending => cellValue.toLowerCase().indexOf(ending.toLowerCase()) >= 0).reduce((a, b) => a || b);
        if (ended) return true;
        return false;
     });
