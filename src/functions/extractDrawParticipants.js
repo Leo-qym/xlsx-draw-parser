@@ -1,4 +1,4 @@
-import { cellValue, numberValue } from 'functions/sheetAccess';
+import { getCellValue, numberValue } from 'functions/sheetAccess';
 import { getColumnMatches } from 'functions/columnMatches';
 import { roundData, nameHash, lastFirstI } from 'functions/drawFx';
 
@@ -86,9 +86,9 @@ export function extractDrawParticipants({ profile, sheet, headerRow, columns, ro
         player.seed = numberValue(sheet, `${columns.seed}${seedRow}`);
      }
 
-     let firstName = cellValue(sheet[`${columns.firstName}${row}`]);
-     let lastName = cellValue(sheet[`${columns.lastName}${row}`]);
-     let fullName = firstName && lastName ? `${lastName}, ${firstName}` : cellValue(sheet[`${columns.players}${row}`]);
+     let firstName = getCellValue(sheet[`${columns.firstName}${row}`]);
+     let lastName = getCellValue(sheet[`${columns.lastName}${row}`]);
+     let fullName = firstName && lastName ? `${lastName}, ${firstName}` : getCellValue(sheet[`${columns.players}${row}`]);
      
      if (extract_seed.test(fullName)) {
         player.seed = parseInt(extract_seed.exec(fullName)[1]);
@@ -102,14 +102,14 @@ export function extractDrawParticipants({ profile, sheet, headerRow, columns, ro
      player.hash = nameHash(player.first_name + player.last_name);
      if (columns.id) {
       const cellReference = `${columns.id}${row}`; 
-      const value = cellValue(sheet[cellReference]);
+      const value = getCellValue(sheet[cellReference]);
       // TODO: this should be part of profile
       player.id = value.replace('"', '');
      }
-     if (columns.club) player.club = cellValue(sheet[`${columns.club}${row}`]);
+     if (columns.club) player.club = getCellValue(sheet[`${columns.club}${row}`]);
      if (columns.rank) player.rank = numberValue(sheet, `${columns.rank}${row}`);
-     if (columns.entry) player.entry = cellValue(sheet[`${columns.entry}${row}`]);
-     if (columns.country) player.ioc = cellValue(sheet[`${columns.country}${row}`]);
+     if (columns.entry) player.entry = getCellValue(sheet[`${columns.entry}${row}`]);
+     if (columns.country) player.ioc = getCellValue(sheet[`${columns.country}${row}`]);
      if (columns.rr_result) player.rr_result = numberValue(sheet, `${columns.rr_result}${row}`);
      return player;
   }

@@ -2,14 +2,14 @@ import { normalizeName } from 'normalize-text'
 import { unique, instanceCount } from 'functions/utilities';
 
 export function numberValue(sheet, reference) {
-  return !isNaN(parseInt(cellValue(sheet[reference]))) ? parseInt(cellValue(sheet[reference])) : '';
+  return !isNaN(parseInt(getCellValue(sheet[reference]))) ? parseInt(getCellValue(sheet[reference])) : '';
 }
 export function cellsContaining({sheet, term}) {
   let references = Object.keys(sheet);
   return references.filter(ref => (sheet[ref].v + '').toLowerCase().indexOf(term.toLowerCase()) >= 0);
 };
 
-export function cellValue(cell) {
+export function getCellValue(cell) {
   let val = cell ? cell.v + '' : '';
   val = (typeof val === 'string') ? val.trim() : val;
   val = val.indexOf(',,') >= 0 ? val.replace(',,', ',') : val;
@@ -38,7 +38,7 @@ export function findValueRefs(searchText, sheet, options) {
     }
     return value;
   }
-  return Object.keys(sheet).filter(ref => transformValue(cellValue(sheet[ref])) === searchText);
+  return Object.keys(sheet).filter(ref => transformValue(getCellValue(sheet[ref])) === searchText);
 }
 
 export function getTargetValue({searchText, sheet, rowOffset=0, columnOffset=0, options}) {
@@ -49,7 +49,7 @@ export function getTargetValue({searchText, sheet, rowOffset=0, columnOffset=0, 
   const column = getCol(nameRefs[0]);
   const targetColumn = String.fromCharCode(((column && column.charCodeAt()) || 0) + columnOffset);
   const targetRef = `${targetColumn}${targetRow}`;
-  const value = cellValue(sheet[targetRef]);
+  const value = getCellValue(sheet[targetRef]);
   return value;
 }
 

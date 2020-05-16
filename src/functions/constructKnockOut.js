@@ -1,4 +1,4 @@
-import { cellValue } from 'functions/sheetAccess';
+import { getCellValue } from 'functions/sheetAccess';
 import { getColumnMatches } from 'functions/columnMatches';
 import { chunkArray, instanceCount, numArr, generateRange, unique, isPowerOf2 } from 'functions/utilities';
 import { constructMatches, constructPreroundMatches } from 'functions/matchConstruction';
@@ -8,8 +8,9 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
    let first_round;
    let rounds = [];
    let matches = [];
-  
-   const round_data = roundData({profile, sheet, columns, player_data, headerRow});
+ 
+   const matchOutcomes = profile.matchOutcomes;
+   const round_data = roundData({profile, sheet, columns, player_data, headerRow, matchOutcomes});
    const players = player_data.players;
    const allDrawPositions = players.map(p=>p.drawPosition);
    const drawPositions = unique(allDrawPositions);
@@ -72,7 +73,6 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
 
   preround = (player_data.preround && player_data.preround.matches) ? constructPreroundMatches(rounds, player_data.preround, players, gender) : [];
 
-  const matchOutcomes = profile.matchOutcomes;
   if (player_data.playoff3rd && player_data.playoff3rd.length) {
     console.log('constructing 3rd place match');
 
@@ -81,7 +81,7 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
     // create a range from the minimum and maximum playoff rows
     let result_range = generateRange(Math.min(...player_data.playoff3rd_rows), Math.max(...player_data.playoff3rd_rows) + 1);
     // accumulate all values for the result range and filter for score or player
-    let result = result_range.map(row => cellValue(sheet[`${result_column}${row}`]))
+    let result = result_range.map(row => getCellValue(sheet[`${result_column}${row}`]))
        .filter(f=>f)
        .filter(cell_value => scoreOrPlayer({ cell_value, players, matchOutcomes }));
     // 

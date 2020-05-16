@@ -1,6 +1,6 @@
 import { unique } from 'functions/utilities';
 import { scoreOrPlayer, roundData } from 'functions/drawFx';
-import { cellValue } from 'functions/sheetAccess';
+import { getCellValue } from 'functions/sheetAccess';
 import { normalizeScore } from 'functions/cleanScore';
 
 export function constructRoundRobin({ profile, sheet, columns, gender, qualifying, player_data }) {
@@ -23,7 +23,7 @@ export function constructRoundRobin({ profile, sheet, columns, gender, qualifyin
        let opponent_draw_position = rr_columns.indexOf(result_column) + 1;
        let direction = opponent_draw_position > player_draw_position ? 1 : -1;
        let opponent_index = findPlayerAtDrawPosition(players, player_index, opponent_draw_position, direction);
-       let result = normalizeScore(cellValue(sheet[reference]));
+       let result = normalizeScore(getCellValue(sheet[reference]));
        let match_winner = determineWinner(result);
        let loser = +match_winner === 1 ? player_index : opponent_index;
        let winner = +match_winner === 1 ? opponent_index : player_index;
@@ -58,7 +58,7 @@ export function constructRoundRobin({ profile, sheet, columns, gender, qualifyin
 
  const matchOutcomes = profile.matchOutcomes;
  let profileTargetsWinner = 'FOO'; // TODO: re-enable this
- let target = unique(keys.filter(f=>cellValue(sheet[f]) === profileTargetsWinner))[0];
+ let target = unique(keys.filter(f=>getCellValue(sheet[f]) === profileTargetsWinner))[0];
  if (target && target.match(/\d+/)) {
     let finals_col = target[0];
     let finals_row = parseInt(target.match(/\d+/)[0]);
@@ -68,10 +68,10 @@ export function constructRoundRobin({ profile, sheet, columns, gender, qualifyin
        if (!numeric) return false;
        // do these values need to be coerced to ints?
        return numeric[0] >= finals_range[0] && numeric[0] <= finals_range[finals_range.length - 1] && k[0] === finals_col;
-    }).filter(ref => scoreOrPlayer({ cell_value: cellValue(sheet[ref]), players, matchOutcomes }));
-    let finals_details = finals_cells.map(fc => cellValue(sheet[fc]));
+    }).filter(ref => scoreOrPlayer({ cell_value: getCellValue(sheet[ref]), players, matchOutcomes }));
+    let finals_details = finals_cells.map(fc => getCellValue(sheet[fc]));
     let finalists = player_data.finals
-       .map(row => cellValue(sheet[`${columns.players}${row}`]))
+       .map(row => getCellValue(sheet[`${columns.players}${row}`]))
        .filter(player => scoreOrPlayer({ cell_value: player, players, matchOutcomes }));
     let winner = finals_details.filter(f => finalists.indexOf(f) >= 0)[0];
     let result = finals_details.filter(f => finalists.indexOf(f) < 0)[0];

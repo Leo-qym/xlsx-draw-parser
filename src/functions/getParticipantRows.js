@@ -1,6 +1,6 @@
 import { maxInstance } from 'functions/utilities';
 import { validRanking } from 'functions/validators.js';
-import { getRow, getCol, cellsContaining, cellValue } from 'functions/sheetAccess.js';
+import { getRow, getCol, cellsContaining, getCellValue } from 'functions/sheetAccess.js';
 
 export function getParticipantRows({sheet, profile, headerRow, footerRow, avoidRows, columns}) {
   if (!profile) return { rows: [], preround_rows: [] };
@@ -12,12 +12,12 @@ export function getParticipantRows({sheet, profile, headerRow, footerRow, avoidR
     return row && row > headerRow && row < footerRow;
   };
   const isStringValue = key => {
-    const value = cellValue(sheet[key]);
+    const value = getCellValue(sheet[key]);
     return value && typeof value === 'string';
   };
   const isNumeric = value => /^\d+(a)?$/.test(value);
   const isNumericValue = key => {
-    const value = cellValue(sheet[key]);
+    const value = getCellValue(sheet[key]);
     return value && isNumeric(value);
   };
   function isSkipExpression(value, expression) {
@@ -25,7 +25,7 @@ export function getParticipantRows({sheet, profile, headerRow, footerRow, avoidR
    return value && re.test(value);
   }
   function isNotSkipExpression(key) {
-   const value = cellValue(sheet[key]);
+   const value = getCellValue(sheet[key]);
    const matchesExpression = skipExpressions.reduce((matchesExpression, expression) => {
       return isSkipExpression(value, expression) ? true : matchesExpression;
    }, false);
@@ -38,7 +38,7 @@ export function getParticipantRows({sheet, profile, headerRow, footerRow, avoidR
   const targetColumn = (key, column) => getCol(key) === columns[column];
 
   const isNotSkipWord = key => {
-    const value = cellValue(sheet[key]);
+    const value = getCellValue(sheet[key]);
     const isSkipWord = (skipWords || [])
       .map(skipWord=>skipWord.toLowerCase())
       .includes(value.toLowerCase());
@@ -53,7 +53,7 @@ export function getParticipantRows({sheet, profile, headerRow, footerRow, avoidR
   let ids = filteredKeys.filter(key => targetColumn(key, 'id')).filter(isStringValue).filter(isNotSkipWord).map(getRow);
   let seeds = filteredKeys.filter(key => targetColumn(key, 'seed')).filter(isNumericValue).map(getRow);
   let drawPositions = filteredKeys.filter(key => targetColumn(key, 'position')).map(getRow);
-  let rankings = filteredKeys.filter(key => targetColumn(key, 'rank') && validRanking(cellValue(sheet[key]))).map(getRow);
+  let rankings = filteredKeys.filter(key => targetColumn(key, 'rank') && validRanking(getCellValue(sheet[key]))).map(getRow);
     
   let finals;
   
@@ -61,7 +61,7 @@ export function getParticipantRows({sheet, profile, headerRow, footerRow, avoidR
   if (columns.rr_result) {
      rr_result = Object.keys(sheet)
         // eslint-disable-next-line no-useless-escape
-        .filter(f => f[0] === columns.rr_result && /\d/.test(f[1]) && /^\d+[\.]*$/.test(cellValue(sheet[f])))
+        .filter(f => f[0] === columns.rr_result && /\d/.test(f[1]) && /^\d+[\.]*$/.test(getCellValue(sheet[f])))
         .map(ref=>getRow(ref));
      rankings = rankings.filter(f => rr_result.indexOf(f) >= 0);
   }
@@ -74,7 +74,7 @@ export function getParticipantRows({sheet, profile, headerRow, footerRow, avoidR
      let additions = [];
      playerNames.forEach(f => {
         // additions is just a counter
-        if (cellValue(sheet[`${columns.players}${f}`]).toLowerCase() === 'bye') additions.push(f - 1); 
+        if (getCellValue(sheet[`${columns.players}${f}`]).toLowerCase() === 'bye') additions.push(f - 1); 
      });
      sources.push(playerNames);
   }

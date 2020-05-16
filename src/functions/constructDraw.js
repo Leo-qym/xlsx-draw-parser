@@ -19,7 +19,7 @@ export function tournamentDraw({profile, sheet, columns, headerRow, gender, play
   
   /*
   let number = /\d+/;
-  let rank_override = cellValue(sheet['Q5']);
+  let rank_override = getCellValue(sheet['Q5']);
   if (rank_override && rank_override.indexOf('rang') >= 0 && number.test(rank_override)) {
      draw.rank = +rank_override.match(/\d+/)[0];
   }

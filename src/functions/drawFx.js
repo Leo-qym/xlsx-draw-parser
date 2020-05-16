@@ -1,15 +1,24 @@
 import { normalizeName } from 'normalize-text'
-import { cellValue, getCol, getRow } from 'functions/sheetAccess';
+import { getCellValue, getCol, getRow } from 'functions/sheetAccess';
 import { letterValue, unique } from 'functions/utilities';
 
-export function getDrawPosition({value, players, idx = 0}) {
+export function getDrawPosition({value, players, idx = 0, expectedDrawPositions=[]}) {
   // idx used in instances where there are multiple BYEs, such that they each have a unique drawPosition
-  let tournament_player = players
+  
+  const matchingPlayers = players
     .filter(player => {
       const fullNameMatch = player.full_name && normalizeName(player.full_name) === normalizeName(value)
       const lastNameMatch = player.last_name && normalizeName(player.last_name) === normalizeName(value)
       return fullNameMatch || lastNameMatch;
-    })[idx];
+    });
+ 
+  // if more than one matching player take the player whose drawPosition matches the expected drawPosition
+  const matchingPlayer = matchingPlayers.reduce((matching, current) => {
+    return expectedDrawPositions.includes(current.drawPosition) ? current : matching;
+  }, undefined);
+
+  let tournament_player = matchingPlayer || matchingPlayers[idx];
+    
   if (!tournament_player) {
      // find player draw position by last name, first initial; for draws where first name omitted after first round
      tournament_player = players.filter(player => player.last_first_i && player.last_first_i === lastFirstI(value))[0];
@@ -48,7 +57,7 @@ export function roundColumns({sheet, columns, headerRow}) {
    return unique(round_columns).sort();
 };
 
-export function roundData({sheet, columns, headerRow, profile, player_data, round_robin}) {
+export function roundData({sheet, columns, headerRow, profile, player_data, round_robin, matchOutcomes}) {
   let rr_columns;
   let players = player_data.players;
   let round_columns = roundColumns({sheet, columns, headerRow});
@@ -59,7 +68,7 @@ export function roundData({sheet, columns, headerRow, profile, player_data, roun
 
   let filtered_columns = round_columns.map(column => { 
    let column_references = cell_references.filter(ref => ref[0] === column)
-     .filter(ref => scoreOrPlayer({ cell_value: cellValue(sheet[ref]), players }));
+     .filter(ref => scoreOrPlayer({ cell_value: getCellValue(sheet[ref]), players, matchOutcomes }));
    return { column, column_references };
   }).filter(f=>f.column_references.length);
   
@@ -72,7 +81,7 @@ export function roundData({sheet, columns, headerRow, profile, player_data, roun
      let column_range = round_columns.slice(start, end);
      rr_columns = column_range.map(column => { 
       let column_references = cell_references.filter(ref => ref[0] === column)
-        .filter(ref => scoreOrPlayer({ cell_value: cellValue(sheet[ref]), players }));
+        .filter(ref => scoreOrPlayer({ cell_value: getCellValue(sheet[ref]), players, matchOutcomes }));
       return { column, column_references };
      });
   }
@@ -83,7 +92,7 @@ export function roundData({sheet, columns, headerRow, profile, player_data, roun
 // eslint-disable-next-line 
 export const scoreMatching = /[\d\(]+[\d\.\(\)\[\]\\ \:\-\,\/O]+(Ret)?(ret)?(RET)?[\.]*$/;
 
-export function scoreOrPlayer({cell_value, players, matchOutcomes}) {
+export function scoreOrPlayer({cell_value, players, matchOutcomes=[]}) {
   // TODO: more robust way of handling 'nije igrano' or 'not recorded' situations
   if (cell_value === 'not recorded') return true;
   // if (cell_value === 'nije igrano') return true; // really broken way of working around situation where final match not played
@@ -91,10 +100,8 @@ export function scoreOrPlayer({cell_value, players, matchOutcomes}) {
   if (drawPosition) return true;
   let score = cell_value.match(scoreMatching);
   if (score && score[0] === cell_value) return true;
-  let ended = matchOutcomes.map(ending => cell_value.toLowerCase().indexOf(ending.toLowerCase()) >= 0).reduce((a, b) => a || b);
-  if (ended) return true;
-
-  // console.log('Not Score or Player:', cell_value);
+  let ended = matchOutcomes.map(ending => cell_value.toLowerCase().indexOf(ending.toLowerCase()) >= 0).reduce((a, b) => a || b, undefined);
+  if (ended) { return true; }
   return false;
 };
 
@@ -103,7 +110,7 @@ function extraneousData({profile, sheet, ref}) {
   if (!isNaN(value) && value < 16) return true;
   let extraneous = profile && profile.extraneous;
   if (extraneous && extraneous.starts_with) {
-     let cell_value = cellValue(sheet[ref]) + '';
+     let cell_value = getCellValue(sheet[ref]) + '';
      return extraneous.starts_with.map(s => cell_value.toLowerCase().indexOf(s) === 0).reduce((a, b) => (a || b));
   }
 };
