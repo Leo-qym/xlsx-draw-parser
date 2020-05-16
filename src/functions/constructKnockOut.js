@@ -1,4 +1,5 @@
 import { getCellValue } from 'functions/sheetAccess';
+import { normalizeDiacritics } from 'normalize-text';
 import { getColumnMatches } from 'functions/columnMatches';
 import { chunkArray, instanceCount, numArr, generateRange, unique, isPowerOf2 } from 'functions/utilities';
 import { constructMatches, constructPreroundMatches } from 'functions/matchConstruction';
@@ -9,7 +10,7 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
    let rounds = [];
    let matches = [];
  
-   const matchOutcomes = profile.matchOutcomes;
+   const matchOutcomes = profile.matchOutcomes.map(normalizeDiacritics);
    const round_data = getRoundData({profile, sheet, columns, player_data, headerRow, matchOutcomes});
    const players = player_data.players;
    const allDrawPositions = players.map(p=>p.drawPosition);
@@ -62,7 +63,7 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
     rounds = add1stRound(rounds, players);
   }
   rounds = rounds.filter(round => round.filter(f => f.winners ? f.winners.length : true).length);
-  rounds = constructMatches({ rounds, players, isDoubles });
+  rounds = (rounds.length && constructMatches({ rounds, players, isDoubles })) || [];
 
   // merge all rounds into list of matches
   matches = [].concat(...rounds).filter(f=>f.losers && f.result);

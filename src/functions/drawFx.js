@@ -1,4 +1,4 @@
-import { normalizeName } from 'normalize-text'
+import { normalizeDiacritics } from 'normalize-text'
 import { getCellValue, getCol, getRow } from 'functions/sheetAccess';
 import { letterValue, unique } from 'functions/utilities';
 
@@ -7,8 +7,8 @@ export function getDrawPosition({value, players, idx = 0, expectedDrawPositions=
   
   const matchingPlayers = players
     .filter(player => {
-      const fullNameMatch = player.full_name && normalizeName(player.full_name) === normalizeName(value)
-      const lastNameMatch = player.last_name && normalizeName(player.last_name) === normalizeName(value)
+      const fullNameMatch = player.full_name && normalizeDiacritics(player.full_name) === normalizeDiacritics(value)
+      const lastNameMatch = player.last_name && normalizeDiacritics(player.last_name) === normalizeDiacritics(value)
       return fullNameMatch || lastNameMatch;
     });
  
@@ -38,7 +38,7 @@ export function lastFirstI(name) {
 };
 
 export function nameHash(name) {
-  return normalizeName(name.replace(/[-_,. ]+/g, "")).toLowerCase()
+  return normalizeDiacritics(name.replace(/[-_,. ]+/g, "")).toLowerCase()
 }
 
 const inDrawColumns = ({ref, round_columns}) => {

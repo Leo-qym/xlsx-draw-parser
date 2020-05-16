@@ -1,4 +1,4 @@
-import { normalizeName } from 'normalize-text'
+import { normalizeDiacritics } from 'normalize-text'
 import { unique, instanceCount } from 'functions/utilities';
 
 export function numberValue(sheet, reference) {
@@ -6,7 +6,7 @@ export function numberValue(sheet, reference) {
 }
 export function cellsContaining({sheet, term}) {
   let references = Object.keys(sheet);
-  return references.filter(ref => (sheet[ref].v + '').toLowerCase().indexOf(term.toLowerCase()) >= 0);
+  return references.filter(ref => (sheet[ref].v + '').toLowerCase().indexOf(normalizeDiacritics(term).toLowerCase()) >= 0);
 };
 
 export function getCellValue(cell) {
@@ -14,7 +14,7 @@ export function getCellValue(cell) {
   val = (typeof val === 'string') ? val.trim() : val;
   val = val.indexOf(',,') >= 0 ? val.replace(',,', ',') : val;
   val = val.indexOf(',') >= 0 ? val.split(',').map(v => v.trim()).join(', ') : val;
-  return val;
+  return normalizeDiacritics(val);
 };
 
 export function getRow(reference) {
@@ -28,7 +28,8 @@ export function findValueRefs(searchText, sheet, options) {
   function transformValue(value) {
     if (options) {
       if (options.lowerCase) value = value.toLowerCase();
-      if (options.normalize) value = normalizeName(value);
+      // if (options.normalize) value = normalizeDiacritics(value);
+      value = normalizeDiacritics(value);
       if (options.remove && Array.isArray(options.remove)) {
         options.remove.forEach(replace => {
           const re = new RegExp(replace,"g");
@@ -38,7 +39,7 @@ export function findValueRefs(searchText, sheet, options) {
     }
     return value;
   }
-  return Object.keys(sheet).filter(ref => transformValue(getCellValue(sheet[ref])) === searchText);
+  return Object.keys(sheet).filter(ref => transformValue(getCellValue(sheet[ref])) === normalizeDiacritics(searchText));
 }
 
 export function getTargetValue({searchText, sheet, rowOffset=0, columnOffset=0, options}) {
@@ -59,7 +60,7 @@ export function findRow({sheet, rowDefinition, allTargetRows, firstTargetRow}) {
   const options = { lowerCase: true, normalize: true, remove: [':'] };
   const elementRows = [].concat(...rowElements
     .map(element => options.lowerCase ? element.toLowerCase() : element)
-    .map(element => options.normalize ? normalizeName(element) : element)
+    .map(element => options.normalize ? normalizeDiacritics(element) : element)
     .map(element => {
       const valueRefs = findValueRefs(element, sheet, options);
       // remove duplicate instances on the same row

@@ -381,7 +381,7 @@ export const tournamentParser = function() {
 
    tp.drawPosition = ({full_name, players, idx = 0}) => {
       // idx used in instances where there are multiple BYEs, such that they each have a unique drawPosition
-      let tournament_player = players.filter(player => player.full_name && stringFx.normalizeName(player.full_name) === stringFx.normalizeName(full_name))[idx];
+      let tournament_player = players.filter(player => player.full_name && stringFx.normalizeDiacritics(player.full_name) === stringFx.normalizeDiacritics(full_name))[idx];
       if (!tournament_player) {
          // find player draw position by last name, first initial; for draws where first name omitted after first round
          tournament_player = players.filter(player => player.last_first_i && player.last_first_i === lastFirstI(full_name))[0];

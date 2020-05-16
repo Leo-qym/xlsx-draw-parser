@@ -25,12 +25,12 @@ export function getColumnMatches({sheet, round, roundIndex, players, isDoubles, 
       const cellValue = getCellValue(sheet[reference]);
       const drawPosition = getDrawPosition({ value: cellValue, players});
       const isScoreValue = cellValue.match(scoreMatching);
-      const isMatchOutcome = matchOutcomes.map(ending => cellValue.toLowerCase().indexOf(ending.toLowerCase()) >= 0).reduce((a, b) => a || b, undefined);
+      const isMatchOutcome = matchOutcomes
+         .map(ending => cellValue.toLowerCase().indexOf(ending.toLowerCase()) >= 0).reduce((a, b) => a || b, undefined);
       return { cellValue, cellRow, drawPosition, isScoreValue, isMatchOutcome }
    });
 
    let lastCellRow = 0;
-   let expectedGroupingsIndex = 0;
    const discontinuities = unique(roundColumnValues.map((value, i) => {
       const isWhiteSpace = value.cellRow - lastCellRow > 1;
       const isOutcome = value.isScoreValue || value.isMatchOutcome;
@@ -38,10 +38,19 @@ export function getColumnMatches({sheet, round, roundIndex, players, isDoubles, 
       return isWhiteSpace ? i : isOutcome ? i + 1 : undefined;
    }).filter(f=>f));
 
-   console.log({roundColumnValues, discontinuities})
+   let lastDisconiuity = 0;
+   const columnGroupings = discontinuities.map(discontinuity => {
+      const grouping = roundColumnValues.slice(lastDisconiuity, discontinuity);
+      lastDisconiuity = discontinuity;
+      return grouping;
+   });
+   const finalDiscontinuity = roundColumnValues.slice(lastDisconiuity);
+   if (finalDiscontinuity.length) columnGroupings.push(finalDiscontinuity);
+
+   console.log({roundColumnValues, discontinuities, columnGroupings})
   
-  expectedGroupingsIndex = 0;
-  round.column_references.forEach(reference => {
+   let expectedGroupingsIndex = 0;
+   round.column_references.forEach(reference => {
      const expectedDrawPositions = expectedGroupings[expectedGroupingsIndex];
      
      // if row number not sequential => new match
@@ -101,7 +110,7 @@ export function getColumnMatches({sheet, round, roundIndex, players, isDoubles, 
             next_round_winners = [];
          }
      }
-  });
+   });
   
   // still winners => last column match had a bye
   if (winners.length) {
