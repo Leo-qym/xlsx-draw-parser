@@ -43,6 +43,7 @@ export const workbookTypes = [
             'kiem', 'családi név', 'keresztnév',
             'egyesület', 'döntő', '2. forduló'
           ],
+          rows: 1,
           minimumElements: 5
         },
         {
@@ -53,6 +54,7 @@ export const workbookTypes = [
             'vezetéknév', 'keresztnév', 'egyesület',
             'helyezés', 'pontszám', 'bónusz'
           ],
+          rows: 1,
           minimumElements: 7
         },
         {
@@ -63,6 +65,7 @@ export const workbookTypes = [
             'aláírás', 'nevezési rangsor', 'elfogadási státusz',
             'sorsolási rangsor', 'kiemelés'
           ],
+          rows: 1,
           minimumElements: 8
         },
         {
@@ -73,6 +76,7 @@ export const workbookTypes = [
             '1. játékos ranglista', 'aláírás', '2. játékos ranglista',
             'páros egyesített rangsora', 'kIemelés'
           ],
+          rows: 1,
           minimumElements: 8
         },
         {
@@ -84,6 +88,7 @@ export const workbookTypes = [
             'szerencés vesztes', 'sorsolás időpontja',
             'kiemelt párosok'
           ],
+          rows: 9,
           minimumElements: 3
         },
         {
@@ -92,6 +97,7 @@ export const workbookTypes = [
           elements: [
             'a verseny dátuma (éééé.hh.nn)', 'város', 'versenybíró'
           ],
+          rows: 1,
           minimumElements: 2
         },
         {
@@ -100,6 +106,7 @@ export const workbookTypes = [
           elements: [
             'orvos neve', 'verseny rendezője','versenyigazgató'
           ],
+          rows: 1,
           minimumElements: 2
         },
       ],
@@ -217,6 +224,7 @@ export const workbookTypes = [
             'rang', 'st.', 'nositelj', 'prezime, ime', 'klub',
             '2.kolo', '1/2 finale', 'finale', 'pobjednik'
           ],
+          rows: 1,
           minimumElements: 5
         },
         {
@@ -224,6 +232,7 @@ export const workbookTypes = [
           id: 'roundRobinParticipants',
           elements: [
           ],
+          rows: 1,
           minimumElements: 7
         },
         {
@@ -231,6 +240,7 @@ export const workbookTypes = [
           id: 'singlesParticipants',
           elements: [
           ],
+          rows: 1,
           minimumElements: 8
         },
         {
@@ -238,6 +248,7 @@ export const workbookTypes = [
           id: 'doublesParticipants',
           elements: [
           ],
+          rows: 1,
           minimumElements: 8
         },
         {
@@ -248,6 +259,7 @@ export const workbookTypes = [
             'sretni gubitnici (LL)/zamjenjuje',
             'datum/vrijeme ždrijeba'
           ],
+          rows: 9,
           minimumElements: 3
         }
       ],

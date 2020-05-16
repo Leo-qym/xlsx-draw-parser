@@ -2,7 +2,7 @@ import { maxInstance } from 'functions/utilities';
 import { validRanking } from 'functions/validators.js';
 import { getRow, getCol, cellsContaining, cellValue } from 'functions/sheetAccess.js';
 
-export function getParticipantRows({sheet, profile, headerRow, footerRow, columns}) {
+export function getParticipantRows({sheet, profile, headerRow, footerRow, avoidRows, columns}) {
   if (!profile) return { rows: [], preround_rows: [] };
   const skipWords = profile.skipWords;
   const skipExpressions = profile.skipExpressions;
@@ -113,7 +113,7 @@ export function getParticipantRows({sheet, profile, headerRow, footerRow, column
   const endRow = draw_rows[draw_rows.length - 1];
   const range = [startRow, endRow];
 
-  const rows = allRows.filter(row => row >= startRow && row <= endRow);
+  const rows = allRows.filter(row => row >= startRow && row <= endRow && !avoidRows.includes(row));
   
   // determine whether there are player rows outside of Round Robins
   finals = finals ? finals.filter(f => draw_rows.indexOf(f) < 0) : undefined;

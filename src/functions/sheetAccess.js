@@ -53,7 +53,7 @@ export function getTargetValue({searchText, sheet, rowOffset=0, columnOffset=0, 
   return value;
 }
 
-export function findRow({sheet, rowDefinition}) {
+export function findRow({sheet, rowDefinition, allTargetRows, firstTargetRow}) {
   const rowElements = rowDefinition && rowDefinition.elements;
   if (!rowElements) return;
   const options = { lowerCase: true, normalize: true, remove: [':'] };
@@ -69,6 +69,13 @@ export function findRow({sheet, rowDefinition}) {
   const valueCounts = instanceCount(elementRows);
   const elementInstances = Math.max(0, ...Object.values(valueCounts));
   if (elementInstances >= rowDefinition.minimumElements) {
-    return Object.keys(valueCounts).reduce((p, c) => valueCounts[c] === elementInstances ? c : p, undefined);
+    const targetRows = Object.keys(valueCounts).reduce((p, c) => valueCounts[c] === elementInstances ? p.concat(+c) : p, []);
+    if (allTargetRows) {
+      return targetRows;
+    } else if (firstTargetRow) {
+      return Math.min(...targetRows);
+    } else {
+      return Math.max(...targetRows);
+    }
   }
 }

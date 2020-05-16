@@ -349,7 +349,7 @@ export const tournamentParser = function() {
 
       if (pdata[0] && pdata[0].column_references) {
          // there should be only one column of relevant data
-         preround.matches = columnMatches(sheet, pdata[0], preround.players).matches.filter(match => match.result);
+         preround.matches = getColumnMatches(sheet, pdata[0], preround.players).matches.filter(match => match.result);
       }
 
       return { players, rows, playoff3rd, playoff3rd_rows, range, finals, preround };
@@ -389,7 +389,7 @@ export const tournamentParser = function() {
       return tournament_player ? tournament_player.drawPosition : undefined;
    };
 
-   let columnMatches = (sheet, round, players) => {
+   let getColumnMatches = (sheet, round, players) => {
       let names = [];
       let matches = [];
       let winners = [];
@@ -695,7 +695,7 @@ export const tournamentParser = function() {
          let first_round;
          let round_data = tp.roundData({sheet, player_data});
          rounds = round_data.map(round => {
-            let column_matches = columnMatches(sheet, round, players);
+            let column_matches = getColumnMatches(sheet, round, players);
             let matches_with_results = column_matches.matches.filter(match => match.result);
 
             if (!matches_with_results.length) {

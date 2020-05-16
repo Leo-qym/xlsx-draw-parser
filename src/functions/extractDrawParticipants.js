@@ -1,41 +1,49 @@
 import { cellValue, numberValue } from 'functions/sheetAccess';
-import { columnMatches } from 'functions/columnMatches';
+import { getColumnMatches } from 'functions/columnMatches';
 import { roundData, nameHash, lastFirstI } from 'functions/drawFx';
 
 export function extractDrawParticipants({ profile, sheet, headerRow, columns, rows, range, finals, preround_rows}) {
+   console.log({headerRow, rows, range})
    let players = [];
    let playoff3rd = [];
    let playoff3rd_rows = [];
    let hasharray = [];
 
    let isDoubles = false;
+   let expectedDrawPosition = 1;
+   
    const extract_seed = /\[(\d+)(\/\d+)?\]/;
    const rowOffset = profile.doubles.drawPosition.rowOffset;
 
    rows.forEach(row => {
-     let drawPosition = numberValue(sheet, `${columns.position}${row}`);
+      let drawPosition = numberValue(sheet, `${columns.position}${row}`);
 
-     if (!drawPosition) {
-        // MUST BE DOUBLES
-        isDoubles = true;
-        drawPosition = numberValue(sheet, `${columns.position}${row + rowOffset}`);
-     }
+      if (!drawPosition) {
+         // MUST BE DOUBLES
+         isDoubles = true;
+         drawPosition = numberValue(sheet, `${columns.position}${row + rowOffset}`);
+      }
 
-     let player = extractPlayer({row, drawPosition, isDoubles});
+      let player = extractPlayer({row, drawPosition, isDoubles});
 
-     if (['bye,', 'bye', 'byebye'].indexOf(player.hash) >= 0) {
-       players.push(player);
-     } else if (
-         ['', 'bye', 'byebye'].indexOf(player.hash) < 0 &&
-         hasharray.indexOf(player.hash) < 0 &&
-         player.first_name && player.last_name
-       ) {
-       hasharray.push(player.hash);
-       players.push(player);
-     } else {
-       playoff3rd_rows.push(row);
-       playoff3rd.push(player);
-     }
+      if (['bye,', 'bye', 'byebye'].indexOf(player.hash) >= 0) {
+         player.isBye = true;
+         players.push(player);
+      } else if (
+            ['', 'bye', 'byebye'].indexOf(player.hash) < 0 &&
+            hasharray.indexOf(player.hash) < 0 &&
+            player.first_name && player.last_name
+         ) {
+            hasharray.push(player.hash);
+            players.push(player);
+            expectedDrawPosition = drawPosition + 1;
+      } else if (drawPosition === expectedDrawPosition) {
+         player.isBye = true;
+         players.push(player);
+      } else {
+         playoff3rd_rows.push(row);
+         playoff3rd.push(player);
+      }
   });
 
   // rows from playoff round are excluded
@@ -59,7 +67,7 @@ export function extractDrawParticipants({ profile, sheet, headerRow, columns, ro
 
   if (pdata[0] && pdata[0].column_references) {
      // there should be only one column of relevant data
-     preround.matches = columnMatches({
+     preround.matches = getColumnMatches({
         sheet,
         round: pdata[0],
         players: preround.players,
@@ -67,6 +75,8 @@ export function extractDrawParticipants({ profile, sheet, headerRow, columns, ro
         rowOffset
       }).matches.filter(match => match.result);
   }
+
+  console.log({players, playoff3rd});
 
   return { players, rows, playoff3rd, playoff3rd_rows, range, finals, preround, isDoubles };
 

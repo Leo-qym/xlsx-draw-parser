@@ -7,7 +7,6 @@ export function tournamentDraw({profile, sheet, columns, headerRow, gender, play
   let preround = [];
 
   let players = player_data.players;
-  console.log({players});
   let round_robin = players.length ? players.map(p=>p.rr_result !== undefined).reduce((a, b) => a || b) : false;
   
   if (round_robin) {

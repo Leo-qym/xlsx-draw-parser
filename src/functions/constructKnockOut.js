@@ -1,6 +1,6 @@
 import { cellValue } from 'functions/sheetAccess';
-import { columnMatches } from 'functions/columnMatches';
-import { numArr, range, unique, instanceCount } from 'functions/utilities';
+import { getColumnMatches } from 'functions/columnMatches';
+import { chunkArray, instanceCount, numArr, generateRange, unique } from 'functions/utilities';
 import { constructMatches, constructPreroundMatches } from 'functions/matchConstruction';
 import { getDrawPosition, matchOutcomes, scoreMatching, scoreOrPlayer, roundData, roundColumns } from 'functions/drawFx';
 
@@ -8,23 +8,31 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
   let first_round;
   let rounds = [];
   let matches = [];
+  
   const round_data = roundData({profile, sheet, columns, player_data, headerRow});
   const players = player_data.players;
-  const drawPositions = players.map(p=>p.drawPosition);
+  const drawPositions = unique(players.map(p=>p.drawPosition));
   const isDoubles = Math.max(...Object.values(instanceCount(drawPositions))) === 2;
   const rowOffset = profile.doubles.drawPosition.rowOffset;
   if (isDoubles) console.log('%c DOUBLES', 'color: yellow');
-
+  
+  let expectedMatchUps = drawPositions.length / (2 + ((isDoubles ? 1 : 0) * 1));
+  let expectedGroupings = chunkArray(drawPositions, 2);
+  console.log({drawPositions, expectedMatchUps})
+  
   rounds = round_data.map((round, roundIndex) => {
-    let column_matches = columnMatches({sheet, round, roundIndex, players, isDoubles, rowOffset});
+    let column_matches = getColumnMatches({sheet, round, roundIndex, players, isDoubles, rowOffset, expectedMatchUps, expectedGroupings});
     let matches_with_results = column_matches.matches.filter(match => match.result);
 
-    console.log({column_matches});
+    console.log({expectedMatchUps, column_matches});
 
     if (!matches_with_results.length) {
        // first_round necessary for situations where i.e. 32 draw used when 16 would suffice
        first_round = column_matches.matches.filter(match => match.winners).map(match => match.winners[0]);
     }
+    expectedMatchUps = expectedMatchUps / 2;
+    expectedGroupings = chunkArray(column_matches.winnerDrawPositions, 2);
+    
     return column_matches;
   });
   
@@ -66,7 +74,7 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
     // 3rd place playoff column should be the first round result column
     let result_column = roundColumns({sheet, columns, headerRow})[0];
     // create a range from the minimum and maximum playoff rows
-    let result_range = range(Math.min(...player_data.playoff3rd_rows), Math.max(...player_data.playoff3rd_rows) + 1);
+    let result_range = generateRange(Math.min(...player_data.playoff3rd_rows), Math.max(...player_data.playoff3rd_rows) + 1);
     // accumulate all values for the result range and filter for score or player
     let result = result_range.map(row => cellValue(sheet[`${result_column}${row}`]))
        .filter(f=>f)

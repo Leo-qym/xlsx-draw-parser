@@ -4,8 +4,9 @@ import { workbookTypes } from 'types/workbookTypes';
 import { HEADER, FOOTER } from 'types/sheetElements';
 import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../types/sheetTypes';
 
-import { tournamentDraw } from 'functions/constructDraw';
+import { generateRange } from 'functions/utilities';
 import { extractInfo } from 'functions/extractInfo';
+import { tournamentDraw } from 'functions/constructDraw';
 import { getParticipantRows } from 'functions/getParticipantRows';
 import { extractDrawParticipants } from 'functions/extractDrawParticipants';
 import { findRow, getRow, getCol, findValueRefs } from 'functions/sheetAccess.js';
@@ -48,42 +49,11 @@ export function spreadSheetParser(file_content, sheetFilter) {
         console.log(message, `color: ${color}`)
         color = 'yellow';
       } else if (sheetDefinition.type === KNOCKOUT) {
-        message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
-        console.log(message, `color: ${color}`)
-
-        const rowDefinitions = profile.rowDefinitions;
-        const headerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: HEADER });
-        const footerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: FOOTER });
-
-        const headerRow = findRow({sheet, rowDefinition: headerRowDefinition});
-        const footerRow = findRow({sheet, rowDefinition: footerRowDefinition});
-        const columns = getHeaderColumns({sheet, profile, headerRow});
-
-        const {rows, range, finals, preround_rows} = getParticipantRows({sheet, profile, headerRow, footerRow, columns});
-        const { players, isDoubles } = extractDrawParticipants({ profile, sheet, headerRow, columns, rows, range, finals, preround_rows });
-        const drawType = isDoubles ? 'DOUBLES' : 'SINGES';
-        
-        const drawInfo = extractInfo({profile, sheet, infoClass: 'drawInfo'});
-        Object.assign(drawInfo, { drawType });
-        const gender = drawInfo.gender;
-        console.log({drawInfo})
-
-        const qualifying = false;
-        const player_data = { players, rows, range, finals, preround_rows };
-        const { rounds, matches, preround } = tournamentDraw({profile, sheet, columns, headerRow, gender, player_data, qualifying}) 
-
-        Object.assign(drawInfo, { matches });
+        const { drawInfo } = processKnockOut({profile, sheet, sheetName, sheetDefinition});
         tournamentRecord.draws.push({drawInfo});
-        console.log({rounds, matches, preround});
-        
       } else if (sheetDefinition.type === ROUND_ROBIN) {
-        message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
-        console.log(message, `color: ${color}`)
-        
-        const rowDefinitions = profile.rowDefinitions;
-        const headerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: HEADER });
-        const footerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: FOOTER });
-        console.log({headerRowDefinition, footerRowDefinition})
+        const { drawInfo } = processRoundRobin({profile, sheet, sheetName, sheetDefinition});
+        console.log({drawInfo});
       } else if (sheetDefinition.type === PARTICIPANTS) {
         message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
         console.log(message, `color: ${color}`)
@@ -150,3 +120,57 @@ function getHeaderColumns({sheet, profile, headerRow}) {
   }
   return columnsMap;
 };
+
+function processRoundRobin({profile, sheet, sheetName, sheetDefinition}) {
+  const message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
+  console.log(message, `color: cyan`)
+  
+  const rowDefinitions = profile.rowDefinitions;
+  const headerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: HEADER });
+  const footerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: FOOTER });
+  console.log({headerRowDefinition, footerRowDefinition})
+  return { drawInfo: undefined };
+}
+
+function processKnockOut({profile, sheet, sheetName, sheetDefinition}) {
+  let message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
+  console.log(message, `color: cyan`)
+
+  const rowDefinitions = profile.rowDefinitions;
+  const headerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: HEADER });
+  const footerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: FOOTER });
+
+  const headerRows = findRow({sheet, rowDefinition: headerRowDefinition, allTargetRows: true});
+  const footerRows = findRow({sheet, rowDefinition: footerRowDefinition, allTargetRows: true});
+  const headerRow = headerRows[0];
+  const footerRow = footerRows[footerRows.length - 1];
+  const headerAvoidRows = headerRows.map(headerRow => {
+    const startRange = +headerRow;
+    const endRange = +headerRow + (headerRowDefinition.rows || 0);
+    return generateRange(startRange, endRange);
+  });
+  const footerAvoidRows = footerRows.map(footerRow => {
+    const startRange = +footerRow;
+    const endRange = +footerRow + (footerRowDefinition.rows || 0);
+    return generateRange(startRange, endRange);
+  });
+  const avoidRows = [].concat(...headerAvoidRows, ...footerAvoidRows);
+  const columns = getHeaderColumns({sheet, profile, headerRow});
+
+  const {rows, range, finals, preround_rows} = getParticipantRows({sheet, profile, headerRow, footerRow, avoidRows, columns});
+  const { players, isDoubles } = extractDrawParticipants({ profile, sheet, headerRow, columns, rows, range, finals, preround_rows });
+  const drawType = isDoubles ? 'DOUBLES' : 'SINGES';
+  
+  const drawInfo = extractInfo({profile, sheet, infoClass: 'drawInfo'});
+  Object.assign(drawInfo, { drawType });
+  const gender = drawInfo.gender;
+  console.log({drawInfo})
+
+  const qualifying = false;
+  const player_data = { players, rows, range, finals, preround_rows };
+  const { rounds, matches, preround } = tournamentDraw({profile, sheet, columns, headerRow, gender, player_data, qualifying}) 
+  Object.assign(drawInfo, { matches });
+  console.log({ drawInfo, rounds, matches, preround});
+
+  return { drawInfo };
+}

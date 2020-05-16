@@ -51,7 +51,7 @@ export function constructMatches({ rounds, players, isDoubles }) {
         let round_name = roundIndex + 2 < rounds.length || roundIndex < 3 ? main_draw_rounds[roundIndex] : `R${draw_positions}`;
         round_matches.forEach((match, match_index) => {
            match.matchType = matchType;
-           match.roundNumber = rounds.length - roundIndex;
+           match.roundNumber = rounds.length - roundIndex - 1;
            match.finishingRound = roundIndex + 1;
            match.roundPosition = match_index + 1;
            match.roundName = draw_type === 'main' ? round_name : `Q${roundIndex || ''}`;
