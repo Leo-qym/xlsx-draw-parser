@@ -3,7 +3,6 @@ import { getColumnMatches } from 'functions/columnMatches';
 import { roundData, nameHash, lastFirstI } from 'functions/drawFx';
 
 export function extractDrawParticipants({ profile, sheet, headerRow, columns, rows, range, finals, preround_rows}) {
-   console.log({headerRow, rows, range})
    let players = [];
    let playoff3rd = [];
    let playoff3rd_rows = [];

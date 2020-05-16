@@ -2,7 +2,7 @@ import { getDrawPosition } from 'functions/drawFx';
 import { normalizeScore } from 'functions/cleanScore';
 import { getRow, cellValue } from 'functions/sheetAccess';
 
-export function getColumnMatches({sheet, round, roundIndex, players, isDoubles, rowOffset}) {
+export function getColumnMatches({sheet, round, roundIndex, players, isDoubles, rowOffset, expectedMatchUps, expectedGroupings}) {
   let names = [];
   let matches = [];
   let winners = [];

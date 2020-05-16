@@ -159,12 +159,11 @@ function processKnockOut({profile, sheet, sheetName, sheetDefinition}) {
 
   const {rows, range, finals, preround_rows} = getParticipantRows({sheet, profile, headerRow, footerRow, avoidRows, columns});
   const { players, isDoubles } = extractDrawParticipants({ profile, sheet, headerRow, columns, rows, range, finals, preround_rows });
-  const drawType = isDoubles ? 'DOUBLES' : 'SINGES';
+  const drawType = isDoubles ? 'DOUBLES' : 'SINGLES';
   
   const drawInfo = extractInfo({profile, sheet, infoClass: 'drawInfo'});
   Object.assign(drawInfo, { drawType });
   const gender = drawInfo.gender;
-  console.log({drawInfo})
 
   const qualifying = false;
   const player_data = { players, rows, range, finals, preround_rows };

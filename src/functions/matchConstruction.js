@@ -26,7 +26,7 @@ export function constructPreroundMatches({rounds, preround, players, gender}) {
 };
 
 export function constructMatches({ rounds, players, isDoubles }) {
-   const matchType = isDoubles ? 'DOUBLES' : 'SINGES';
+   const matchType = isDoubles ? 'DOUBLES' : 'SINGLES';
   // less broken way of working around situation where final match not played
   let draw_type = (rounds[0].length === 1 || (rounds[0].length === 2 && rounds[1].length === 4)) ? 'main' : 'qualification';
 

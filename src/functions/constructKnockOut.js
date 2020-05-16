@@ -1,46 +1,50 @@
 import { cellValue } from 'functions/sheetAccess';
 import { getColumnMatches } from 'functions/columnMatches';
-import { chunkArray, instanceCount, numArr, generateRange, unique } from 'functions/utilities';
+import { chunkArray, instanceCount, numArr, generateRange, unique, isPowerOf2 } from 'functions/utilities';
 import { constructMatches, constructPreroundMatches } from 'functions/matchConstruction';
 import { getDrawPosition, matchOutcomes, scoreMatching, scoreOrPlayer, roundData, roundColumns } from 'functions/drawFx';
 
 export function constructKnockOut({ profile, sheet, columns, headerRow, gender, player_data, preround }) {
-  let first_round;
-  let rounds = [];
-  let matches = [];
+   let first_round;
+   let rounds = [];
+   let matches = [];
   
-  const round_data = roundData({profile, sheet, columns, player_data, headerRow});
-  const players = player_data.players;
-  const drawPositions = unique(players.map(p=>p.drawPosition));
-  const isDoubles = Math.max(...Object.values(instanceCount(drawPositions))) === 2;
-  const rowOffset = profile.doubles.drawPosition.rowOffset;
-  if (isDoubles) console.log('%c DOUBLES', 'color: yellow');
-  
-  let expectedMatchUps = drawPositions.length / (2 + ((isDoubles ? 1 : 0) * 1));
-  let expectedGroupings = chunkArray(drawPositions, 2);
-  console.log({drawPositions, expectedMatchUps})
-  
-  rounds = round_data.map((round, roundIndex) => {
-    let column_matches = getColumnMatches({sheet, round, roundIndex, players, isDoubles, rowOffset, expectedMatchUps, expectedGroupings});
-    let matches_with_results = column_matches.matches.filter(match => match.result);
+   const round_data = roundData({profile, sheet, columns, player_data, headerRow});
+   const players = player_data.players;
+   const allDrawPositions = players.map(p=>p.drawPosition);
+   const drawPositions = unique(allDrawPositions);
+   
+   const isDoubles = Math.max(...Object.values(instanceCount(allDrawPositions))) === 2;
+   const rowOffset = profile.doubles.drawPosition.rowOffset;
+   if (isDoubles) console.log('%c DOUBLES', 'color: yellow');
 
-    console.log({expectedMatchUps, column_matches});
+   let expectedMatchUps = drawPositions.length / 2;
+   let expectedGroupings = chunkArray(drawPositions, 2);
 
-    if (!matches_with_results.length) {
-       // first_round necessary for situations where i.e. 32 draw used when 16 would suffice
-       first_round = column_matches.matches.filter(match => match.winners).map(match => match.winners[0]);
-    }
-    expectedMatchUps = expectedMatchUps / 2;
-    expectedGroupings = chunkArray(column_matches.winnerDrawPositions, 2);
-    
-    return column_matches;
-  });
+   const isValidExpectedMatchUps = isPowerOf2(expectedMatchUps);
+   if (!isValidExpectedMatchUps) {
+      console.log('%c Invalid Expected MatchUps', 'color: lightred');
+      return { rounds, matches: [] };
+   }
+
+   rounds = round_data.map((round, roundIndex) => {
+      let column_matches = getColumnMatches({sheet, round, roundIndex, players, isDoubles, rowOffset, expectedMatchUps, expectedGroupings});
+      let matches_with_results = column_matches.matches.filter(match => match.result);
+
+      if (!matches_with_results.length) {
+          // first_round necessary for situations where i.e. 32 draw used when 16 would suffice
+          first_round = column_matches.matches.filter(match => match.winners).map(match => match.winners[0]);
+      }
+
+      expectedMatchUps = expectedMatchUps / 2;
+      expectedGroupings = chunkArray(column_matches.winnerDrawPositions, 2);
+
+      return column_matches;
+   });
   
   findEmbeddedRounds(rounds).forEach(round => rounds.push(round));
   rounds = rounds.map(round => round.matches);
-  if (!rounds.length) {
-    return { rounds, matches: [] };
-  }
+  if (!rounds.length) { return { rounds, matches: [] }; }
   
   rounds = addByes(rounds, players);
   /* reverse rounds to:
