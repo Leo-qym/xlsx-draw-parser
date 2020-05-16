@@ -12,6 +12,11 @@ export const workbookTypes = [
       const tournamentInfo = /^altalanos/.test(sheetName.toLowerCase());
       return knockout || (roundRobin || rrPlayoff || tournamentInfo);
     },
+    matchOutcomes: [
+      'ret.', 'RET', 'DEF.', 'Def.', 'def.', 'BYE', 'w.o',
+      'w.o.', 'W.O', 'W.O.', 'wo.', 'WO', 'Abandoned',
+      'jn betegség', 'jn.'
+    ],
     profile: {
       skipWords: ['umpire', '0'],
       skipExpressions: ['[0-9,/, ]+pont', 'umpire'],
@@ -196,6 +201,10 @@ export const workbookTypes = [
         .includes(sheetName.slice(nameLength - 2, nameLength));
       return (Singles || Doubles) && validDrawSize;
     },
+    matchOutcomes: [
+      'ret.', 'RET', 'DEF.', 'Def.', 'def.', 'BYE', 'w.o',
+      'w.o.', 'W.O', 'W.O.', 'wo.', 'WO', 'Abandoned'
+    ],
     profile: {
       skipWords: ['umpire'],
       doubles: {

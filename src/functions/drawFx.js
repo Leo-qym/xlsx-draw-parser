@@ -82,9 +82,8 @@ export function roundData({sheet, columns, headerRow, profile, player_data, roun
 
 // eslint-disable-next-line 
 export const scoreMatching = /[\d\(]+[\d\.\(\)\[\]\\ \:\-\,\/O]+(Ret)?(ret)?(RET)?[\.]*$/;
-export const matchOutcomes = ['ret.', 'RET', 'DEF.', 'Def.', 'def.', 'BYE', 'w.o', 'w.o.', 'W.O', 'W.O.', 'wo.', 'WO', 'Abandoned'];
 
-export function scoreOrPlayer({cell_value, players}) {
+export function scoreOrPlayer({cell_value, players, matchOutcomes}) {
   // TODO: more robust way of handling 'nije igrano' or 'not recorded' situations
   if (cell_value === 'not recorded') return true;
   // if (cell_value === 'nije igrano') return true; // really broken way of working around situation where final match not played

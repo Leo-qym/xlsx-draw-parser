@@ -9,9 +9,13 @@ export function getColumnMatches({sheet, round, roundIndex, players, isDoubles, 
   let last_draw_position;
   let round_occurrences = [];
   let winnerDrawPositions = [];
+  let expectedGroupingsIndex = 0;
+  console.log({roundIndex, refs: round.column_references})
+  
   const offset = isDoubles ? rowOffset : 1;
   let last_row_number = getRow(round.column_references[0]) - offset;
   round.column_references.forEach(reference => {
+     
      // if row number not sequential => new match
      let this_row_number = getRow(reference);
      if (+this_row_number !== +last_row_number + 1 && winners.length) {

@@ -3,7 +3,7 @@ import { scoreOrPlayer, roundData } from 'functions/drawFx';
 import { cellValue } from 'functions/sheetAccess';
 import { normalizeScore } from 'functions/cleanScore';
 
-export function constructRoundRobin({ sheet, columns, gender, qualifying, player_data }) {
+export function constructRoundRobin({ profile, sheet, columns, gender, qualifying, player_data }) {
  let hash = [];
  let matches = []; 
  let players = player_data.players;
@@ -56,6 +56,7 @@ export function constructRoundRobin({ sheet, columns, gender, qualifying, player
  // also search for final match in single-page RR sheet
  let keys = Object.keys(sheet);
 
+ const matchOutcomes = profile.matchOutcomes;
  let profileTargetsWinner = 'FOO'; // TODO: re-enable this
  let target = unique(keys.filter(f=>cellValue(sheet[f]) === profileTargetsWinner))[0];
  if (target && target.match(/\d+/)) {
@@ -67,11 +68,11 @@ export function constructRoundRobin({ sheet, columns, gender, qualifying, player
        if (!numeric) return false;
        // do these values need to be coerced to ints?
        return numeric[0] >= finals_range[0] && numeric[0] <= finals_range[finals_range.length - 1] && k[0] === finals_col;
-    }).filter(ref => scoreOrPlayer({ cell_value: cellValue(sheet[ref]), players }));
+    }).filter(ref => scoreOrPlayer({ cell_value: cellValue(sheet[ref]), players, matchOutcomes }));
     let finals_details = finals_cells.map(fc => cellValue(sheet[fc]));
     let finalists = player_data.finals
        .map(row => cellValue(sheet[`${columns.players}${row}`]))
-       .filter(player => scoreOrPlayer({ cell_value: player, players }));
+       .filter(player => scoreOrPlayer({ cell_value: player, players, matchOutcomes }));
     let winner = finals_details.filter(f => finalists.indexOf(f) >= 0)[0];
     let result = finals_details.filter(f => finalists.indexOf(f) < 0)[0];
     let loser = finalists.filter(f => +f !== +winner)[0];
