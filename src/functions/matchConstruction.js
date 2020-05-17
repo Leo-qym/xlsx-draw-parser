@@ -28,10 +28,9 @@ export function constructPreroundMatches({rounds, preround, players, gender}) {
 export function constructMatches({ rounds, players, isDoubles }) {
    const matchType = isDoubles ? 'DOUBLES' : 'SINGLES';
   // less broken way of working around situation where final match not played
+  let roundsProfile = rounds.map(round => round.length);
+  console.log({roundsProfile})
   let draw_type = (rounds[0].length === 1 || (rounds[0].length === 2 && rounds[1] && rounds[1].length === 4)) ? 'main' : 'qualification';
-
-  // really broken way of working around situation where final match not played
-  // if (rounds[0][0].result === 'nije igrano') rounds = rounds.slice(1);
 
   rounds.forEach((round, roundIndex) => {
      if (+roundIndex + 2 === rounds.length) round = round.filter(player => player.bye === undefined);
