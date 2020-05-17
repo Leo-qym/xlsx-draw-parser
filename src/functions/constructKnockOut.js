@@ -1,7 +1,7 @@
 import { getCellValue } from 'functions/sheetAccess';
 import { normalizeDiacritics } from 'normalize-text';
 import { getColumnMatches } from 'functions/columnMatches';
-import { chunkArray, instanceCount, numArr, generateRange, unique, isPowerOf2 } from 'functions/utilities';
+import { chunkArray, instanceCount, generateRange, unique, isPowerOf2 } from 'functions/utilities';
 import { constructMatches, constructPreroundMatches } from 'functions/matchConstruction';
 import { getDrawPosition, scoreMatching, scoreOrPlayer, getRoundData, roundColumns } from 'functions/drawFx';
 
@@ -17,7 +17,6 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
    const drawPositions = unique(allDrawPositions);
    
    const isDoubles = Math.max(...Object.values(instanceCount(allDrawPositions))) === 2;
-   const rowOffset = profile.doubles.drawPosition.rowOffset;
    if (isDoubles) console.log('%c DOUBLES', 'color: yellow');
 
    let expectedMatchUps = drawPositions.length / 2;
@@ -29,8 +28,16 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
       return { rounds, matches: [] };
    }
 
-   rounds = round_data.map((round, roundIndex) => {
-      let column_matches = getColumnMatches({sheet, round, roundIndex, players, isDoubles, rowOffset, matchOutcomes, expectedGroupings});
+   let expectOutcomes = false;
+   rounds = round_data.map(round => {
+      let column_matches = getColumnMatches({
+         sheet,
+         round,
+         players,
+         matchOutcomes,
+         expectOutcomes,
+         expectedGroupings
+      });
       let matches_with_results = column_matches.matches.filter(match => match.result);
 
       if (!matches_with_results.length) {
@@ -40,11 +47,11 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
 
       expectedMatchUps = expectedMatchUps / 2;
       expectedGroupings = chunkArray(column_matches.winnerDrawPositions, 2);
+      expectOutcomes = expectOutcomes || column_matches.allOutcomes;
 
       return column_matches;
    });
   
-  findEmbeddedRounds(rounds).forEach(round => rounds.push(round));
   rounds = rounds.map(round => round.matches);
   if (!rounds.length) { return { rounds, matches: [] }; }
   
@@ -125,52 +132,6 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
   }
   return { matches, rounds, preround };
 }
-
-function findEmbeddedRounds(rounds) {
-  let embedded_rounds = [];
-  rounds.forEach((round) => {
-     const embedded = round.round_occurrences.filter(f=>f.indices.length > 1).length;
-     if (embedded) {
-        let other_rounds = [];
-        const indices = numArr(round.matches.length);
-        for (let i=embedded; i > 0; i--) {
-           let embedded_indices = findMiddles(indices, i);
-           if (embedded_indices.length) {
-              other_rounds = other_rounds.concat(...embedded_indices);
-              embedded_rounds.push({ matches: embedded_indices.map(match_index => Object.assign({}, round.matches[match_index])) });
-              embedded_indices.forEach(match_index => {
-                 if (round.matches[match_index]) round.matches[match_index].result = undefined
-              });
-           }
-        }
-        // filter out embedded matches
-        round.matches = round.matches.filter(match => match.result);
-     }
-  });
-  return embedded_rounds;
-};
-
-function findMiddles(arr, number) {
-  if (!(arr.length % 2)) return [];
-  let parts = [arr.slice()];
-  let middles;
-  while (number) {
-     middles = [];
-     let more_parts = [];
-     // eslint-disable-next-line
-     parts.forEach(part => {
-        let middle = findMiddle(part);
-        middles.push(middle);
-        more_parts.push(part.slice(0, middle));
-        more_parts.push(part.slice(middle + 1));
-        parts = more_parts;
-     });
-     number--;
-  }
-  return middles;
-  
-  function findMiddle(arr) { return arr[Math.round((arr.length - 1) / 2)]; }
-};
 
 const draw_byes = {
   '12': [1, 4, 9, 12],
