@@ -5,7 +5,7 @@ import { normalizeScore } from 'functions/cleanScore';
 
 export function constructRoundRobin({ profile, sheet, columns, gender, qualifying, player_data }) {
  let hash = [];
- let matches = []; 
+ let matchUps = []; 
  let players = player_data.players;
  let player_rows = player_data.rows;
  let pi = player_data.players.map((p, i) => p.rr_result ? i : undefined).filter(f=>f !== undefined);
@@ -47,7 +47,7 @@ export function constructRoundRobin({ profile, sheet, columns, gender, qualifyin
           // don't add the same match twice
           if (hash.indexOf(`${winner}${loser}${result}`) < 0) {
              hash.push(`${winner}${loser}${result}`);
-             matches.push(match);
+             matchUps.push(match);
           }
        }
     });
@@ -84,10 +84,10 @@ export function constructRoundRobin({ profile, sheet, columns, gender, qualifyin
           result: normalizeScore(result),
           gender: gender
        };
-       matches.push(match);
+       matchUps.push(match);
     }
  }
- return { matches }
+ return { matchUps }
 }
 
 function findPlayerAtDrawPosition(players, start, goal, direction) {

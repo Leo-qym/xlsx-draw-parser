@@ -95,7 +95,7 @@ export function getColumnMatches({
    // console.log({roundColumnValues, discontinuities, containsEmbeddedMatchUps, columnOutcomes, columnMatchUps, roundMatchUps, embeddedMatchUps});
    // console.log({expectedGroupings, winnerRowNumbers, columnMatchUps, expectedRoundMatchUps, unExpectedRoundMatchUps});
  
-  return { matches: roundMatchUps, embeddedMatchUps, winnerDrawPositions, winnerRowNumbers, allOutcomes };
+  return { matchUps: roundMatchUps, embeddedMatchUps, winnerDrawPositions, winnerRowNumbers, allOutcomes };
 
   function isPresent(entity) { return entity; }
 };

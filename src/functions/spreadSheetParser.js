@@ -52,7 +52,7 @@ export function spreadSheetParser(file_content) {
         color = 'yellow';
       } else if (sheetDefinition.type === KNOCKOUT) {
         const { drawInfo } = processKnockOut({profile, sheet, sheetName, sheetDefinition});
-        tournamentRecord.draws.push({drawInfo});
+        tournamentRecord.draws.push(drawInfo);
       } else if (sheetDefinition.type === ROUND_ROBIN) {
         const { drawInfo } = processRoundRobin({profile, sheet, sheetName, sheetDefinition});
         console.log({drawInfo});
@@ -64,6 +64,7 @@ export function spreadSheetParser(file_content) {
         console.log(message, `color: ${color}`)
 
         const tournamentInfo = extractInfo({profile, sheet, infoClass: 'tournamentInfo'})
+        console.log({tournamentInfo})
         Object.assign(tournamentRecord, tournamentInfo);
       } else {
         message = `%c sheetDefinition not found: ${sheetName}`;
@@ -73,24 +74,10 @@ export function spreadSheetParser(file_content) {
     });
   }
 
-  function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-
-  let matchUps = [...Array(30)].map(m => {
-      return {
-          side1: 'LASTNAME / LASTNAME',
-          side2: 'LASTNAME / LASTNAME',
-          roundName: getRandomInt(5,300),
-          result: getRandomInt(1,80),
-      }
-  }).sort((a, b) => (b.singles + b.doubles) - (a.singles + a.doubles));
-
-  xlsxStore.dispatch({ type: 'set matchUps', payload: matchUps });
-
   xlsxStore.dispatch({ type: 'set tournament record', payload: tournamentRecord });
+
+  let matchUps = [].concat(...(tournamentRecord.draws || []).map(d => d.matchUps));
+  xlsxStore.dispatch({ type: 'set matchUps', payload: matchUps });
 }
 
 function findRowDefinition({rowDefinitions, rowIds, type}) {
@@ -186,9 +173,10 @@ function processKnockOut({profile, sheet, sheetName, sheetDefinition}) {
 
   const qualifying = false;
   const player_data = { players, rows, range, finals, preround_rows };
-  const { rounds, matches, preround } = tournamentDraw({profile, sheet, columns, headerRow, gender, player_data, qualifying}) 
-  Object.assign(drawInfo, { matches });
-  console.log({ drawInfo, rounds, matches, preround});
+  const { rounds, matchUps, preround } = tournamentDraw({profile, sheet, columns, headerRow, gender, player_data, qualifying}) 
+  Object.assign(drawInfo, { matchUps });
+  matchUps.forEach(matchUp => matchUp.event = drawInfo.event);
+  console.log({ drawInfo, rounds, matchUps, preround});
 
   return { drawInfo };
 }

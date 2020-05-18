@@ -1,5 +1,5 @@
 import React from 'react';
-import { Provider } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { setDev } from 'config/setDev';
 
 import { makeStyles } from '@material-ui/core';
@@ -10,9 +10,9 @@ import { spreadSheetParser } from 'functions/spreadSheetParser';
 import { MatchUpsTable } from 'components/tables/matchUpsTable';
 
 import { AppToaster } from 'components/dialogs/AppToaster';
-import { xlsxStore } from 'stores/xlsxStore';
 
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 import { AppBar, Toolbar, IconButton } from '@material-ui/core/';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import useScrollTrigger from '@material-ui/core/useScrollTrigger';
@@ -65,11 +65,23 @@ function ScrollTop(props) {
 }
 
 export default function App(props) {
+  const dispatch = useDispatch();
+  const data = useSelector(state => state.xlsx.matchUps);
   const handleCallback = file => {
     loadFile(file, spreadSheetParser);
-  }
+  };
+  const downloadClick = () => {
+      dispatch({
+        type: 'toaster state',
+        payload: {
+          severity: 'success',
+          message: `Downloading...`
+        }
+      });
+  };
+  
   return (
-    <Provider store={xlsxStore}>
+    <>
       <AppToaster />
       <CssBaseline />
       <AppBar>
@@ -82,6 +94,17 @@ export default function App(props) {
           >
             <CloudUploadIcon />
           </IconButton>
+          {
+            !data || !data.length ? '' :
+            <IconButton
+              edge="end"
+              color="inherit"
+              aria-label="menu"
+              onClick={downloadClick}
+            >
+              <CloudDownloadIcon />
+            </IconButton>
+          }
         </Toolbar>
       </AppBar>
       <Toolbar id="back-to-top-anchor" />
@@ -93,6 +116,6 @@ export default function App(props) {
           <KeyboardArrowUpIcon />
         </Fab>
       </ScrollTop>
-    </Provider>
+    </>
   );
 }

@@ -66,13 +66,13 @@ export function extractDrawParticipants({ profile, sheet, headerRow, columns, ro
 
   if (pdata[0] && pdata[0].column_references) {
      // there should be only one column of relevant data
-     preround.matches = getColumnMatches({
+     preround.matchUps = getColumnMatches({
         sheet,
         round: pdata[0],
         players: preround.players,
         isDoubles,
         rowOffset
-      }).matches.filter(match => match.result);
+      }).matchUps.filter(match => match.result);
   }
 
   console.log({players, playoff3rd});

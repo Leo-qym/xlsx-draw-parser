@@ -3,14 +3,11 @@ const main_draw_rounds = ['F', 'SF', 'QF', 'R16', 'R32', 'R64', 'R128', 'R256'];
 export function constructPreroundMatches({rounds, preround, players, gender}) {
   let round_winners = [];
   let round_name = main_draw_rounds[rounds.length - 1];
-  // let draw_positions = preround.players.map(p => p.drawPosition);
-  // draw position offset
-  // let dpo = Math.min(...draw_positions) - 1;
 
-  preround.matches.forEach(match => round_winners.push(match.winners[0]));
+  preround.matchUps.forEach(match => round_winners.push(match.winners[0]));
   let winning_players = preround.players.filter(player => round_winners.indexOf(player.drawPosition) >= 0);
   let eliminated_players = preround.players.filter(player => round_winners.indexOf(player.drawPosition) < 0);
-  preround.matches.forEach((match, match_index) => {
+  preround.matchUps.forEach((match, match_index) => {
      match.roundNumber = 1;
      match.round_name = round_name;
      match.losers = [eliminated_players[match_index]];
@@ -22,7 +19,7 @@ export function constructPreroundMatches({rounds, preround, players, gender}) {
      if (winner_details) match.main_draw_position = [winner_details.drawPosition];
      if (gender) match.gender = gender;
   });
-  return preround.matches;
+  return preround.matchUps;
 };
 
 export function constructMatches({ rounds, players, isDoubles }) {
@@ -46,14 +43,14 @@ export function constructMatches({ rounds, players, isDoubles }) {
            return match.winners ? match.winners[0] : match.bye ? match.bye[0] : match.players && match.players[0];
         });
         let eliminatedDrawPositions = previous_round_players.filter(player => round_winners.indexOf(player) < 0);
-        let draw_positions = players.map(m=>m.drawPosition).filter((item, i, s) => s.lastIndexOf(item) === i).length;
-        let round_name = roundIndex + 2 < rounds.length || roundIndex < 3 ? main_draw_rounds[roundIndex] : `R${draw_positions}`;
+        const finishingRound = roundIndex + 1;
+        const roundName = main_draw_rounds[finishingRound];
         round_matches.forEach((match, match_index) => {
            match.matchType = matchType;
            match.roundNumber = rounds.length - roundIndex - 1;
-           match.finishingRound = roundIndex + 1;
+           match.finishingRound = finishingRound;
            match.roundPosition = match_index + 1;
-           match.roundName = draw_type === 'main' ? round_name : `Q${roundIndex || ''}`;
+           match.roundName = draw_type === 'main' ? roundName : `Q${roundIndex || ''}`;
            match.losers = players.filter(f=>+f.drawPosition === +eliminatedDrawPositions[match_index]);
         });
      }

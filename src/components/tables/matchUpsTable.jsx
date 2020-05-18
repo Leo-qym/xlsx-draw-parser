@@ -4,13 +4,45 @@ import { Paper } from '@material-ui/core';
 
 import MaterialTable from 'material-table';
 
-// function renderPlayer(player) { return <img src={player.avatar} style={{width: 40, borderRadius: '50%'}} alt={player.name}/>; }
-// function renderTotal(player) { return (player.singles || 0) + (player.doubles || 0) }
+function renderSide(rowData, attribute) {
+    if (rowData[attribute]) {
+        if (rowData[attribute].length === 1) {
+            return rowData[attribute][0].full_name;
+        } else if (rowData[attribute].length === 2) {
+            return rowData[attribute].map(p => p.last_name).join('/');
+        }
+    } 
+    return '';
+}
+
+function renderWinner(rowData) { return renderSide(rowData, 'winningSide'); }
+function renderLoser(rowData) { return renderSide(rowData, 'losers'); }
+
+const participantSearch = (value, rowData, attribute) => {
+    let name = renderSide(rowData, attribute);
+    if (!value) return;
+    return name.toLowerCase().indexOf(value.toLowerCase()) >= 0;
+}
+
+const winnerSearch = (value, rowData) => participantSearch(value, rowData, 'winningSide');
+const loserSearch = (value, rowData) => participantSearch(value, rowData, 'losers');
+
+function renderFormat(rowData) {
+    if (!rowData.matchType) return '';
+    return rowData.matchType;
+}
+function formatSearch(value, rowData) {
+    let format = renderFormat(rowData);
+    return format.toLowerCase().indexOf(value.toLowerCase()) >= 0;
+}
 
 const columns = [
-    { title: 'Side One', field: 'side1' },
-    { title: 'Side Two', field: 'side2' },
-    { title: 'Round', field: 'roundName' },
+    { title: 'Event', field: 'event' },
+    { title: 'Format', render: renderFormat, customFilterAndSearch: formatSearch },
+    { title: 'Winner', render: renderWinner, customFilterAndSearch: winnerSearch },
+    { title: 'Loser', render: renderLoser, customFilterAndSearch: loserSearch },
+    { title: 'Round #', field: 'roundNumber' },
+    { title: 'Round Name', field: 'roundName' },
     { title: 'Result', field: 'result' }
 ];
 const options = {
@@ -51,8 +83,10 @@ export function MatchUpsTable(props) {
 }
 
 export function PersonsTable ({ initialValues }) {
-    const baseTitle = "";
-    let data = useSelector(state => state.xlsx.matchUps);
+    const tournamentRecord = useSelector(state => state.xlsx.tournamentRecord);
+    const tableTitle = (tournamentRecord && tournamentRecord.tournamentName) || ''; 
+    const data = useSelector(state => state.xlsx.matchUps);
+    
     let matchUps = JSON.parse(JSON.stringify(data));
     
     const defaultValues = { selectedRow: null };
@@ -76,7 +110,7 @@ export function PersonsTable ({ initialValues }) {
     
     return (
       <MaterialTable
-        title={baseTitle}
+        title={tableTitle}
         options={Object.assign(defaultOptions, options)}
         columns={columns}
         components={components}

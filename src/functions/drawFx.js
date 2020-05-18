@@ -12,7 +12,7 @@ export function getDrawPosition({value, players, idx = 0, expectedDrawPositions=
       return fullNameMatch || lastNameMatch;
     });
  
-  // if more than one matching player take the player whose drawPosition matches the expected drawPosition
+  // if more than one matching player take the player whose drawPosition matchUps the expected drawPosition
   const matchingPlayer = matchingPlayers.reduce((matching, current) => {
     return expectedDrawPositions.includes(current.drawPosition) ? current : matching;
   }, undefined);
