@@ -3,16 +3,35 @@ import ReactDOM from 'react-dom';
 import { withStyles } from '@material-ui/core/styles'
 import { Button, Dialog, DialogTitle, DialogActions, DialogContent } from '@material-ui/core'
 import CircularProgress from '@material-ui/core/CircularProgress'
+import { makeStyles } from '@material-ui/core';
+import { TextField } from '@material-ui/core';
+// import { InputAdornment } from '@material-ui/core';
+// import Clear from '@material-ui/icons/Clear';
 
 const ANCHORID = 'dialogAnchor';
 
 const styles = { root: { marginLeft: 5 } }
- const SpinnerAdornment = withStyles(styles)(props => (
+const SpinnerAdornment = withStyles(styles)(props => (
    <CircularProgress
      className={props.classes.spinner}
      size={20}
    />
- ))
+))
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    position: 'fixed',
+    bottom: theme.spacing(2),
+    right: theme.spacing(2),
+  },
+  loadSpreadsheet: {
+    marginBottom: '2em',
+  },
+  sheetFilter: {
+    marginBottom: '1em',
+    width: '10em',
+  },
+}));
 
 export const dialogModal = function() {
    let fx = {};
@@ -94,6 +113,9 @@ export const dialogModal = function() {
    }
 
    function TmxDialog(props) {
+      const classes = useStyles();
+      const filterValueStorage = 'xlsxSheetFilter';
+      const filterChanged = evt => localStorage.setItem(filterValueStorage, evt.target.value);
       useEffect(() => { if (props.onRender) props.onRender(); });
       return (
          <Dialog
@@ -104,7 +126,15 @@ export const dialogModal = function() {
             autoFocus={true}
             className={props.className}
          >
-            <DialogTitle>SpreadSheet Loader</DialogTitle>
+            <DialogTitle>
+               <TextField
+                   onChange={filterChanged}
+                   defaultValue={localStorage.getItem(filterValueStorage)}
+                   className={classes.sheetFilter}
+                   placeholder="Sheet Filter"
+                   label="Sheet Filter"
+               />
+            </DialogTitle>
             <DialogContent>
                {props.content}
             </DialogContent>
@@ -112,6 +142,19 @@ export const dialogModal = function() {
          </Dialog>
       );
    }
+
+   /*
+                   InputProps={{
+                     endAdornment: (
+                        <InputAdornment position="end">
+                           {
+                              localStorage.getItem(filterValueStorage) ?
+                             <Clear fontSize="small" onClick={()=>console.log('boo')}/> : ''
+                           }
+                        </InputAdornment>
+                     ),
+                   }}
+   */
 
    fx.close = () => {
       let anchor = document.getElementById(ANCHORID);

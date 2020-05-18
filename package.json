@@ -14,6 +14,7 @@
     "@types/react": "^16.9.34",
     "@types/react-dom": "^16.9.7",
     "immer": "^6.0.3",
+    "material-table": "^1.57.2",
     "normalize-text": "^2.0.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",

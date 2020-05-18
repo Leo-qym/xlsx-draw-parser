@@ -11,7 +11,9 @@ import { getParticipantRows } from 'functions/getParticipantRows';
 import { extractDrawParticipants } from 'functions/extractDrawParticipants';
 import { findRow, getRow, getCol, findValueRefs } from 'functions/sheetAccess.js';
 
-export function spreadSheetParser(file_content, sheetFilter) {
+export function spreadSheetParser(file_content) {
+  const filterValueStorage = 'xlsxSheetFilter';
+  const sheetFilter = localStorage.getItem(filterValueStorage)
   let tournamentRecord = {
     draws: []
   };
@@ -70,6 +72,23 @@ export function spreadSheetParser(file_content, sheetFilter) {
       }
     });
   }
+
+  function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  let matchUps = [...Array(30)].map(m => {
+      return {
+          side1: 'LASTNAME / LASTNAME',
+          side2: 'LASTNAME / LASTNAME',
+          roundName: getRandomInt(5,300),
+          result: getRandomInt(1,80),
+      }
+  }).sort((a, b) => (b.singles + b.doubles) - (a.singles + a.doubles));
+
+  xlsxStore.dispatch({ type: 'set matchUps', payload: matchUps });
 
   xlsxStore.dispatch({ type: 'set tournament record', payload: tournamentRecord });
 }

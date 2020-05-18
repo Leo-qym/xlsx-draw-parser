@@ -51,7 +51,6 @@ const DropAccept = ({callback, dropzoneText, dropzoneReject, accept}={}) => {
         canCancel={false}
         onChangeStatus={handleChangeStatus}
         accept={accept || "application/vnd.ms-excel, application/vnd.ms-excel.sheet.macroenabled.12"}
-        // validate={fileWithMeta=>{console.log(fileWithMeta.meta); return false;}}
         inputContent={getInputContent}
         styles={{
             dropzone: { width: 400, height: 200 },

@@ -11,7 +11,8 @@ const initialState = {
     severity: 'success',
     message: ''
   },
-  tournamentRecord: {}
+  tournamentRecord: {},
+  matchUps: []
 };
 
 const createReducer = handlers => (state=initialState, action) => {
