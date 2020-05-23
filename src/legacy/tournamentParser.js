@@ -521,7 +521,7 @@ export const tournamentParser = function() {
       return preround.matches;
    };
 
-   let constructMatches = (rounds, players) => {
+   let constructMatchUps = (rounds, players) => {
       // less broken way of working around situation where final match not played
       let draw_type = (rounds[0].length === 1 || (rounds[0].length === 2 && rounds[1].length === 4)) ? 'main' : 'qualification';
 
@@ -725,7 +725,7 @@ export const tournamentParser = function() {
             rounds = add1stRound(rounds, players);
          }
          rounds = rounds.filter(round => round.filter(f => f.winners ? f.winners.length : true).length);
-         rounds = constructMatches(rounds, players);
+         rounds = constructMatchUps(rounds, players);
 
          // merge all rounds into list of matches
          matches = [].concat(...rounds).filter(f=>f.losers && f.result);

@@ -1,4 +1,4 @@
-import React, { forwardRef, useState } from 'react';
+import React, { forwardRef } from 'react';
 
 import { Clear, Search, ViewColumn } from '@material-ui/icons';
 import { Paper } from '@material-ui/core';
@@ -67,49 +67,19 @@ const localization = {
     body: {
         emptyDataSourceMessage: 'No Data'
     },
-    toolbar: {
-        searchTooltip: 'Search',
-        searchPlaceholder: 'Search...'
-    },
-    pagination: {
-        labelRowsSelect: 'rows',
-        labelDisplayedRows: '{from}-{to} of {count}',
-        firstTooltip: 'First Page',
-        previousTooltip: 'Previous Page',
-        nextTooltip: 'Next Page',
-        lastTooltip: 'Last Page'
-    }
 }
 
 export function MatchUpsTable(props) {
     const { matchUps, title } = props;
-    const defaultValues = { selectedRow: null };
-    const [values, setValues] = useState(defaultValues);
-
-    const rowStyle = rowData => ({
-        backgroundColor: (values.selectedRow && values.selectedRow.tableData.id === rowData.tableData.id) ? '#EEE' : '#FFF'
-    })
-
-    const defaultOptions = {
-        rowStyle,
-        actionsColumnIndex: columns.length
-    };
-
-    const rowClick = (_, rowData, togglePanel) => {
-        setValues({...values, selectedRow: rowData });
-        if (options.detail) togglePanel();
-    }
-
     const components = { Container: props => <Paper {...props} elevation={0}/> }
     
     return (
       <MaterialTable
         title={title}
-        options={Object.assign(defaultOptions, options)}
+        options={options}
         columns={columns}
         components={components}
         data={matchUps}        
-        onRowClick={rowClick}
         localization={localization}
         icons={{
             Clear: forwardRef((props, ref) => <Clear {...props} ref={ref} color='action' />),

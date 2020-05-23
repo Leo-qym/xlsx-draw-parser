@@ -15,9 +15,8 @@ const setLoadingState = (state, action) => produce(state, draftState => {
 });
 
 const setTournamentRecord = (state, action) => produce(state, draftState => {
-  const tournamentRecord = action.payload;
-  let matchUps = [].concat(...(tournamentRecord.draws || []).map(d => d.matchUps));
-  draftState.tournamentRecord = action.payload;
+  const { tournamentRecord, matchUps } = action.payload;
+  draftState.tournamentRecord = tournamentRecord;
   draftState.matchUps = matchUps;
   draftState.loadingState = false;
 });

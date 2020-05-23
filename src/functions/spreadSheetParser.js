@@ -78,7 +78,10 @@ export function spreadSheetParser(file_content) {
     });
   }
 
-  xlsxStore.dispatch({ type: 'set tournament record', payload: tournamentRecord });
+  const draws = tournamentRecord.draws || [];
+  const matchUps = draws.map(draw => draw.matchUps).flat();
+  
+  xlsxStore.dispatch({ type: 'set tournament record', payload: { tournamentRecord, matchUps }});
 }
 
 function generateTournamentId({tournamentInfo}={}) {

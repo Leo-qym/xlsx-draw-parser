@@ -24,7 +24,7 @@ export function constructPreroundMatches({rounds, preround, players, gender}) {
   return preround.matchUps;
 };
 
-export function constructMatches({ rounds=[], players, isDoubles }) {
+export function constructMatchUps({ rounds=[], players, isDoubles }) {
    const matchType = isDoubles ? DOUBLES : SINGLES;
   // less broken way of working around situation where final match not played
   let roundsProfile = rounds.map(round => round.length).filter(removeUndefined);
@@ -44,10 +44,16 @@ export function constructMatches({ rounds=[], players, isDoubles }) {
            return match.winners ? match.winners[0] : match.bye ? match.bye[0] : match.players && match.players[0];
         });
         let eliminatedDrawPositions = previous_round_players.filter(player => roundWinners.indexOf(player) < 0);
-        const finishingRound = roundIndex;
-        const roundName = mainDrawRoundNames[finishingRound];
+        const finishingRound = roundIndex + 1;
+        const roundName = mainDrawRoundNames[finishingRound - 1];
         round_matches.forEach((match, match_index) => {
+           const losers = players.filter(f=>+f.drawPosition === +eliminatedDrawPositions[match_index]);
+            const drawPositions = [match.winningSide[0].drawPosition, losers[0].drawPosition]
+            .sort((a, b) => a - b);
+           
+           match.losers = losers;
            match.matchType = matchType;
+           match.drawPositions = drawPositions;
            match.roundNumber = rounds.length - roundIndex - 1;
            match.finishingRound = finishingRound;
            match.roundPosition = match_index + 1;

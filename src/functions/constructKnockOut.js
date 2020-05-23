@@ -2,7 +2,7 @@ import { getRoundData } from 'functions/drawFx';
 import { normalizeDiacritics } from 'normalize-text';
 import { getColumnMatchUps, getExpectedRoundMatchUps } from 'functions/columnMatches';
 import { chunkArray, instanceCount, unique, isPowerOf2, generateRange } from 'functions/utilities';
-import { constructMatches, constructPreroundMatches } from 'functions/matchConstruction';
+import { constructMatchUps, constructPreroundMatches } from 'functions/matchConstruction';
 
 export function constructKnockOut({ profile, sheet, columns, headerRow, gender, playerData, preround }) {
    const matchOutcomes = profile.matchOutcomes.map(normalizeDiacritics);
@@ -78,7 +78,7 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
   */
   rounds.reverse();
   rounds = addEntryRound(rounds, players);
-  const {roundMatchUps, stage} = constructMatches({ rounds, players, isDoubles });
+  const {roundMatchUps, stage} = constructMatchUps({ rounds, players, isDoubles });
 
   // merge all rounds into list of matchUps
   matchUps = [].concat(...roundMatchUps).filter(f=>f.losers && f.result);
