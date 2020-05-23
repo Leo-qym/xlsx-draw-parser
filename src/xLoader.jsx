@@ -8,6 +8,7 @@ import { Box, Container, Fab, Zoom } from '@material-ui/core';
 import { AppBar, Toolbar, IconButton } from '@material-ui/core/';
 import { makeStyles, CssBaseline, Typography } from '@material-ui/core';
 import { CloudUpload, CloudDownload, KeyboardArrowUp } from '@material-ui/icons';
+// import { Reorder as TableView } from '@material-ui/icons';
 
 import TODS from 'assets/TODS.png';
 import { loadFile } from 'functions/fileLoader';

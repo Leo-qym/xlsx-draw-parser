@@ -8,16 +8,16 @@ import { processKnockOut } from 'functions/processKnockOut';
 import { processRoundRobin } from 'functions/processRoundRobin';
 
 import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../types/sheetTypes';
+import { createTournamentRecord } from './tournamentRecord';
 
 export function spreadSheetParser(file_content) {
   xlsxStore.dispatch({type: 'loading state', payload: true});
   const filterValueStorage = 'xlsxSheetFilter';
   const sheetFilter = localStorage.getItem(filterValueStorage)
-  let tournamentRecord = {
-    draws: []
-  };
   const workbook = XLSX.read(file_content, { type: 'binary' });
   
+  let draws = [];
+  let tournamentRecord = {};
   const sheetNames = workbook.SheetNames;
   const workbookType = identifyWorkbook({sheetNames});
   if (workbookType) {
@@ -54,7 +54,7 @@ export function spreadSheetParser(file_content) {
         }
       } else if (processSheet && sheetDefinition.type === KNOCKOUT) {
         const { drawInfo } = processKnockOut({profile, sheet, sheetName, sheetDefinition});
-        tournamentRecord.draws.push(drawInfo);
+        draws.push(drawInfo);
       } else if (processSheet && sheetDefinition.type === ROUND_ROBIN) {
         const { drawInfo } = processRoundRobin({profile, sheet, sheetName, sheetDefinition});
         console.log({drawInfo});
@@ -78,10 +78,7 @@ export function spreadSheetParser(file_content) {
     });
   }
 
-  const draws = tournamentRecord.draws || [];
-  const matchUps = draws.map(draw => draw.matchUps).flat();
-  
-  xlsxStore.dispatch({ type: 'set tournament record', payload: { tournamentRecord, matchUps }});
+  createTournamentRecord({draws, tournamentRecord});
 }
 
 function generateTournamentId({tournamentInfo}={}) {
