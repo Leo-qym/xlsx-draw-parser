@@ -3,7 +3,7 @@ import { getDrawPosition } from 'functions/drawFx';
 import { normalizeScore } from 'functions/cleanScore';
 import { getRow, getCellValue } from 'functions/sheetAccess';
 
-export function getColumnMatches({
+export function getColumnMatchUps({
    sheet,
    round,
    players,
@@ -61,19 +61,7 @@ export function getColumnMatches({
       }
    });
 
-   console.log({roundColumnValues, discontinuities, columnOutcomes, columnMatchUps})
-   
-   const containsEmbeddedMatchUps = columnOutcomes.length > expectedGroupings.length;
-   if (containsEmbeddedMatchUps) console.log('%c EMBEDDED', 'color: pink', {columnOutcomes, expectedGroupings})
-   const roundMatchUps = columnMatchUps.filter((matchUp, i) => !containsEmbeddedMatchUps || (1 - i%2));
-   const embeddedMatchUps = columnMatchUps.filter((matchUp, i) => containsEmbeddedMatchUps && i%2);
-   
-   const expectedRoundMatchUps = expectedRowRanges.map(rowRange => {
-      if (!rowRange.length || rowRange.length !== 2) return undefined;
-      return columnMatchUps.reduce((matchUp, candidate) => {
-         return candidate.cellRow >= rowRange[0] && candidate.cellRow < rowRange[1] ? candidate : matchUp;
-      }, undefined);
-   }).filter(isPresent);
+   const expectedRoundMatchUps = getExpectedRoundMatchUps({ matchUps: columnMatchUps, expectedRowRanges, expectedGroupings });
 
    const unExpectedRoundMatchUps = columnMatchUps.filter(matchUp => {
       let notFound = expectedRowRanges.reduce((notFound, rowRange) => {
@@ -84,18 +72,30 @@ export function getColumnMatches({
       return notFound;
    });
 
-   console.log({expectedRowRanges, expectedRoundMatchUps, roundMatchUps, unExpectedRoundMatchUps})
-   
-   const winnerDrawPositions = [].concat(...roundMatchUps.map(matchUp => matchUp.drawPositions));
-   
-   const winnerRowNumbers = columnOutcomes.map(groupings => {
-      return groupings.reduce((rowNumber, grouping) => grouping.cellRow || rowNumber, undefined);
-   }).filter(isPresent);
-   
-   // console.log({roundColumnValues, discontinuities, containsEmbeddedMatchUps, columnOutcomes, columnMatchUps, roundMatchUps, embeddedMatchUps});
-   // console.log({expectedGroupings, winnerRowNumbers, columnMatchUps, expectedRoundMatchUps, unExpectedRoundMatchUps});
- 
-  return { matchUps: roundMatchUps, embeddedMatchUps, winnerDrawPositions, winnerRowNumbers, allOutcomes };
+   // the first round matchUp expectedRowRanges are not defined, so are always unexpected
+   const roundMatchUps = expectedRoundMatchUps.length ? expectedRoundMatchUps : unExpectedRoundMatchUps;
+   const embeddedMatchUps = expectedRoundMatchUps.length ? unExpectedRoundMatchUps : [];
 
-  function isPresent(entity) { return entity; }
+  return { roundMatchUps, embeddedMatchUps, allOutcomes };
+
 };
+
+export function getExpectedRoundMatchUps({matchUps, expectedRowRanges, expectedGroupings}) {
+   return expectedRowRanges.map(rowRange => {
+      if (!rowRange.length || rowRange.length !== 2) return undefined;
+      return matchUps.reduce((matchUp, candidate) => {
+         const drawPosition = candidate.winningSide[0].drawPosition;
+         // candidate needs to be in the expected row range
+         const inRange = candidate.cellRow >= rowRange[0] && candidate.cellRow < rowRange[1];
+         // candidate needs to contain expected drawPosition
+         const expectedDrawPosition = checkGrouping({drawPosition, expectedGroupings});
+         return inRange && expectedDrawPosition ? candidate : matchUp;
+      }, undefined);
+   }).filter(removeUndefined);
+}
+
+function checkGrouping({drawPosition, expectedGroupings}) {
+   return expectedGroupings.reduce((found, candidate) => candidate.includes(drawPosition) || found, false);
+}
+
+function removeUndefined(entity) { return entity; }

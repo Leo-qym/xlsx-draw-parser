@@ -25,9 +25,8 @@ export function constructPreroundMatches({rounds, preround, players, gender}) {
 export function constructMatches({ rounds, players, isDoubles }) {
    const matchType = isDoubles ? 'DOUBLES' : 'SINGLES';
   // less broken way of working around situation where final match not played
-  let roundsProfile = rounds.map(round => round.length);
-  console.log({roundsProfile})
-  let draw_type = (rounds[0].length === 1 || (rounds[0].length === 2 && rounds[1] && rounds[1].length === 4)) ? 'main' : 'qualification';
+  let roundsProfile = rounds.map(round => round.length).filter(removeUndefined);
+  let draw_type = roundsProfile[0] === 1 ? 'main' : 'qualification';
 
   rounds.forEach((round, roundIndex) => {
      if (+roundIndex + 2 === rounds.length) round = round.filter(player => player.bye === undefined);
@@ -43,7 +42,7 @@ export function constructMatches({ rounds, players, isDoubles }) {
            return match.winners ? match.winners[0] : match.bye ? match.bye[0] : match.players && match.players[0];
         });
         let eliminatedDrawPositions = previous_round_players.filter(player => round_winners.indexOf(player) < 0);
-        const finishingRound = roundIndex + 1;
+        const finishingRound = roundIndex;
         const roundName = main_draw_rounds[finishingRound];
         round_matches.forEach((match, match_index) => {
            match.matchType = matchType;
@@ -57,3 +56,5 @@ export function constructMatches({ rounds, players, isDoubles }) {
   });
   return rounds;
 };
+
+function removeUndefined(entity) { return entity; }

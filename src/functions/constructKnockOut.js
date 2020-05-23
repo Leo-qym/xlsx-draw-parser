@@ -1,13 +1,10 @@
 import { getRoundData } from 'functions/drawFx';
 import { normalizeDiacritics } from 'normalize-text';
-import { getColumnMatches } from 'functions/columnMatches';
-import { chunkArray, instanceCount, unique, isPowerOf2 } from 'functions/utilities';
+import { getColumnMatchUps, getExpectedRoundMatchUps } from 'functions/columnMatches';
+import { chunkArray, instanceCount, unique, isPowerOf2, generateRange } from 'functions/utilities';
 import { constructMatches, constructPreroundMatches } from 'functions/matchConstruction';
 
 export function constructKnockOut({ profile, sheet, columns, headerRow, gender, player_data, preround }) {
-   let rounds = [];
-   let matchUps = [];
- 
    const matchOutcomes = profile.matchOutcomes.map(normalizeDiacritics);
    const round_data = getRoundData({profile, sheet, columns, player_data, headerRow, matchOutcomes});
    const players = player_data.players;
@@ -20,16 +17,22 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
    let expectedMatchUps = drawPositions.length / 2;
    let expectedGroupings = chunkArray(drawPositions, 2);
 
+   let rounds = [];
+   let matchUps = [];
    const isValidExpectedMatchUps = isPowerOf2(expectedMatchUps);
    if (!isValidExpectedMatchUps) {
-      console.log('%c Invalid Expected MatchUps', 'color: lightred');
+      console.log('%c Invalid Expected MatchUps', 'color: red');
+      console.log({drawPositions, expectedMatchUps})
       return { rounds, matchUps: [] };
    }
 
    let expectOutcomes = false;
    let expectedRowRanges = [];
-   rounds = round_data.map(round => {
-      let column_matches = getColumnMatches({
+   
+   round_data.forEach((round, i) => {
+      const {
+         roundMatchUps, embeddedMatchUps, allOutcomes
+      } = getColumnMatchUps({
          sheet,
          round,
          players,
@@ -39,16 +42,33 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
          expectedRowRanges,
          expectedGroupings
       });
+      rounds.push(roundMatchUps);
+
+      const winnerDrawPositions = [].concat(...roundMatchUps.map(matchUp => matchUp.drawPositions));
+      const winnerRowNumbers = [].concat(...roundMatchUps.map(matchUp => matchUp.cellRow));
       
       expectedMatchUps = expectedMatchUps / 2;
-      expectedGroupings = chunkArray(column_matches.winnerDrawPositions, 2);
-      expectedRowRanges = chunkArray(column_matches.winnerRowNumbers, 2)
-      expectOutcomes = expectOutcomes || column_matches.allOutcomes;
-
-      return column_matches;
+      expectedGroupings = chunkArray(winnerDrawPositions, 2);
+      expectedRowRanges = chunkArray(winnerRowNumbers, 2)
+      expectOutcomes = expectOutcomes || allOutcomes;
+      
+      const embeddedMatchUpsCount = embeddedMatchUps.length;
+      if (embeddedMatchUpsCount) {
+         generateRange(0, embeddedMatchUpsCount).forEach(_ => {
+            const roundMatchUps = getExpectedRoundMatchUps({matchUps: embeddedMatchUps, expectedRowRanges, expectedGroupings});
+            
+            const winnerDrawPositions = [].concat(...roundMatchUps.map(matchUp => matchUp.drawPositions));
+            const winnerRowNumbers = [].concat(...roundMatchUps.map(matchUp => matchUp.cellRow));
+            
+            expectedMatchUps = expectedMatchUps / 2;
+            expectedGroupings = chunkArray(winnerDrawPositions, 2);
+            expectedRowRanges = chunkArray(winnerRowNumbers, 2)
+           
+            if (roundMatchUps.length) rounds.push(roundMatchUps);
+         })
+      }
    });
   
-  rounds = rounds.map(round => round.matchUps);
   if (!rounds.length) { return { rounds, matchUps: [] }; }
   
   /* reverse rounds to:

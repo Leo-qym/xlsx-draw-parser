@@ -1,5 +1,5 @@
 import { getCellValue, numberValue } from 'functions/sheetAccess';
-import { getColumnMatches } from 'functions/columnMatches';
+import { getColumnMatchUps } from 'functions/columnMatches';
 import { getRoundData, nameHash, lastFirstI } from 'functions/drawFx';
 
 export function extractDrawParticipants({ profile, sheet, headerRow, columns, rows, range, finals, preround_rows}) {
@@ -66,7 +66,7 @@ export function extractDrawParticipants({ profile, sheet, headerRow, columns, ro
 
   if (pdata[0] && pdata[0].column_references) {
      // there should be only one column of relevant data
-     preround.matchUps = getColumnMatches({
+     preround.matchUps = getColumnMatchUps({
         sheet,
         round: pdata[0],
         players: preround.players,
@@ -74,8 +74,6 @@ export function extractDrawParticipants({ profile, sheet, headerRow, columns, ro
         rowOffset
       }).matchUps.filter(match => match.result);
   }
-
-  console.log({players, playoff3rd});
 
   return { players, rows, playoff3rd, playoff3rd_rows, range, finals, preround, isDoubles };
 

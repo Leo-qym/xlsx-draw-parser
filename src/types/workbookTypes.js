@@ -176,7 +176,7 @@ export const workbookTypes = [
         const startDate = splitDate[0].split('.').join('-');
         let result = { startDate };
         if (splitDate[1]) {
-          const endSplit = splitDate[1].split('.');
+          const endSplit = splitDate[1].split('.').filter(f=>f);
           const yearMonth = startDate.split('-').slice(0,3 - endSplit.length);
           const endDate = [].concat(...yearMonth, ...endSplit).join('-');
           result.endDate = endDate;

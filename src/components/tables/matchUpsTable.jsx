@@ -38,23 +38,25 @@ function formatSearch(value, rowData) {
 
 const columns = [
     { title: 'Event', field: 'event' },
+    { title: 'Gender', field: 'gender' },
     { title: 'Format', render: renderFormat, customFilterAndSearch: formatSearch },
     { title: 'Winner', render: renderWinner, customFilterAndSearch: winnerSearch },
     { title: 'Loser', render: renderLoser, customFilterAndSearch: loserSearch },
-    { title: 'Round #', field: 'roundNumber' },
+    { title: 'Round #', field: 'roundNumber', hidden: true },
     { title: 'Round Name', field: 'roundName' },
     { title: 'Result', field: 'result' }
 ];
 const options = {
+    pageSize: 10,
+    search: true,
+    paging: false,
+    sorting: true,
     actions: false,
     editable: false,
     showTitle: true,
-    search: true,
-    sorting: true,
     selection: false,
     padding: 'dense',
-    paging: false,
-    pageSize: 20,
+    columnsButton: true,
     maxBodyHeight: window.innerHeight,
     pageSizeOptions: [10, 20, 50],
     headerStyle: {fontWeight:'bold'}

@@ -1,24 +1,19 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux'
 import { setDev } from 'config/setDev';
+import { useDispatch, useSelector } from 'react-redux'
 
-import { makeStyles } from '@material-ui/core';
-import { Container } from '@material-ui/core';
+import { useScrollTrigger } from '@material-ui/core';
+import { Container, Fab, Zoom } from '@material-ui/core';
+import { makeStyles, CssBaseline } from '@material-ui/core';
+import { AppBar, Toolbar, IconButton } from '@material-ui/core/';
+import { CloudUpload, CloudDownload, KeyboardArrowUp } from '@material-ui/icons';
+
 import { loadFile } from 'functions/fileLoader';
+import { exportJSON } from 'functions/exportJSON';
+import { AppToaster } from 'components/dialogs/AppToaster';
 import { dropModal } from 'components/dialogs/dragDropModal';
 import { spreadSheetParser } from 'functions/spreadSheetParser';
 import { MatchUpsTable } from 'components/tables/matchUpsTable';
-
-import { AppToaster } from 'components/dialogs/AppToaster';
-
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
-import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
-import { AppBar, Toolbar, IconButton } from '@material-ui/core/';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import useScrollTrigger from '@material-ui/core/useScrollTrigger';
-import Fab from '@material-ui/core/Fab';
-import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import Zoom from '@material-ui/core/Zoom';
 
 import './App.css';
 
@@ -67,17 +62,30 @@ function ScrollTop(props) {
 export default function App(props) {
   const dispatch = useDispatch();
   const data = useSelector(state => state.xlsx.matchUps);
+  const tournamentRecord = useSelector(state => state.xlsx.tournamentRecord);
   const handleCallback = file => {
     loadFile(file, spreadSheetParser);
   };
   const downloadClick = () => {
-      dispatch({
-        type: 'toaster state',
-        payload: {
-          severity: 'success',
-          message: `Downloading...`
-        }
-      });
+      const tournamentId = tournamentRecord && tournamentRecord.tournamentId;
+      if (tournamentId) {
+        dispatch({
+          type: 'toaster state',
+          payload: {
+            severity: 'success',
+            message: `Downloading...`
+          }
+        });
+        exportJSON(`${tournamentId}.json`, tournamentRecord);
+      } else {
+        dispatch({
+          type: 'toaster state',
+          payload: {
+            severity: 'error',
+            message: `Tournament Name NOT FOUND`
+          }
+        });
+      }
   };
   
   return (
@@ -92,7 +100,7 @@ export default function App(props) {
             aria-label="menu"
             onClick={()=>dropModal({callback: handleCallback})}
           >
-            <CloudUploadIcon />
+            <CloudUpload />
           </IconButton>
           {
             !data || !data.length ? '' :
@@ -102,7 +110,7 @@ export default function App(props) {
               aria-label="menu"
               onClick={downloadClick}
             >
-              <CloudDownloadIcon />
+              <CloudDownload />
             </IconButton>
           }
         </Toolbar>
@@ -113,7 +121,7 @@ export default function App(props) {
       </Container>
       <ScrollTop {...props}>
         <Fab color="secondary" size="small" aria-label="scroll back to top">
-          <KeyboardArrowUpIcon />
+          <KeyboardArrowUp />
         </Fab>
       </ScrollTop>
     </>

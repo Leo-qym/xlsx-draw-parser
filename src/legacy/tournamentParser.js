@@ -1,7 +1,7 @@
 import { util } from './util';
 import { staging } from './staging';
 import { stringFx } from './stringFx';
-import { cleanScore } from './cleanScore';
+import { cleanScore } from '../functions/cleanScore';
 
 export const tournamentParser = function() {
 
@@ -349,7 +349,7 @@ export const tournamentParser = function() {
 
       if (pdata[0] && pdata[0].column_references) {
          // there should be only one column of relevant data
-         preround.matches = getColumnMatches(sheet, pdata[0], preround.players).matches.filter(match => match.result);
+         preround.matches = getColumnMatchUps(sheet, pdata[0], preround.players).matches.filter(match => match.result);
       }
 
       return { players, rows, playoff3rd, playoff3rd_rows, range, finals, preround };
@@ -389,7 +389,7 @@ export const tournamentParser = function() {
       return tournament_player ? tournament_player.drawPosition : undefined;
    };
 
-   let getColumnMatches = (sheet, round, players) => {
+   let getColumnMatchUps = (sheet, round, players) => {
       let names = [];
       let matches = [];
       let winners = [];
@@ -695,14 +695,14 @@ export const tournamentParser = function() {
          let first_round;
          let round_data = tp.getRoundData({sheet, player_data});
          rounds = round_data.map(round => {
-            let column_matches = getColumnMatches(sheet, round, players);
-            let matches_with_results = column_matches.matches.filter(match => match.result);
+            let columnMatchUps = getColumnMatchUps(sheet, round, players);
+            let matches_with_results = columnMatchUps.matches.filter(match => match.result);
 
             if (!matches_with_results.length) {
                // first_round necessary for situations where i.e. 32 draw used when 16 would suffice
-               first_round = column_matches.matches.filter(match => match.winners).map(match => match.winners[0]);
+               first_round = columnMatchUps.matches.filter(match => match.winners).map(match => match.winners[0]);
             }
-            return column_matches;
+            return columnMatchUps;
          });
          findEmbeddedRounds(rounds).forEach(round => rounds.push(round));
          rounds = rounds.map(round => round.matches);
