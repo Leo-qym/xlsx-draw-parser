@@ -78,7 +78,7 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
   */
   rounds.reverse();
   rounds = addEntryRound(rounds, players);
-  const {roundMatchUps, drawType} = constructMatches({ rounds, players, isDoubles });
+  const {roundMatchUps, stage} = constructMatches({ rounds, players, isDoubles });
 
   // merge all rounds into list of matchUps
   matchUps = [].concat(...roundMatchUps).filter(f=>f.losers && f.result);
@@ -89,7 +89,7 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
 
   preround = (playerData.preround && playerData.preround.matchUps) ? constructPreroundMatches(rounds, playerData.preround, players, gender) : [];
 
-  return { matchUps, drawType, preround };
+  return { matchUps, stage, preround };
 }
 
 function addEntryRound(rounds, players) {

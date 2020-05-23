@@ -28,7 +28,7 @@ export function constructMatches({ rounds=[], players, isDoubles }) {
    const matchType = isDoubles ? DOUBLES : SINGLES;
   // less broken way of working around situation where final match not played
   let roundsProfile = rounds.map(round => round.length).filter(removeUndefined);
-  let drawType = roundsProfile[0] === 1 ? MAIN : QUALIFYING;
+  let stage = roundsProfile[0] === 1 ? MAIN : QUALIFYING;
 
   rounds.forEach((round, roundIndex) => {
      if (+roundIndex + 2 === rounds.length) round = round.filter(player => player.bye === undefined);
@@ -51,12 +51,12 @@ export function constructMatches({ rounds=[], players, isDoubles }) {
            match.roundNumber = rounds.length - roundIndex - 1;
            match.finishingRound = finishingRound;
            match.roundPosition = match_index + 1;
-           match.roundName = drawType === MAIN ? roundName : `Q${roundIndex || ''}`;
+           match.roundName = stage === MAIN ? roundName : `Q${roundIndex || ''}`;
            match.losers = players.filter(f=>+f.drawPosition === +eliminatedDrawPositions[match_index]);
         });
      }
   });
-  return { roundMatchUps: rounds, drawType };
+  return { roundMatchUps: rounds, stage };
 };
 
 function removeUndefined(entity) { return entity; }

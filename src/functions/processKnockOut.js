@@ -35,16 +35,16 @@ export function processKnockOut({profile, sheet, sheetName, sheetDefinition}) {
 
   const {rows, range, finals, preround_rows} = getParticipantRows({sheet, profile, headerRow, footerRow, avoidRows, columns});
   const { players, isDoubles } = extractDrawParticipants({ profile, sheet, headerRow, columns, rows, range, finals, preround_rows });
-  const drawType = isDoubles ? 'DOUBLES' : 'SINGLES';
+  const drawFormat = isDoubles ? 'DOUBLES' : 'SINGLES';
   
   const drawInfo = extractInfo({profile, sheet, infoClass: 'drawInfo'});
-  Object.assign(drawInfo, { drawType });
+  Object.assign(drawInfo, { drawFormat });
   const gender = drawInfo.gender;
 
   const playerData = { players, rows, range, finals, preround_rows };
-  const { matchUps } = tournamentDraw({profile, sheet, columns, headerRow, gender, playerData}) 
+  const { matchUps, stage } = tournamentDraw({profile, sheet, columns, headerRow, gender, playerData}) 
 
-  Object.assign(drawInfo, { matchUps });
+  Object.assign(drawInfo, { matchUps, stage });
   matchUps.forEach(matchUp => matchUp.event = drawInfo.event);
 
   return { drawInfo };
