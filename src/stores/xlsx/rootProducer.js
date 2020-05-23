@@ -15,9 +15,12 @@ const setLoadingState = (state, action) => produce(state, draftState => {
 });
 
 const setTournamentRecord = (state, action) => produce(state, draftState => {
-  const { tournamentRecord, matchUps } = action.payload;
+  const { tournamentRecord, matchUps, originalDraws } = action.payload;
+  
   draftState.tournamentRecord = tournamentRecord;
+  draftState.originalDraws = originalDraws;
   draftState.matchUps = matchUps;
+  
   draftState.loadingState = false;
 });
 
