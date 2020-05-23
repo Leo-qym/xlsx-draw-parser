@@ -12,6 +12,7 @@ import { extractDrawParticipants } from 'functions/extractDrawParticipants';
 import { findRow, getRow, getCol, findValueRefs } from 'functions/sheetAccess.js';
 
 export function spreadSheetParser(file_content) {
+  xlsxStore.dispatch({type: 'loading state', payload: true});
   const filterValueStorage = 'xlsxSheetFilter';
   const sheetFilter = localStorage.getItem(filterValueStorage)
   let tournamentRecord = {
@@ -80,9 +81,6 @@ export function spreadSheetParser(file_content) {
   }
 
   xlsxStore.dispatch({ type: 'set tournament record', payload: tournamentRecord });
-
-  let matchUps = [].concat(...(tournamentRecord.draws || []).map(d => d.matchUps));
-  xlsxStore.dispatch({ type: 'set matchUps', payload: matchUps });
 }
 
 function generateTournamentId({tournamentInfo}={}) {

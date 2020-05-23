@@ -10,10 +10,16 @@ const setToasterState = (state, action) => produce(state, draftState => {
   }
 });
 
-const setLoadingState = (state, action) => produce(state, draftState => { draftState.loadingState = action.payload; });
+const setLoadingState = (state, action) => produce(state, draftState => {
+  draftState.loadingState = action.payload;
+});
 
 const setTournamentRecord = (state, action) => produce(state, draftState => {
+  const tournamentRecord = action.payload;
+  let matchUps = [].concat(...(tournamentRecord.draws || []).map(d => d.matchUps));
   draftState.tournamentRecord = action.payload;
+  draftState.matchUps = matchUps;
+  draftState.loadingState = false;
 });
 
 const setMatchUps = (state, action) => produce(state, draftState => {

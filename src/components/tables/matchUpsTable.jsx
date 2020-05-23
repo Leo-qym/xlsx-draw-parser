@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { forwardRef, useState } from 'react';
+
+import { Clear, Search, ViewColumn } from '@material-ui/icons';
 import { Paper } from '@material-ui/core';
 
 import MaterialTable from 'material-table';
@@ -81,18 +82,9 @@ const localization = {
 }
 
 export function MatchUpsTable(props) {
-    return PersonsTable({ initialValues: { columns, options, localization } });
-}
-
-export function PersonsTable ({ initialValues }) {
-    const tournamentRecord = useSelector(state => state.xlsx.tournamentRecord);
-    const tableTitle = (tournamentRecord && tournamentRecord.tournamentName) || ''; 
-    const data = useSelector(state => state.xlsx.matchUps);
-    
-    let matchUps = JSON.parse(JSON.stringify(data));
-    
+    const { matchUps, title } = props;
     const defaultValues = { selectedRow: null };
-    const [values, setValues] = useState(Object.assign(defaultValues, initialValues));
+    const [values, setValues] = useState(defaultValues);
 
     const rowStyle = rowData => ({
         backgroundColor: (values.selectedRow && values.selectedRow.tableData.id === rowData.tableData.id) ? '#EEE' : '#FFF'
@@ -103,7 +95,7 @@ export function PersonsTable ({ initialValues }) {
         actionsColumnIndex: columns.length
     };
 
-    const rowClick = (event, rowData, togglePanel) => {
+    const rowClick = (_, rowData, togglePanel) => {
         setValues({...values, selectedRow: rowData });
         if (options.detail) togglePanel();
     }
@@ -112,13 +104,18 @@ export function PersonsTable ({ initialValues }) {
     
     return (
       <MaterialTable
-        title={tableTitle}
+        title={title}
         options={Object.assign(defaultOptions, options)}
         columns={columns}
         components={components}
         data={matchUps}        
         onRowClick={rowClick}
         localization={localization}
+        icons={{
+            Clear: forwardRef((props, ref) => <Clear {...props} ref={ref} color='action' />),
+            Search: forwardRef((props, ref) => <Search {...props} ref={ref} color='action' />),
+            ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} color='action' />),
+        }}
       />
     )
 }
