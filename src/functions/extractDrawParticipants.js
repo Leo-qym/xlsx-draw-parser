@@ -3,7 +3,6 @@ import { getColumnMatchUps } from 'functions/columnMatches';
 import { getRoundData, nameHash, lastFirstI } from 'functions/drawFx';
 
 export function extractDrawParticipants({ profile, sheet, headerRow, columns, rows, range, finals, preround_rows}) {
-   let players = [];
    let playoff3rd = [];
    let playoff3rd_rows = [];
    let hasharray = [];
@@ -14,31 +13,52 @@ export function extractDrawParticipants({ profile, sheet, headerRow, columns, ro
    const extract_seed = /\[(\d+)(\/\d+)?\]/;
    const rowOffset = profile.doubles.drawPosition.rowOffset;
 
+   let potentialPartner;
+   let doublesPartners = [];
+   rows.forEach(row => {
+      let drawPosition = numberValue(sheet, `${columns.position}${row}`);
+      let player = extractPlayer({row, drawPosition, isDoubles});
+      if (player.full_name && (!drawPosition || drawPosition === expectedDrawPosition - 1)) {
+         potentialPartner = player;
+      }
+      if (drawPosition === expectedDrawPosition) {
+         if (potentialPartner) {
+            doublesPartners.push(potentialPartner);
+            potentialPartner = undefined;
+         }
+         expectedDrawPosition++;
+      }
+   });
+   if (doublesPartners.length) { isDoubles = true; }
+
+   let players = [];
+   expectedDrawPosition = 1;
    rows.forEach(row => {
       let drawPosition = numberValue(sheet, `${columns.position}${row}`);
 
-      if (!drawPosition) {
-         // MUST BE DOUBLES
-         isDoubles = true;
+      if (!drawPosition && isDoubles) {
          drawPosition = numberValue(sheet, `${columns.position}${row + rowOffset}`);
       }
 
       let player = extractPlayer({row, drawPosition, isDoubles});
 
-      if (['bye,', 'bye', 'byebye'].indexOf(player.hash) >= 0) {
+      const isBye = ['bye,', 'bye', 'byebye'].indexOf(player.hash) >= 0;
+      const notBye = ['', 'bye', 'byebye'].indexOf(player.hash) < 0;
+      const newPlayer = hasharray.indexOf(player.hash) < 0;
+      const hasName = player.first_name && player.last_name;
+      
+      if (isBye) {
          player.isBye = true;
          players.push(player);
-      } else if (
-            ['', 'bye', 'byebye'].indexOf(player.hash) < 0 &&
-            hasharray.indexOf(player.hash) < 0 &&
-            player.first_name && player.last_name
-         ) {
-            hasharray.push(player.hash);
-            players.push(player);
-            expectedDrawPosition = drawPosition + 1;
+         expectedDrawPosition = drawPosition + 1;
+      } else if ( notBye && newPlayer && hasName) {
+         hasharray.push(player.hash);
+         players.push(player);
+         expectedDrawPosition = drawPosition + 1;
       } else if (drawPosition === expectedDrawPosition) {
          player.isBye = true;
          players.push(player);
+         expectedDrawPosition = drawPosition + 1;
       } else {
          playoff3rd_rows.push(row);
          playoff3rd.push(player);
@@ -62,7 +82,7 @@ export function extractDrawParticipants({ profile, sheet, headerRow, columns, ro
   });
 
   preround.range = [Math.min(0, ...preround.rows), Math.max(0, ...preround.rows)];
-  let pdata = getRoundData({sheet, columns, headerRow, player_data: { players: preround.players, range: preround.range }});
+  let pdata = getRoundData({sheet, columns, headerRow, playerData: { players: preround.players, range: preround.range }});
 
   if (pdata[0] && pdata[0].column_references) {
      // there should be only one column of relevant data

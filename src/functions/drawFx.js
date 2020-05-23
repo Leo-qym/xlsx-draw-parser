@@ -57,11 +57,11 @@ export function roundColumns({sheet, columns, headerRow}) {
    return unique(round_columns).sort();
 };
 
-export function getRoundData({sheet, columns, headerRow, profile, player_data, round_robin, matchOutcomes}) {
+export function getRoundData({sheet, columns, headerRow, profile, playerData, round_robin, matchOutcomes}) {
   let rr_columns;
-  let players = player_data.players;
+  let players = playerData.players;
   let round_columns = roundColumns({sheet, columns, headerRow});
-  let range = player_data.range;
+  let range = playerData.range;
   let cellReferences = Object.keys(sheet)
      .filter(ref => inDrawColumns({ref, round_columns}) && inDrawRows(ref, range))
      .filter(ref => !extraneousData({profile, sheet, ref}));

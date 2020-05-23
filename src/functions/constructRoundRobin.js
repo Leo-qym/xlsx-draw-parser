@@ -3,18 +3,18 @@ import { scoreOrPlayer, getRoundData } from 'functions/drawFx';
 import { getCellValue } from 'functions/sheetAccess';
 import { normalizeScore } from 'functions/cleanScore';
 
-export function constructRoundRobin({ profile, sheet, columns, gender, qualifying, player_data }) {
+export function constructRoundRobin({ profile, sheet, columns, gender, qualifying, playerData }) {
  let hash = [];
  let matchUps = []; 
- let players = player_data.players;
- let player_rows = player_data.rows;
- let pi = player_data.players.map((p, i) => p.rr_result ? i : undefined).filter(f=>f !== undefined);
+ let players = playerData.players;
+ let player_rows = playerData.rows;
+ let pi = playerData.players.map((p, i) => p.rr_result ? i : undefined).filter(f=>f !== undefined);
  let group_size = pi.length;
 
  // combine all cell references that are in result columns
- let round_data = getRoundData({sheet, player_data, round_robin: true}) || [];
- let rr_columns = round_data.map(m=>m.column).slice(0, group_size);
- let result_references = [].concat(...round_data.map((round, index) => index < group_size ? round.column_references : []));
+ let roundData = getRoundData({sheet, playerData, round_robin: true}) || [];
+ let rr_columns = roundData.map(m=>m.column).slice(0, group_size);
+ let result_references = [].concat(...roundData.map((round, index) => index < group_size ? round.column_references : []));
  player_rows.forEach((player_row, player_index) => {
     let player_result_referencess = result_references.filter(ref => +ref.slice(1) === +player_row);
     player_result_referencess.forEach(reference => {
@@ -62,7 +62,7 @@ export function constructRoundRobin({ profile, sheet, columns, gender, qualifyin
  if (target && target.match(/\d+/)) {
     let finals_col = target[0];
     let finals_row = parseInt(target.match(/\d+/)[0]);
-    let finals_range = player_data.finals.filter(f => +f !== +finals_row);
+    let finals_range = playerData.finals.filter(f => +f !== +finals_row);
     let finals_cells = keys.filter(k => {
        let numeric = k.match(/\d+/);
        if (!numeric) return false;
@@ -70,7 +70,7 @@ export function constructRoundRobin({ profile, sheet, columns, gender, qualifyin
        return numeric[0] >= finals_range[0] && numeric[0] <= finals_range[finals_range.length - 1] && k[0] === finals_col;
     }).filter(ref => scoreOrPlayer({ cellValue: getCellValue(sheet[ref]), players, matchOutcomes }));
     let finals_details = finals_cells.map(fc => getCellValue(sheet[fc]));
-    let finalists = player_data.finals
+    let finalists = playerData.finals
        .map(row => getCellValue(sheet[`${columns.players}${row}`]))
        .filter(player => scoreOrPlayer({ cellValue: player, players, matchOutcomes }));
     let winner = finals_details.filter(f => finalists.indexOf(f) >= 0)[0];

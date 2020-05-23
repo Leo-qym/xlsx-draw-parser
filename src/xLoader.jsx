@@ -64,7 +64,20 @@ export default function App(props) {
   const data = useSelector(state => state.xlsx.matchUps);
   const tournamentRecord = useSelector(state => state.xlsx.tournamentRecord);
   const handleCallback = file => {
-    loadFile(file, spreadSheetParser);
+    if (window.location.host.indexOf('localhost:3') >= 0) {
+      loadFile(file, spreadSheetParser);
+    } else {
+      try { loadFile(file, spreadSheetParser); } 
+      catch (err) {
+        dispatch({
+          type: 'toaster state',
+          payload: {
+            severity: 'error',
+            message: `OOPS... Something went wrong!`
+          }
+        });
+      }
+    }
   };
   const downloadClick = () => {
       const tournamentId = tournamentRecord && tournamentRecord.tournamentId;

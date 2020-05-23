@@ -4,10 +4,10 @@ import { getColumnMatchUps, getExpectedRoundMatchUps } from 'functions/columnMat
 import { chunkArray, instanceCount, unique, isPowerOf2, generateRange } from 'functions/utilities';
 import { constructMatches, constructPreroundMatches } from 'functions/matchConstruction';
 
-export function constructKnockOut({ profile, sheet, columns, headerRow, gender, player_data, preround }) {
+export function constructKnockOut({ profile, sheet, columns, headerRow, gender, playerData, preround }) {
    const matchOutcomes = profile.matchOutcomes.map(normalizeDiacritics);
-   const round_data = getRoundData({profile, sheet, columns, player_data, headerRow, matchOutcomes});
-   const players = player_data.players;
+   const roundData = getRoundData({profile, sheet, columns, playerData, headerRow, matchOutcomes});
+   const players = playerData.players;
    const allDrawPositions = players.map(p=>p.drawPosition);
    const drawPositions = unique(allDrawPositions);
    
@@ -29,7 +29,7 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
    let expectOutcomes = false;
    let expectedRowRanges = [];
    
-   round_data.forEach((round, i) => {
+   roundData.forEach((round, i) => {
       const {
          roundMatchUps, embeddedMatchUps, allOutcomes
       } = getColumnMatchUps({
@@ -88,7 +88,7 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
   matchUps.forEach(match => match.winners = players.filter(f=>+f.drawPosition === +match.winners[0]));
   if (gender) { matchUps.forEach(match => match.gender = gender); }
 
-  preround = (player_data.preround && player_data.preround.matchUps) ? constructPreroundMatches(rounds, player_data.preround, players, gender) : [];
+  preround = (playerData.preround && playerData.preround.matchUps) ? constructPreroundMatches(rounds, playerData.preround, players, gender) : [];
 
   return { matchUps, rounds, preround };
 }

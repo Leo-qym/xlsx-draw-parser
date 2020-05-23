@@ -26,7 +26,7 @@ export function getParticipantRows({sheet, profile, headerRow, footerRow, avoidR
   }
   function isNotSkipExpression(key) {
    const value = getCellValue(sheet[key]);
-   const matchesExpression = skipExpressions.reduce((matchesExpression, expression) => {
+   const matchesExpression = skipExpressions && skipExpressions.reduce((matchesExpression, expression) => {
       return isSkipExpression(value, expression) ? true : matchesExpression;
    }, false);
    return !matchesExpression;
