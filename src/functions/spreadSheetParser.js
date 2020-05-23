@@ -1,15 +1,13 @@
 import XLSX from 'xlsx';
-import { xlsxStore } from 'stores/xlsxStore';
-import { workbookTypes } from 'types/workbookTypes';
-import { HEADER, FOOTER } from 'types/sheetElements';
-import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../types/sheetTypes';
 
-import { generateRange } from 'functions/utilities';
+import { xlsxStore } from 'stores/xlsxStore';
 import { extractInfo } from 'functions/extractInfo';
-import { tournamentDraw } from 'functions/constructDraw';
-import { getParticipantRows } from 'functions/getParticipantRows';
-import { extractDrawParticipants } from 'functions/extractDrawParticipants';
-import { findRow, getRow, getCol, findValueRefs } from 'functions/sheetAccess.js';
+import { workbookTypes } from 'types/workbookTypes';
+import { identifySheet } from 'functions/profileFx';
+import { processKnockOut } from 'functions/processKnockOut';
+import { processRoundRobin } from 'functions/processRoundRobin';
+
+import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../types/sheetTypes';
 
 export function spreadSheetParser(file_content) {
   xlsxStore.dispatch({type: 'loading state', payload: true});
@@ -94,14 +92,6 @@ function generateTournamentId({tournamentInfo}={}) {
   return { tournamentId };
 }
 
-function findRowDefinition({rowDefinitions, rowIds, type}) {
-  return rowDefinitions.reduce((headerDefinition, currentDefinition) => {
-    if (currentDefinition.type !== type) return headerDefinition;
-    if (!rowIds.includes(currentDefinition.id)) return headerDefinition;
-    return currentDefinition;
-  }, undefined);
-}
-
 function identifyWorkbook({sheetNames}) {
   return workbookTypes.reduce((type, currentType) => {
     const containsValidSheet = sheetNames.reduce((result, sheet) => currentType.validSheet(sheet) || result, false);
@@ -109,87 +99,4 @@ function identifyWorkbook({sheetNames}) {
     const containsRequiredSheets = !requiredSheetTest.includes(false);
     return containsValidSheet && containsRequiredSheets ? currentType : type;
   }, undefined);
-}
-
-function identifySheet({sheet, profile}) {
-  const sheetDefinitions = profile.sheetDefinitions;
-  const rowDefinitions = profile.rowDefinitions;
-  const rowIds = rowDefinitions.reduce((rowIds, rowDefinition) => {
-    const row = findRow({sheet, rowDefinition});
-    return row ? rowIds.concat(rowDefinition.id) : rowIds;
-  }, []).filter(f=>f);
-  const identifiedDefinition = sheetDefinitions.reduce((sheetDefinition, currentDefinition) => {
-    const exactMatch = currentDefinition.rowIds.reduce((result, rowId) => rowIds.includes(rowId) && result, true );
-    return exactMatch ? currentDefinition : sheetDefinition;
-  }, undefined);
-  return identifiedDefinition;
-}
-
-// function confirms that header columns are in expected position
-// and adjusts when possible...
-function getHeaderColumns({sheet, profile, headerRow}) {
-  const columnsMap = Object.assign({}, profile.columnsMap);
-  if (profile.headerColumns) {
-     profile.headerColumns.forEach(obj => {
-      const searchText = obj.header;
-      const ref = findValueRefs(searchText, sheet)
-        .reduce((p, c) => getRow(c) === parseInt(headerRow) ? c : p, undefined);
-      const col = ref && getCol(ref);
-      if (col) columnsMap[obj.attr] = col;
-     });
-  }
-  return columnsMap;
-};
-
-function processRoundRobin({profile, sheet, sheetName, sheetDefinition}) {
-  const message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
-  console.log(message, `color: cyan`)
-  
-  const rowDefinitions = profile.rowDefinitions;
-  const headerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: HEADER });
-  const footerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: FOOTER });
-  console.log({headerRowDefinition, footerRowDefinition})
-  return { drawInfo: undefined };
-}
-
-function processKnockOut({profile, sheet, sheetName, sheetDefinition}) {
-  let message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
-  console.log(message, `color: cyan`)
-
-  const rowDefinitions = profile.rowDefinitions;
-  const headerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: HEADER });
-  const footerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: FOOTER });
-
-  const headerRows = findRow({sheet, rowDefinition: headerRowDefinition, allTargetRows: true});
-  const footerRows = findRow({sheet, rowDefinition: footerRowDefinition, allTargetRows: true});
-  const headerRow = headerRows[0];
-  const footerRow = footerRows[footerRows.length - 1];
-  const headerAvoidRows = headerRows.map(headerRow => {
-    const startRange = +headerRow;
-    const endRange = +headerRow + (headerRowDefinition.rows || 0);
-    return generateRange(startRange, endRange);
-  });
-  const footerAvoidRows = footerRows.map(footerRow => {
-    const startRange = +footerRow;
-    const endRange = +footerRow + (footerRowDefinition.rows || 0);
-    return generateRange(startRange, endRange);
-  });
-  const avoidRows = [].concat(...headerAvoidRows, ...footerAvoidRows);
-  const columns = getHeaderColumns({sheet, profile, headerRow});
-
-  const {rows, range, finals, preround_rows} = getParticipantRows({sheet, profile, headerRow, footerRow, avoidRows, columns});
-  const { players, isDoubles } = extractDrawParticipants({ profile, sheet, headerRow, columns, rows, range, finals, preround_rows });
-  const drawType = isDoubles ? 'DOUBLES' : 'SINGLES';
-  
-  const drawInfo = extractInfo({profile, sheet, infoClass: 'drawInfo'});
-  Object.assign(drawInfo, { drawType });
-  const gender = drawInfo.gender;
-
-  const qualifying = false;
-  const playerData = { players, rows, range, finals, preround_rows };
-  const { matchUps } = tournamentDraw({profile, sheet, columns, headerRow, gender, playerData, qualifying}) 
-  Object.assign(drawInfo, { matchUps });
-  matchUps.forEach(matchUp => matchUp.event = drawInfo.event);
-
-  return { drawInfo };
 }

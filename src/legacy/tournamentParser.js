@@ -15,7 +15,7 @@ export const tournamentParser = function() {
       '24': [1, 6, 7, 12, 13, 18, 19, 24],
       '48': [1, 6, 7, 12, 13, 18, 19, 24, 25, 30, 31, 36, 37, 42, 43, 48]
    };
-   var main_draw_rounds = ['F', 'SF', 'QF', 'R16', 'R32', 'R64', 'R128', 'R256'];
+   var mainDrawRoundNames = ['F', 'SF', 'QF', 'R16', 'R32', 'R64', 'R128', 'R256'];
 
    tp.config = {
       // eslint-disable-next-line no-useless-escape
@@ -496,7 +496,7 @@ export const tournamentParser = function() {
 
    let constructPreroundMatches = (rounds, preround, players, gender) => {
       let round_winners = [];
-      let round_name = main_draw_rounds[rounds.length - 1];
+      let round_name = mainDrawRoundNames[rounds.length - 1];
       let draw_positions = preround.players.map(p => p.drawPosition);
 
       // draw position offset
@@ -543,7 +543,7 @@ export const tournamentParser = function() {
             });
             let eliminated_players = previous_round_players.filter(player => round_winners.indexOf(player) < 0);
             let draw_positions = players.map(m=>m.drawPosition).filter((item, i, s) => s.lastIndexOf(item) === i).length;
-            let round_name = index + 2 < rounds.length || index < 3 ? main_draw_rounds[index] : `R${draw_positions}`;
+            let round_name = index + 2 < rounds.length || index < 3 ? mainDrawRoundNames[index] : `R${draw_positions}`;
             round_matches.forEach((match, match_index) => {
 
                match.round_name = draw_type === 'main' ? round_name : `Q${index || ''}`;

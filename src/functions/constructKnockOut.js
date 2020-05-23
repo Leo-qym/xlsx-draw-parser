@@ -77,12 +77,11 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
     - filter players with byes into 2nd round
   */
   rounds.reverse();
-
   rounds = addEntryRound(rounds, players);
-  rounds = (rounds.length && constructMatches({ rounds, players, isDoubles })) || [];
+  const {roundMatchUps, drawType} = constructMatches({ rounds, players, isDoubles });
 
   // merge all rounds into list of matchUps
-  matchUps = [].concat(...rounds).filter(f=>f.losers && f.result);
+  matchUps = [].concat(...roundMatchUps).filter(f=>f.losers && f.result);
 
   // add player names to matchUps
   matchUps.forEach(match => match.winners = players.filter(f=>+f.drawPosition === +match.winners[0]));
@@ -90,7 +89,7 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
 
   preround = (playerData.preround && playerData.preround.matchUps) ? constructPreroundMatches(rounds, playerData.preround, players, gender) : [];
 
-  return { matchUps, rounds, preround };
+  return { matchUps, drawType, preround };
 }
 
 function addEntryRound(rounds, players) {
