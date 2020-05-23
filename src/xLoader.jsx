@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import ReactJson from 'react-json-view';
 import { setDev } from 'config/setDev';
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -8,7 +9,8 @@ import { Box, Container, Fab, Zoom } from '@material-ui/core';
 import { AppBar, Toolbar, IconButton } from '@material-ui/core/';
 import { makeStyles, CssBaseline, Typography } from '@material-ui/core';
 import { CloudUpload, CloudDownload, KeyboardArrowUp } from '@material-ui/icons';
-// import { Reorder as TableView } from '@material-ui/icons';
+import { CurlyBraces } from 'assets/curlyBracesIcon';
+import ListIcon from '@material-ui/icons/List';
 
 import TODS from 'assets/TODS.png';
 import { loadFile } from 'functions/fileLoader';
@@ -31,6 +33,9 @@ const useStyles = makeStyles((theme) => ({
       width: theme.spacing(16),
       height: theme.spacing(16),
     },
+  },
+  title: {
+    flexGrow: 1
   },
   root: {
     position: 'fixed',
@@ -93,6 +98,8 @@ const Welcome = () => {
 
 export default function App(props) {
   const dispatch = useDispatch();
+  const classes = useStyles();
+  const [view, setView] = useState('table');
   
   const data = useSelector(state => state.xlsx.matchUps);
   const loadingState = useSelector((state) => state.xlsx.loadingState);
@@ -118,27 +125,24 @@ export default function App(props) {
       }
     }
   };
+  
   const downloadClick = () => {
       const tournamentId = tournamentRecord && tournamentRecord.tournamentId;
       if (tournamentId) {
         dispatch({
           type: 'toaster state',
-          payload: {
-            severity: 'success',
-            message: `Downloading...`
-          }
+          payload: { severity: 'success', message: `Downloading...` }
         });
         exportJSON(`${tournamentId}.json`, tournamentRecord);
       } else {
         dispatch({
           type: 'toaster state',
-          payload: {
-            severity: 'error',
-            message: `Tournament Name NOT FOUND`
-          }
+          payload: { severity: 'error', message: `Tournament Name NOT FOUND` }
         });
       }
   };
+
+  const viewJSON = () => { setView(view === 'table' ? 'json' : 'table') }
   
   return (
     <>
@@ -146,6 +150,14 @@ export default function App(props) {
       <CssBaseline />
       <AppBar>
         <Toolbar>
+          {
+            !matchUps.length
+            ? ''
+            : view === 'table'
+            ? <CurlyBraces onClick={viewJSON} />
+            : <ListIcon onClick={viewJSON} />
+          }
+          <Typography variant="h6" className={classes.title}></Typography>
           <IconButton
             edge="start"
             color="inherit"
@@ -171,9 +183,18 @@ export default function App(props) {
       { !loadingState ? '' : <LinearProgress color='secondary' /> }
       <Container>
         {
-          matchUps.length
-            ? <MatchUpsTable matchUps={matchUps} title={tableTitle} />
-            : <Welcome />
+          !matchUps.length
+          ? <Welcome />
+          : view === 'table'
+          ? <MatchUpsTable matchUps={matchUps} title={tableTitle} />
+          : <Box m={3}>
+              <ReactJson
+                style={{fontSize: 18}}
+                src={tournamentRecord}
+                theme='summerfruit:inverted'
+                displayDataTypes={false}
+              />
+            </Box>
         }
       </Container>
       <ScrollTop {...props}>
