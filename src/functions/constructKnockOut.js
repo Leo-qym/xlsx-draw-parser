@@ -10,9 +10,9 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
    const players = playerData.players;
    const allDrawPositions = players.map(p=>p.drawPosition);
    const drawPositions = unique(allDrawPositions);
-   
+
+   // TODO: this may be insufficient for TP or HTS Doubles Draws
    const isDoubles = Math.max(...Object.values(instanceCount(allDrawPositions))) === 2;
-   if (isDoubles) console.log('%c DOUBLES', 'color: yellow');
 
    let expectedMatchUps = drawPositions.length / 2;
    let expectedGroupings = chunkArray(drawPositions, 2);

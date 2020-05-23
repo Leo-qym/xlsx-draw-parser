@@ -189,10 +189,9 @@ function processKnockOut({profile, sheet, sheetName, sheetDefinition}) {
 
   const qualifying = false;
   const playerData = { players, rows, range, finals, preround_rows };
-  const { rounds, matchUps, preround } = tournamentDraw({profile, sheet, columns, headerRow, gender, playerData, qualifying}) 
+  const { matchUps } = tournamentDraw({profile, sheet, columns, headerRow, gender, playerData, qualifying}) 
   Object.assign(drawInfo, { matchUps });
   matchUps.forEach(matchUp => matchUp.event = drawInfo.event);
-  console.log({ drawInfo, rounds, matchUps, preround});
 
   return { drawInfo };
 }
