@@ -1,5 +1,6 @@
-import { getCellValue, numberValue } from 'functions/sheetAccess';
+import { hashId } from 'functions/utilities';
 import { getColumnMatchUps } from 'functions/columnMatches';
+import { getCellValue, numberValue } from 'functions/sheetAccess';
 import { getRoundData, nameHash, lastFirstI } from 'functions/drawFx';
 
 export function extractDrawParticipants({ profile, sheet, headerRow, columns, rows, range, finals, preround_rows}) {
@@ -81,55 +82,54 @@ export function extractDrawParticipants({ profile, sheet, headerRow, columns, ro
 
   });
 
-  preround.range = [Math.min(0, ...preround.rows), Math.max(0, ...preround.rows)];
-  let pdata = getRoundData({sheet, columns, headerRow, playerData: { players: preround.players, range: preround.range }});
+   preround.range = [Math.min(0, ...preround.rows), Math.max(0, ...preround.rows)];
+   let pdata = getRoundData({sheet, columns, headerRow, playerData: { players: preround.players, range: preround.range }});
 
-  if (pdata[0] && pdata[0].column_references) {
-     // there should be only one column of relevant data
-     preround.matchUps = getColumnMatchUps({
-        sheet,
-        round: pdata[0],
-        players: preround.players,
-        isDoubles,
-        rowOffset
+   if (pdata[0] && pdata[0].column_references) {
+      // there should be only one column of relevant data
+      preround.matchUps = getColumnMatchUps({
+         sheet,
+         round: pdata[0],
+         players: preround.players,
+         isDoubles,
+         rowOffset
       }).matchUps.filter(match => match.result);
-  }
+   }
 
-  return { players, rows, playoff3rd, playoff3rd_rows, range, finals, preround, isDoubles };
+   return { players, rows, playoff3rd, playoff3rd_rows, range, finals, preround, isDoubles };
 
-  function extractPlayer({row, drawPosition, isDoubles}) {
-     let player = { drawPosition };
-     if (columns.seed) {
+   function extractPlayer({row, drawPosition, isDoubles}) {
+      let player = { drawPosition };
+      if (columns.seed) {
         const seedRow = isDoubles ? row + rowOffset : row;
         player.seed = numberValue(sheet, `${columns.seed}${seedRow}`);
-     }
+      }
 
-     let firstName = getCellValue(sheet[`${columns.firstName}${row}`]);
-     let lastName = getCellValue(sheet[`${columns.lastName}${row}`]);
-     let fullName = firstName && lastName ? `${lastName}, ${firstName}` : getCellValue(sheet[`${columns.players}${row}`]);
-     
-     if (extract_seed.test(fullName)) {
+      let firstName = getCellValue(sheet[`${columns.firstName}${row}`]);
+      let lastName = getCellValue(sheet[`${columns.lastName}${row}`]);
+      let fullName = firstName && lastName ? `${lastName}, ${firstName}` : getCellValue(sheet[`${columns.players}${row}`]);
+
+      if (extract_seed.test(fullName)) {
         player.seed = parseInt(extract_seed.exec(fullName)[1]);
         fullName = fullName.split('[')[0].trim();
-     }
+      }
 
-     player.full_name = fullName;
-     player.last_first_i = lastFirstI(fullName);
-     player.last_name = lastName || fullName.split(',')[0].trim().toLowerCase();
-     player.first_name = firstName || fullName.split(',').reverse()[0].trim().toLowerCase();
-     player.hash = nameHash(player.first_name + player.last_name);
-     if (columns.id) {
-      const cellReference = `${columns.id}${row}`; 
-      const value = getCellValue(sheet[cellReference]);
-      // TODO: this should be part of profile
-      player.id = value.replace('"', '');
-     }
-     if (columns.club) player.club = getCellValue(sheet[`${columns.club}${row}`]);
-     if (columns.rank) player.rank = numberValue(sheet, `${columns.rank}${row}`);
-     if (columns.entry) player.entry = getCellValue(sheet[`${columns.entry}${row}`]);
-     if (columns.country) player.ioc = getCellValue(sheet[`${columns.country}${row}`]);
-     if (columns.rr_result) player.rr_result = numberValue(sheet, `${columns.rr_result}${row}`);
-     return player;
-  }
-  
+      player.full_name = fullName;
+      player.last_first_i = lastFirstI(fullName);
+      player.last_name = lastName || fullName.split(',')[0].trim().toLowerCase();
+      player.first_name = firstName || fullName.split(',').reverse()[0].trim().toLowerCase();
+      player.hash = nameHash(player.first_name + player.last_name);
+      player.participantId = hashId(player.hash);
+      if (columns.id) {
+         const cellReference = `${columns.id}${row}`; 
+         const value = getCellValue(sheet[cellReference]);
+         player.personId = value.replace('"', '');
+      }
+      if (columns.club) player.club = getCellValue(sheet[`${columns.club}${row}`]);
+      if (columns.rank) player.rank = numberValue(sheet, `${columns.rank}${row}`);
+      if (columns.entry) player.entry = getCellValue(sheet[`${columns.entry}${row}`]);
+      if (columns.country) player.ioc = getCellValue(sheet[`${columns.country}${row}`]);
+      if (columns.rr_result) player.rr_result = numberValue(sheet, `${columns.rr_result}${row}`);
+      return player;
+   }
 };

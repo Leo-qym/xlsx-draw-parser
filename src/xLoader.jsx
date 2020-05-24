@@ -3,20 +3,18 @@ import { setDev } from 'config/setDev';
 import { useSelector } from 'react-redux'
 
 import { LinearProgress } from '@material-ui/core';
-import { AppBar, Toolbar } from '@material-ui/core/';
-import { Fab } from '@material-ui/core';
+import { AppBar, Fab, Toolbar } from '@material-ui/core/';
 import { makeStyles, CssBaseline, Typography } from '@material-ui/core';
 import { KeyboardArrowUp } from '@material-ui/icons';
 
-import { AppToaster } from 'components/dialogs/AppToaster';
-
-import { LoadButton } from 'components/buttons/loadButton';
-import { DownloadButton } from 'components/buttons/downloadButton';
 import { ScrollTop } from 'components/buttons/scrollTop';
+import { LoadButton } from 'components/buttons/loadButton';
+import { AppToaster } from 'components/dialogs/AppToaster';
+import { ResultsContent } from 'components/panels/resultsContent';
+import { DownloadButton } from 'components/buttons/downloadButton';
 import { TournamentView } from 'components/buttons/tournamentView';
 
 import './App.css';
-import { ResultsContent } from 'components/panels/resultsContent';
 
 setDev();
 

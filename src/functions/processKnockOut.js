@@ -42,7 +42,14 @@ export function processKnockOut({profile, sheet, sheetName, sheetDefinition}) {
 
   const playerData = { players, rows, range, finals, preround_rows };
   const { matchUps, stage } = tournamentDraw({profile, sheet, columns, headerRow, gender, playerData}) 
-  const { entries, positionAssignments, seedAssignments } = getEntries({matchUps, drawFormat});
+  const {
+    entries,
+    personIds,
+    playersMap,
+    participantsMap,
+    positionAssignments,
+    seedAssignments
+  } = getEntries({matchUps, drawFormat});
  
   Object.assign(drawInfo, { drawFormat, stage });
   const sizes = [matchUps, entries, positionAssignments, seedAssignments].map(v => v.length);
@@ -70,7 +77,7 @@ export function processKnockOut({profile, sheet, sheetName, sheetDefinition}) {
   Object.assign(drawInfo, { drawId, stage, matchUps, structures, entries });
   matchUps.forEach(matchUp => matchUp.event = drawInfo.event);
 
-  return { drawInfo };
+  return { drawInfo, personIds, playersMap, participantsMap };
 }
 
 function getEntries({matchUps}) {
@@ -79,10 +86,14 @@ function getEntries({matchUps}) {
 
   const matchUpPlayers = matchUpSides
     .flat(Infinity)
-    .map(participant => ({ [participant.id]: participant }));
-  
+    .map(participant => ({ [participant.participantId]: participant }));
+ 
+  const personIds = matchUpSides
+    .flat(Infinity)
+    .filter(participant => participant.personId)
+    .map(participant => ({ [participant.participantId]: participant.personId }));
+
   const playersMap = Object.assign({}, ...matchUpPlayers);
-  const players = Object.keys(playersMap).map(key => playersMap[key]);
 
   const participantsMap = Object.assign({}, ...matchUpSides.map(matchUp => matchUp.map(getSideParticipant)).flat());
   const seedAssignments = Object.keys(participantsMap)
@@ -94,13 +105,14 @@ function getEntries({matchUps}) {
   const entries = Object.keys(participantsMap)
     .map(participantId => ({ participantId }));
   
-  return { players, entries, seedAssignments, positionAssignments };
+  return { personIds, playersMap, participantsMap, entries, seedAssignments, positionAssignments };
 }
 
 function getSideParticipant(side, i) {
-  const participantId = side.map(player => player.id).sort().join('-');
+  const participantIds = side.map(player => player.participantId);
+  const participantId = participantIds.sort().join('|');
   const drawPosition = side[0].drawPosition;
   const seedNumber = side[0].seed;
-  const participant = { [participantId]: { drawPosition, seedNumber }};
+  const participant = { [participantId]: { drawPosition, seedNumber, participantIds }};
   return participant;
 }

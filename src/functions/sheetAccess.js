@@ -25,11 +25,14 @@ export function getRow(reference) {
 export function getCol(reference) { return reference ? reference[0] : undefined; }
 
 export function findValueRefs(searchText, sheet, options) {
+  const lowercaseSearchText = (searchText || '').toLowerCase();
+  return Object.keys(sheet)
+    .filter(ref => transformValue(getCellValue(sheet[ref])) === normalizeDiacritics(lowercaseSearchText));
+    
   function transformValue(value) {
+    value = value.toLowerCase();
+    value = normalizeDiacritics(value);
     if (options) {
-      if (options.lowerCase) value = value.toLowerCase();
-      // if (options.normalize) value = normalizeDiacritics(value);
-      value = normalizeDiacritics(value);
       if (options.remove && Array.isArray(options.remove)) {
         options.remove.forEach(replace => {
           const re = new RegExp(replace,"g");
@@ -39,7 +42,6 @@ export function findValueRefs(searchText, sheet, options) {
     }
     return value;
   }
-  return Object.keys(sheet).filter(ref => transformValue(getCellValue(sheet[ref])) === normalizeDiacritics(searchText));
 }
 
 export function getTargetValue({searchText, sheet, rowOffset=0, columnOffset=0, options}) {

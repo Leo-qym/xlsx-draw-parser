@@ -18,6 +18,11 @@ export function spreadSheetParser(file_content) {
   
   let draws = [];
   let tournamentRecord = {};
+  
+  let allPlayers = {};
+  let allPersonIds = [];
+  let allParticipants = {};
+  
   const sheetNames = workbook.SheetNames;
   const workbookType = identifyWorkbook({sheetNames});
   if (workbookType) {
@@ -38,6 +43,8 @@ export function spreadSheetParser(file_content) {
     
     console.clear();
     console.log('%c Processing sheets...', 'color: lightgreen', sheetsToProcess);
+
+    let drawInfo, playersMap, participantsMap, personIds;
     
     sheetNames.forEach(sheetName => {
       let message = '';
@@ -53,10 +60,10 @@ export function spreadSheetParser(file_content) {
           console.log(message, `color: ${color}`);
         }
       } else if (processSheet && sheetDefinition.type === KNOCKOUT) {
-        const { drawInfo } = processKnockOut({profile, sheet, sheetName, sheetDefinition});
+        ({ drawInfo, personIds, playersMap, participantsMap } = processKnockOut({profile, sheet, sheetName, sheetDefinition}));
         draws.push(drawInfo);
       } else if (processSheet && sheetDefinition.type === ROUND_ROBIN) {
-        const { drawInfo } = processRoundRobin({profile, sheet, sheetName, sheetDefinition});
+        ({ drawInfo, personIds, playersMap, participantsMap } = processRoundRobin({profile, sheet, sheetName, sheetDefinition}));
         console.log({drawInfo});
       } else if (processSheet && sheetDefinition.type === PARTICIPANTS) {
         message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
@@ -75,10 +82,15 @@ export function spreadSheetParser(file_content) {
         message = `%c sheetDefinition not found: ${sheetName}`;
         console.log(message, `color: ${color}`);
       }
+
+      Object.assign(allPlayers, playersMap || {});
+      Object.assign(allParticipants, participantsMap || {});
+      allPersonIds = allPersonIds.concat(personIds || []);
+      
     });
   }
 
-  createTournamentRecord({draws, tournamentRecord});
+  createTournamentRecord({draws, allPersonIds, allPlayers, allParticipants, tournamentRecord});
 }
 
 function generateTournamentId({tournamentInfo}={}) {
