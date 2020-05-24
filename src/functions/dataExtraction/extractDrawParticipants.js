@@ -119,7 +119,7 @@ export function extractDrawParticipants({ profile, sheet, headerRow, columns, ro
       player.last_name = lastName || fullName.split(',')[0].trim().toLowerCase();
       player.first_name = firstName || fullName.split(',').reverse()[0].trim().toLowerCase();
       player.hash = nameHash(player.first_name + player.last_name);
-      player.participantId = hashId(player.hash);
+      player.participantId = `${hashId(player.hash)}-P`;
       if (columns.id) {
          const cellReference = `${columns.id}${row}`; 
          const value = getCellValue(sheet[cellReference]);

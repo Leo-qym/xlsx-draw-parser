@@ -80,7 +80,7 @@ function getEvents({draws}) {
       eventId: `${drawId}-E`,
       draws: [
         {
-          drawId,
+          drawId: `${drawId}-D`,
           entries,
           structures
         }

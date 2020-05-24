@@ -57,7 +57,7 @@ export function processKnockOut({profile, sheet, sheetName, sheetDefinition}) {
 
   const TodsMatchUps = matchUps.map(matchUp => {
     const drawPositions = matchUp.drawPositions.sort((a, b) => a - b);
-    const matchUpId = `${drawId}-${drawPositions.join('')}`
+    const matchUpId = `${drawId}-${drawPositions.join('')}-M`;
     const winningSide = drawPositions.indexOf(matchUp.winners[0].drawPosition);
     return { matchUpId, drawPositions, score: matchUp.result, winningSide };
   });
