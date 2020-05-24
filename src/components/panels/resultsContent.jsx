@@ -10,10 +10,9 @@ import { Welcome } from 'components/panels/welcome';
 export function ResultsContent(props) {
   const { view } = props;
   const data = useSelector(state => state.xlsx.matchUps);
-  const tournamentRecord = useSelector(state => state.xlsx.tournamentRecord);
-
   let matchUps = JSON.parse(JSON.stringify(data));
-  const tableTitle = (tournamentRecord && tournamentRecord.tournamentName) || ''; 
+  
+  const tournamentRecord = useSelector(state => state.xlsx.tournamentRecord);
   
   return (
     
@@ -22,7 +21,7 @@ export function ResultsContent(props) {
           !matchUps.length
           ? <Welcome />
           : view === 'table'
-          ? <MatchUpsTable matchUps={matchUps} title={tableTitle} />
+          ? <MatchUpsTable matchUps={matchUps} />
           : <Box m={3}>
               <ReactJson
                 collapsed={1}

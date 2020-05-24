@@ -27,8 +27,10 @@ export default function App(props) {
   const [view, setView] = useState('table');
   
   const matchUps = useSelector(state => state.xlsx.matchUps);
-  const loadingState = useSelector((state) => state.xlsx.loadingState);
   const hasData = matchUps && matchUps.length;
+  
+  const tournamentName = useSelector(state => state.xlsx.tournamentRecord.tournamentName);
+  const loadingState = useSelector((state) => state.xlsx.loadingState);
 
   return (
     <>
@@ -37,7 +39,9 @@ export default function App(props) {
       <AppBar>
         <Toolbar>
           <TournamentView hasData={hasData} view={view} setView={setView} />
-          <Typography variant="h6" className={classes.spacer}></Typography>
+          <Typography variant='h6' className={classes.spacer} align='center'>
+            {tournamentName || ''}
+          </Typography>
           <LoadButton />
           <DownloadButton hasData={hasData} />
         </Toolbar>

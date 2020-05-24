@@ -28,19 +28,20 @@ const participantSearch = (value, rowData, attribute) => {
 const winnerSearch = (value, rowData) => participantSearch(value, rowData, 'winningSide');
 const loserSearch = (value, rowData) => participantSearch(value, rowData, 'losers');
 
-function renderFormat(rowData) {
+function renderEvent(rowData) {
     if (!rowData.matchType) return '';
-    return rowData.matchType;
+    const event = rowData.event;
+    const matchType = rowData.matchType;
+    return [event, matchType].join(' ');
 }
 function formatSearch(value, rowData) {
-    let format = renderFormat(rowData);
+    let format = renderEvent(rowData);
     return format.toLowerCase().indexOf(value.toLowerCase()) >= 0;
 }
 
 const columns = [
-    { title: 'Event', field: 'event' },
-    { title: 'Gender', field: 'gender' },
-    { title: 'Format', render: renderFormat, customFilterAndSearch: formatSearch },
+    { title: 'Event', render: renderEvent, customFilterAndSearch: formatSearch },
+    { title: 'Gender', field: 'gender', hidden: true },
     { title: 'Winner', render: renderWinner, customFilterAndSearch: winnerSearch },
     { title: 'Loser', render: renderLoser, customFilterAndSearch: loserSearch },
     { title: 'Round #', field: 'roundNumber', hidden: true },
@@ -51,7 +52,7 @@ const options = {
     pageSize: 10,
     search: true,
     paging: false,
-    sorting: true,
+    sorting: false,
     actions: false,
     editable: false,
     showTitle: true,
@@ -70,8 +71,10 @@ const localization = {
 }
 
 export function MatchUpsTable(props) {
-    const { matchUps, title } = props;
+    const { matchUps } = props;
     const components = { Container: props => <Paper {...props} elevation={0}/> }
+
+    const title = `Matches (${matchUps.length})`;
     
     return (
       <MaterialTable
