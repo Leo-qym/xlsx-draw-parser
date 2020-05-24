@@ -33,18 +33,17 @@ export function processKnockOut({profile, sheet, sheetName, sheetDefinition}) {
   const avoidRows = [].concat(...headerAvoidRows, ...footerAvoidRows);
   const columns = getHeaderColumns({sheet, profile, headerRow});
 
-  const {rows, range, finals, preround_rows} = getParticipantRows({sheet, profile, headerRow, footerRow, avoidRows, columns});
-  const { players, isDoubles } = extractDrawParticipants({ profile, sheet, headerRow, columns, rows, range, finals, preround_rows });
-  const drawFormat = isDoubles ? 'DOUBLES' : 'SINGLES';
-  
   const drawInfo = extractInfo({profile, sheet, infoClass: 'drawInfo'});
   const gender = drawInfo.gender;
 
+  const {rows, range, finals, preround_rows} = getParticipantRows({sheet, profile, headerRow, footerRow, avoidRows, columns});
+  const { players, isDoubles } = extractDrawParticipants({ profile, sheet, headerRow, columns, rows, range, gender, finals, preround_rows });
+  const drawFormat = isDoubles ? 'DOUBLES' : 'SINGLES';
+  
   const playerData = { players, rows, range, finals, preround_rows };
   const { matchUps, stage } = tournamentDraw({profile, sheet, columns, headerRow, gender, playerData}) 
   const {
     entries,
-    personIds,
     playersMap,
     participantsMap,
     positionAssignments,
@@ -61,39 +60,31 @@ export function processKnockOut({profile, sheet, sheetName, sheetDefinition}) {
     const matchUpId = `${drawId}-${drawPositions.join('')}`
     const winningSide = drawPositions.indexOf(matchUp.winners[0].drawPosition);
     return { matchUpId, drawPositions, score: matchUp.result, winningSide };
-  })
+  });
 
-  const structures = [
-    { 
-      stage,
-      stageSequence: 1,
-      seedAssignments,
-      positionAssignments,
-      matchUps: TodsMatchUps,
-      finishingPosition: 'roundOutcome'
-    }
-  ];
+  const structure = { 
+    stage,
+    stageSequence: 1,
+    seedAssignments,
+    positionAssignments,
+    matchUps: TodsMatchUps,
+    finishingPosition: 'roundOutcome'
+  };
 
-  Object.assign(drawInfo, { drawId, stage, matchUps, structures, entries });
+  Object.assign(drawInfo, { drawId, stage, matchUps, structure, entries });
   matchUps.forEach(matchUp => matchUp.event = drawInfo.event);
 
-  return { drawInfo, personIds, playersMap, participantsMap };
+  return { drawInfo, playersMap, participantsMap };
 }
 
 function getEntries({matchUps}) {
   const matchUpSides = matchUps
-    .map(matchUp => [matchUp.winningSidej, matchUp.losingSide])
+    .map(matchUp => [matchUp.winningSide, matchUp.losingSide])
 
   const matchUpPlayers = matchUpSides
     .flat(Infinity)
     .filter(participant => participant && !participant.isBye)
     .map(participant => ({ [participant.participantId]: participant }));
- 
-  const personIds = matchUpSides
-    .flat(Infinity)
-    .filter(participant => participant && !participant.isBye)
-    .filter(participant => participant.personId)
-    .map(participant => ({ [participant.participantId]: participant.personId }));
 
   const playersMap = Object.assign({}, ...matchUpPlayers);
 
@@ -112,7 +103,7 @@ function getEntries({matchUps}) {
   const entries = Object.keys(participantsMap)
     .map(participantId => ({ participantId }));
   
-  return { personIds, playersMap, participantsMap, entries, seedAssignments, positionAssignments };
+  return { playersMap, participantsMap, entries, seedAssignments, positionAssignments };
 }
 
 function getSideParticipant(side, i) {
