@@ -39,11 +39,11 @@ export default function App(props) {
       <AppBar>
         <Toolbar>
           <TournamentView hasData={hasData} view={view} setView={setView} />
+          <DownloadButton hasData={hasData} />
           <Typography variant='h6' className={classes.spacer} align='center'>
             {tournamentName || ''}
           </Typography>
           <LoadButton />
-          <DownloadButton hasData={hasData} />
         </Toolbar>
       </AppBar>
       <Toolbar id="back-to-top-anchor" />
