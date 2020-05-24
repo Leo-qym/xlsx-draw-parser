@@ -20,7 +20,6 @@ export function spreadSheetParser(file_content) {
   let tournamentRecord = {};
   
   let allPlayers = {};
-  let allPersonIds = [];
   let allParticipants = {};
   
   const sheetNames = workbook.SheetNames;
@@ -44,7 +43,7 @@ export function spreadSheetParser(file_content) {
     console.clear();
     console.log('%c Processing sheets...', 'color: lightgreen', sheetsToProcess);
 
-    let drawInfo, playersMap, participantsMap, personIds;
+    let drawInfo, playersMap, participantsMap;
     
     sheetNames.forEach(sheetName => {
       let message = '';
@@ -60,10 +59,10 @@ export function spreadSheetParser(file_content) {
           console.log(message, `color: ${color}`);
         }
       } else if (processSheet && sheetDefinition.type === KNOCKOUT) {
-        ({ drawInfo, personIds, playersMap, participantsMap } = processKnockOut({profile, sheet, sheetName, sheetDefinition}));
+        ({ drawInfo, playersMap, participantsMap } = processKnockOut({profile, sheet, sheetName, sheetDefinition}));
         draws.push(drawInfo);
       } else if (processSheet && sheetDefinition.type === ROUND_ROBIN) {
-        ({ drawInfo, personIds, playersMap, participantsMap } = processRoundRobin({profile, sheet, sheetName, sheetDefinition}));
+        ({ drawInfo, playersMap, participantsMap } = processRoundRobin({profile, sheet, sheetName, sheetDefinition}));
         console.log({drawInfo});
       } else if (processSheet && sheetDefinition.type === PARTICIPANTS) {
         message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
@@ -85,12 +84,11 @@ export function spreadSheetParser(file_content) {
 
       Object.assign(allPlayers, playersMap || {});
       Object.assign(allParticipants, participantsMap || {});
-      allPersonIds = allPersonIds.concat(personIds || []);
       
     });
   }
 
-  createTournamentRecord({draws, allPersonIds, allPlayers, allParticipants, tournamentRecord});
+  createTournamentRecord({draws, allPlayers, allParticipants, tournamentRecord});
 }
 
 function generateTournamentId({tournamentInfo}={}) {
