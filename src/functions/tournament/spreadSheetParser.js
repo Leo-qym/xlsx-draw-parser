@@ -36,6 +36,7 @@ export function spreadSheetParser(file_content) {
       });
       return;
     }
+
     const sheetsToProcess = sheetNames
       .filter(sheet => workbookType.validSheet(sheet))
       .filter(sheet => !sheetFilter || sheet.toLowerCase().includes(sheetFilter.toLowerCase()));
@@ -75,7 +76,7 @@ export function spreadSheetParser(file_content) {
 
         const tournamentInfo = extractInfo({profile, sheet, infoClass: 'tournamentInfo'})
         Object.assign(tournamentData, tournamentInfo);
-      } else if (processSheet) {
+      } else if (!processSheet) {
         color = 'yellow'
         message = `%c sheetDefinition not found: ${sheetName}`;
         console.log(message, `color: ${color}`);

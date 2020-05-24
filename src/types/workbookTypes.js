@@ -7,7 +7,7 @@ export const workbookTypes = [
     mustContainSheetNames: ['Altalanos'],
     validSheet:  sheetName => {
       const knockout = /^[FL]{1}[1-8]{2}/.test(sheetName);
-      const roundRobin = /^[1-8]{1}\.*cs/.test(sheetName);
+      const roundRobin = /^[1-8.]*cs*/.test(sheetName);
       const rrPlayoff = /^[1-8]{1}\.*nap/.test(sheetName);
       const tournamentInfo = /^altalanos/.test(sheetName.toLowerCase());
       return knockout || (roundRobin || rrPlayoff || tournamentInfo);
