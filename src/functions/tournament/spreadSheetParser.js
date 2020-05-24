@@ -15,7 +15,7 @@ export function spreadSheetParser(file_content) {
   const filterValueStorage = 'xlsxSheetFilter';
   const sheetFilter = localStorage.getItem(filterValueStorage)
   const workbook = XLSX.read(file_content, { type: 'binary' });
-  
+ 
   let draws = [];
   let tournamentRecord = {};
   
@@ -25,7 +25,7 @@ export function spreadSheetParser(file_content) {
   const sheetNames = workbook.SheetNames;
   const workbookType = identifyWorkbook({sheetNames});
   if (workbookType) {
-    const profile = workbookType.profile;
+    let profile = workbookType.profile;
     if (!profile) {
       xlsxStore.dispatch({
         type: 'toaster state',
@@ -75,7 +75,7 @@ export function spreadSheetParser(file_content) {
 
         const tournamentInfo = extractInfo({profile, sheet, infoClass: 'tournamentInfo'})
         const { tournamentId } = generateTournamentId({tournamentInfo});
-        Object.assign(tournamentRecord, tournamentInfo, { tournamentId });
+        Object.assign(tournamentRecord, tournamentInfo, { tournamentId, providerId });
       } else {
         color = 'yellow'
         message = `%c sheetDefinition not found: ${sheetName}`;
@@ -86,9 +86,11 @@ export function spreadSheetParser(file_content) {
       Object.assign(allParticipants, participantsMap || {});
       
     });
+    
+    const providerId = profile && profile.providerId;
+    Object.assign(tournamentRecord, { providerId });
+    createTournamentRecord({draws, allPlayers, allParticipants, tournamentRecord});
   }
-
-  createTournamentRecord({draws, allPlayers, allParticipants, tournamentRecord});
 }
 
 function generateTournamentId({tournamentInfo}={}) {

@@ -13,6 +13,7 @@ export const workbookTypes = [
       return knockout || (roundRobin || rrPlayoff || tournamentInfo);
     },
     profile: {
+      providerId: 'MTSZ_07982e2f-eb41-42b2-9b75-da3054fe70a8',
       skipWords: ['umpire', '0'],
       skipExpressions: ['[0-9,/, ]+pont', 'umpire'],
       matchOutcomes: [
