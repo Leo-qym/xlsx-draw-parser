@@ -75,7 +75,7 @@ export function spreadSheetParser(file_content) {
 
         const tournamentInfo = extractInfo({profile, sheet, infoClass: 'tournamentInfo'})
         Object.assign(tournamentData, tournamentInfo);
-      } else {
+      } else if (processSheet) {
         color = 'yellow'
         message = `%c sheetDefinition not found: ${sheetName}`;
         console.log(message, `color: ${color}`);
