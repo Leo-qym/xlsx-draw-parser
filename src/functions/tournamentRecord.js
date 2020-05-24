@@ -18,7 +18,6 @@ export function createTournamentRecord({draws, tournamentRecord, allPersonIds, a
 }
 
 function getParticipants({allPersonIds, allPlayers, allParticipants}) {
-  console.log({allPersonIds, allPlayers, allParticipants});
   let participants = Object.keys(allParticipants).map(participantId => {
     const participantIds = allParticipants[participantId].participantIds;
     if (participantIds.length === 2) {
