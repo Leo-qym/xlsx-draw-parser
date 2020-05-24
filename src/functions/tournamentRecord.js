@@ -5,10 +5,15 @@ export function createTournamentRecord({draws, tournamentRecord }) {
   const eventTypes = draws.map(draw => `${draw.event}|${draw.drawFormat}`);
   const events = eventTypes.reduce((events, type) => {
     const [event, format] = type.split('|');
-    const structures = draws
+    const eventDraws = draws
       .filter(draw => draw.event === event && draw.drawFormat === format)
+    const drawId = eventDraws[0].drawId;
+    const entries = eventDraws[0].entries;
+    const structures = eventDraws
       .map(draw => draw.structures)
     const candidate = {
+      drawId,
+      entries,
       structures
     };
     return events.concat(candidate);

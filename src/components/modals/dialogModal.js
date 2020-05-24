@@ -143,19 +143,6 @@ export const dialogModal = function() {
       );
    }
 
-   /*
-                   InputProps={{
-                     endAdornment: (
-                        <InputAdornment position="end">
-                           {
-                              localStorage.getItem(filterValueStorage) ?
-                             <Clear fontSize="small" onClick={()=>console.log('boo')}/> : ''
-                           }
-                        </InputAdornment>
-                     ),
-                   }}
-   */
-
    fx.close = () => {
       let anchor = document.getElementById(ANCHORID);
       if (anchor) { ReactDOM.unmountComponentAtNode(anchor); }
