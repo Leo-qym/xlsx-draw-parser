@@ -146,6 +146,7 @@ export const workbookTypes = [
           { attr: 'id',         header: 'Kódszám' },
           { attr: 'seed',       header: 'Kiem' },
           { attr: 'lastName',   header: 'Családi név' },
+          { attr: 'lastName',   header: 'Vezetéknév' },
           { attr: 'firstName',  header: 'Keresztnév' },
           { attr: 'club',       header: 'Egyesület' },
           { attr: 'rounds',     header: 'Döntő' },
