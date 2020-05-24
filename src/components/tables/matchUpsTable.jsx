@@ -38,7 +38,6 @@ function formatSearch(value, rowData) {
 }
 
 const columns = [
-    { title: '#', field: 'index', hidden: true },
     { title: 'Event', field: 'event' },
     { title: 'Gender', field: 'gender' },
     { title: 'Format', render: renderFormat, customFilterAndSearch: formatSearch },

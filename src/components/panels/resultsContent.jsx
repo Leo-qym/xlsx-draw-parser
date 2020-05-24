@@ -13,7 +13,6 @@ export function ResultsContent(props) {
   const tournamentRecord = useSelector(state => state.xlsx.tournamentRecord);
 
   let matchUps = JSON.parse(JSON.stringify(data));
-  matchUps.forEach((matchUp, i) => matchUp.index = i + 1);
   const tableTitle = (tournamentRecord && tournamentRecord.tournamentName) || ''; 
   
   return (
