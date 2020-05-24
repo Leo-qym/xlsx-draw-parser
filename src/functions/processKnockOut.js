@@ -86,10 +86,12 @@ function getEntries({matchUps}) {
 
   const matchUpPlayers = matchUpSides
     .flat(Infinity)
+    .filter(participant => !participant.isBye)
     .map(participant => ({ [participant.participantId]: participant }));
  
   const personIds = matchUpSides
     .flat(Infinity)
+    .filter(participant => !participant.isBye)
     .filter(participant => participant.personId)
     .map(participant => ({ [participant.participantId]: participant.personId }));
 

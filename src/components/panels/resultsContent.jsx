@@ -25,6 +25,7 @@ export function ResultsContent(props) {
           ? <MatchUpsTable matchUps={matchUps} title={tableTitle} />
           : <Box m={3}>
               <ReactJson
+                collapsed={1}
                 style={{fontSize: 18}}
                 src={tournamentRecord}
                 theme='summerfruit:inverted'

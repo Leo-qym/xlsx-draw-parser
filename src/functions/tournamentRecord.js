@@ -1,4 +1,5 @@
 import { xlsxStore } from 'stores/xlsxStore';
+import { INDIVIDUAL } from 'types/todsConstants';
 
 export function createTournamentRecord({draws, tournamentRecord, allPersonIds, allPlayers, allParticipants }) {
   const matchUps = draws.map(draw => draw.matchUps).flat();
@@ -16,8 +17,20 @@ export function createTournamentRecord({draws, tournamentRecord, allPersonIds, a
 }
 
 function getParticipants({allPersonIds, allPlayers, allParticipants}) {
-  let participants = [];
   console.log({allPersonIds, allPlayers, allParticipants});
+  let participants = Object.keys(allPlayers).map(participantId => {
+    const player = allPlayers[participantId];
+    const participant = {
+      participantId,
+      participantType: INDIVIDUAL,
+      name: player.last_name,
+      preferredGivenName: player.first_name,
+      person: {
+        personId: player.personId
+      }
+    }
+    return participant;
+  })
   
   return { participants };
 }

@@ -1,4 +1,4 @@
-import { MAIN, QUALIFYING, SINGLES, DOUBLES } from 'types/tournamentConstants';
+import { MAIN, QUALIFYING, SINGLES, DOUBLES } from 'types/todsConstants';
 
 const mainDrawRoundNames = ['F', 'SF', 'QF', 'R16', 'R32', 'R64', 'R128', 'R256'];
 
