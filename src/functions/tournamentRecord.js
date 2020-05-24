@@ -1,5 +1,5 @@
 import { xlsxStore } from 'stores/xlsxStore';
-import { INDIVIDUAL } from 'types/todsConstants';
+import { INDIVIDUAL, PAIR } from 'types/todsConstants';
 
 export function createTournamentRecord({draws, tournamentRecord, allPersonIds, allPlayers, allParticipants }) {
   const matchUps = draws.map(draw => draw.matchUps).flat();
@@ -18,8 +18,37 @@ export function createTournamentRecord({draws, tournamentRecord, allPersonIds, a
 
 function getParticipants({allPersonIds, allPlayers, allParticipants}) {
   console.log({allPersonIds, allPlayers, allParticipants});
-  let participants = Object.keys(allPlayers).map(participantId => {
+  let participants = Object.keys(allParticipants).map(participantId => {
+    const participantIds = allParticipants[participantId].participantIds;
+    if (participantIds.length === 2) {
+      return pairParticipant(participantId);   
+    } else {
+      return individualParticipant(participantId);
+    }
+  })
+  
+  return { participants };
+ 
+  function pairParticipant(participantId) {
+    const pair = allParticipants[participantId];
+    const participantIds = pair.participantIds;
+    const players = participantIds.map(participantId => allPlayers[participantId]);
+    const name = players.map(player => player.last_name).join('/');
+    const participant = {
+      name,
+      participantId,
+      participantType: PAIR,
+      participantIds 
+    };
+    return participant;
+  }
+  
+  function individualParticipant(participantId) {
     const player = allPlayers[participantId];
+    if (!player) {
+      console.log('no player', {participantId});
+      return {};
+    }
     const participant = {
       participantId,
       participantType: INDIVIDUAL,
@@ -30,9 +59,7 @@ function getParticipants({allPersonIds, allPlayers, allParticipants}) {
       }
     }
     return participant;
-  })
-  
-  return { participants };
+  }
 }
 
 function getEvents({draws}) {

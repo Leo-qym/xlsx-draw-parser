@@ -97,13 +97,18 @@ function getEntries({matchUps}) {
 
   const playersMap = Object.assign({}, ...matchUpPlayers);
 
-  const participantsMap = Object.assign({}, ...matchUpSides.map(matchUp => matchUp.map(getSideParticipant)).flat());
+  const participantsMap = Object.assign({}, ...matchUpSides
+    .map(matchUp => matchUp.map(getSideParticipant).filter(f=>f))
+    .flat());
+    
   const seedAssignments = Object.keys(participantsMap)
     .map(participantId => ({ participantId, seedNumber: participantsMap[participantId].seedNumber }))
     .sort((a, b) => a.seedNumber - b.seedNumber);
+    
   const positionAssignments = Object.keys(participantsMap)
     .map(participantId => ({ participantId, drawPosition: participantsMap[participantId].drawPosition }))
     .sort((a, b) => a.drawPosition - b.drawPosition);
+    
   const entries = Object.keys(participantsMap)
     .map(participantId => ({ participantId }));
   
@@ -111,10 +116,11 @@ function getEntries({matchUps}) {
 }
 
 function getSideParticipant(side, i) {
+  const isBye = side.reduce((p, c) => c.isBye, undefined);
   const participantIds = side.map(player => player.participantId);
   const participantId = participantIds.sort().join('|');
   const drawPosition = side[0].drawPosition;
   const seedNumber = side[0].seed;
   const participant = { [participantId]: { drawPosition, seedNumber, participantIds }};
-  return participant;
+  if (!isBye) return participant;
 }
