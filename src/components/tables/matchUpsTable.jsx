@@ -17,7 +17,7 @@ function renderSide(rowData, attribute) {
 }
 
 function renderWinner(rowData) { return renderSide(rowData, 'winningSide'); }
-function renderLoser(rowData) { return renderSide(rowData, 'losers'); }
+function renderLoser(rowData) { return renderSide(rowData, 'losingSide'); }
 
 const participantSearch = (value, rowData, attribute) => {
     let name = renderSide(rowData, attribute);
@@ -26,7 +26,7 @@ const participantSearch = (value, rowData, attribute) => {
 }
 
 const winnerSearch = (value, rowData) => participantSearch(value, rowData, 'winningSide');
-const loserSearch = (value, rowData) => participantSearch(value, rowData, 'losers');
+const loserSearch = (value, rowData) => participantSearch(value, rowData, 'losingSide');
 
 function renderEvent(rowData) {
     if (!rowData.matchType) return '';

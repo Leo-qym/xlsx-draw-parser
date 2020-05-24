@@ -81,7 +81,7 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
   const {roundMatchUps, stage} = constructMatchUps({ rounds, players, isDoubles });
 
   // merge all rounds into list of matchUps
-  matchUps = [].concat(...roundMatchUps).filter(f=>f.losers && f.result);
+  matchUps = [].concat(...roundMatchUps).filter(f=>f.losingSide && f.result);
 
   // add player names to matchUps
   matchUps.forEach(match => match.winners = players.filter(f=>+f.drawPosition === +match.winners[0]));

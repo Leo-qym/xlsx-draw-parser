@@ -82,16 +82,16 @@ export function processKnockOut({profile, sheet, sheetName, sheetDefinition}) {
 
 function getEntries({matchUps}) {
   const matchUpSides = matchUps
-    .map(matchUp => [matchUp.winners, matchUp.losers])
+    .map(matchUp => [matchUp.winningSidej, matchUp.losingSide])
 
   const matchUpPlayers = matchUpSides
     .flat(Infinity)
-    .filter(participant => !participant.isBye)
+    .filter(participant => participant && !participant.isBye)
     .map(participant => ({ [participant.participantId]: participant }));
  
   const personIds = matchUpSides
     .flat(Infinity)
-    .filter(participant => !participant.isBye)
+    .filter(participant => participant && !participant.isBye)
     .filter(participant => participant.personId)
     .map(participant => ({ [participant.participantId]: participant.personId }));
 
@@ -116,11 +116,13 @@ function getEntries({matchUps}) {
 }
 
 function getSideParticipant(side, i) {
-  const isBye = side.reduce((p, c) => c.isBye, undefined);
-  const participantIds = side.map(player => player.participantId);
-  const participantId = participantIds.sort().join('|');
-  const drawPosition = side[0].drawPosition;
-  const seedNumber = side[0].seed;
-  const participant = { [participantId]: { drawPosition, seedNumber, participantIds }};
-  if (!isBye) return participant;
+  const isBye = !side || side.reduce((p, c) => c.isBye, undefined);
+  if (!isBye) {
+    const participantIds = side.map(player => player.participantId);
+    const participantId = participantIds.sort().join('|');
+    const drawPosition = side[0].drawPosition;
+    const seedNumber = side[0].seed;
+    const participant = { [participantId]: { drawPosition, seedNumber, participantIds }};
+    return participant;
+  }
 }

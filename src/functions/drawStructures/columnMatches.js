@@ -39,6 +39,7 @@ export function getColumnMatchUps({
       lastDisconiuity = discontinuity;
       return grouping;
    });
+
    const finalDiscontinuity = roundColumnValues.slice(lastDisconiuity);
    if (finalDiscontinuity.length) columnOutcomes.push(finalDiscontinuity);
 
@@ -52,12 +53,22 @@ export function getColumnMatchUps({
       const cellRow = grouping[0].cellRow;
       const drawPosition = grouping[0].drawPosition;
       const result = grouping.length === groupingLengthWithResult && normalizeScore(grouping[grouping.length - 1].cellValue);
+      const expectedDrawPositions = expectedGroupings.reduce((drawPositions, candidate) => {
+         return candidate.includes(drawPosition) ? candidate : drawPositions;
+      }, undefined);
+      const losingDrawPosition = expectedDrawPositions.reduce((losingDrawPosition, candidate) => {
+         return candidate !== drawPosition ? candidate : losingDrawPosition;
+      }, undefined);
+      const winningSide = players.filter(player => +player.drawPosition === +drawPosition);
+      const losingSide = players.filter(player => +player.drawPosition === +losingDrawPosition);
       return {
          cellRow,
          result: result || '',
+         expectedDrawPositions,
          winners: [drawPosition],
          drawPositions: [drawPosition],
-         winningSide: players.filter(player => +player.drawPosition === +drawPosition)
+         winningSide,
+         losingSide
       }
    });
 
@@ -75,7 +86,7 @@ export function getColumnMatchUps({
    // the first round matchUp expectedRowRanges are not defined, so are always unexpected
    const roundMatchUps = expectedRoundMatchUps.length ? expectedRoundMatchUps : unExpectedRoundMatchUps;
    const embeddedMatchUps = expectedRoundMatchUps.length ? unExpectedRoundMatchUps : [];
-
+   
   return { roundMatchUps, embeddedMatchUps, allOutcomes };
 
 };
