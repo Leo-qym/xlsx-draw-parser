@@ -1,5 +1,5 @@
 import { HEADER, FOOTER } from 'types/sheetElements';
-import { findRowDefinition } from 'functions/profileFx';
+import { findRowDefinition } from 'functions/tournament/profileFx';
 
 export function processRoundRobin({profile, sheet, sheetName, sheetDefinition}) {
   const message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;

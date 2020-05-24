@@ -1,7 +1,7 @@
 import { unique } from 'functions/utilities';
-import { getDrawPosition } from 'functions/drawFx';
+import { getDrawPosition } from 'functions/drawStructures/drawFx';
 import { normalizeScore } from 'functions/cleanScore';
-import { getRow, getCellValue } from 'functions/sheetAccess';
+import { getRow, getCellValue } from 'functions/dataExtraction/sheetAccess';
 
 export function getColumnMatchUps({
    sheet,

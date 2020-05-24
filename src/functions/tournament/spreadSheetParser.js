@@ -1,13 +1,13 @@
 import XLSX from 'xlsx';
 
 import { xlsxStore } from 'stores/xlsxStore';
-import { extractInfo } from 'functions/extractInfo';
+import { extractInfo } from 'functions/dataExtraction/extractInfo';
 import { workbookTypes } from 'types/workbookTypes';
-import { identifySheet } from 'functions/profileFx';
-import { processKnockOut } from 'functions/processKnockOut';
-import { processRoundRobin } from 'functions/processRoundRobin';
+import { identifySheet } from 'functions/tournament/profileFx';
+import { processKnockOut } from 'functions/drawStructures/processKnockOut';
+import { processRoundRobin } from 'functions/drawStructures/processRoundRobin';
 
-import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../types/sheetTypes';
+import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../../types/sheetTypes';
 import { createTournamentRecord } from './tournamentRecord';
 
 export function spreadSheetParser(file_content) {

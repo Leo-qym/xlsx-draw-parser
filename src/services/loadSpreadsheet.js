@@ -1,6 +1,6 @@
 import { xlsxStore } from 'stores/xlsxStore';
-import { loadFile } from 'functions/fileLoader';
-import { spreadSheetParser } from 'functions/spreadSheetParser';
+import { loadFile } from 'services/fileLoader';
+import { spreadSheetParser } from 'functions/tournament/spreadSheetParser';
 
 export function loadSpreadsheet(file) {
   if (window.location.host.indexOf('localhost:3') >= 0) {

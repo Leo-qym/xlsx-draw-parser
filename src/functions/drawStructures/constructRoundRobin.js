@@ -1,6 +1,6 @@
 import { unique } from 'functions/utilities';
-import { scoreOrPlayer, getRoundData } from 'functions/drawFx';
-import { getCellValue } from 'functions/sheetAccess';
+import { scoreOrPlayer, getRoundData } from 'functions/drawStructures/drawFx';
+import { getCellValue } from 'functions/dataExtraction/sheetAccess';
 import { normalizeScore } from 'functions/cleanScore';
 
 export function constructRoundRobin({ profile, sheet, columns, gender, qualifying, playerData }) {

@@ -1,12 +1,12 @@
 import { HEADER, FOOTER } from 'types/sheetElements';
 
-import { findRow } from 'functions/sheetAccess.js';
-import { extractInfo } from 'functions/extractInfo';
-import { tournamentDraw } from 'functions/constructDraw';
+import { findRow } from 'functions/dataExtraction/sheetAccess.js';
+import { extractInfo } from 'functions/dataExtraction/extractInfo';
+import { tournamentDraw } from 'functions/drawStructures/constructDraw';
 import { generateRange, hashId } from 'functions/utilities';
-import { getParticipantRows } from 'functions/getParticipantRows';
-import { extractDrawParticipants } from 'functions/extractDrawParticipants';
-import { findRowDefinition, getHeaderColumns } from 'functions/profileFx';
+import { getParticipantRows } from 'functions/drawStructures/getParticipantRows';
+import { extractDrawParticipants } from 'functions/dataExtraction/extractDrawParticipants';
+import { findRowDefinition, getHeaderColumns } from 'functions/tournament/profileFx';
 
 export function processKnockOut({profile, sheet, sheetName, sheetDefinition}) {
   let message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;

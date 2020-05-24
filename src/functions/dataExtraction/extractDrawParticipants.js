@@ -1,7 +1,7 @@
 import { hashId } from 'functions/utilities';
-import { getColumnMatchUps } from 'functions/columnMatches';
-import { getCellValue, numberValue } from 'functions/sheetAccess';
-import { getRoundData, nameHash, lastFirstI } from 'functions/drawFx';
+import { getColumnMatchUps } from 'functions/drawStructures/columnMatches';
+import { getCellValue, numberValue } from 'functions/dataExtraction/sheetAccess';
+import { getRoundData, nameHash, lastFirstI } from 'functions/drawStructures/drawFx';
 
 export function extractDrawParticipants({ profile, sheet, headerRow, columns, rows, range, finals, preround_rows}) {
    let playoff3rd = [];

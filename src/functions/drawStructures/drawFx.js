@@ -1,5 +1,5 @@
 import { normalizeDiacritics } from 'normalize-text'
-import { getCellValue, getCol, getRow } from 'functions/sheetAccess';
+import { getCellValue, getCol, getRow } from 'functions/dataExtraction/sheetAccess';
 import { letterValue, unique } from 'functions/utilities';
 
 export function getDrawPosition({value, players, idx = 0, expectedDrawPositions=[]}) {

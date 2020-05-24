@@ -1,8 +1,8 @@
-import { getRoundData } from 'functions/drawFx';
+import { getRoundData } from 'functions/drawStructures/drawFx';
 import { normalizeDiacritics } from 'normalize-text';
-import { getColumnMatchUps, getExpectedRoundMatchUps } from 'functions/columnMatches';
+import { getColumnMatchUps, getExpectedRoundMatchUps } from 'functions/drawStructures/columnMatches';
 import { chunkArray, instanceCount, unique, isPowerOf2, generateRange } from 'functions/utilities';
-import { constructMatchUps, constructPreroundMatches } from 'functions/matchConstruction';
+import { constructMatchUps, constructPreroundMatches } from 'functions/drawStructures/matchConstruction';
 
 export function constructKnockOut({ profile, sheet, columns, headerRow, gender, playerData, preround }) {
    const matchOutcomes = profile.matchOutcomes.map(normalizeDiacritics);

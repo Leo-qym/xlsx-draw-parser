@@ -1,4 +1,4 @@
-import { getTargetValue } from 'functions/sheetAccess.js';
+import { getTargetValue } from 'functions/dataExtraction/sheetAccess.js';
 
 export function extractInfo({profile, sheet, infoClass}) {
   const extractObject = {};

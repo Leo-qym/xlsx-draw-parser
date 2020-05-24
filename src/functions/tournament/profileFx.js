@@ -1,4 +1,4 @@
-import { findRow, getRow, getCol, findValueRefs } from 'functions/sheetAccess.js';
+import { findRow, getRow, getCol, findValueRefs } from 'functions/dataExtraction/sheetAccess.js';
 
 export function findRowDefinition({rowDefinitions, rowIds, type}) {
   return rowDefinitions.reduce((headerDefinition, currentDefinition) => {

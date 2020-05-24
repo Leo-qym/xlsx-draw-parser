@@ -1,5 +1,5 @@
 import { xlsxStore } from 'stores/xlsxStore';
-import { exportJSON } from 'functions/exportJSON';
+import { exportJSON } from 'services/exportJSON';
 
 export function downloadSpreadsheet() {
   const tournamentRecord = xlsxStore.getState().xlsx.tournamentRecord;
