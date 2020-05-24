@@ -89,7 +89,7 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
 
   preround = (playerData.preround && playerData.preround.matchUps) ? constructPreroundMatches(rounds, playerData.preround, players, gender) : [];
 
-  return { matchUps, stage, preround };
+  return { matchUps, stage, preround, isDoubles };
 }
 
 function addEntryRound(rounds, players) {

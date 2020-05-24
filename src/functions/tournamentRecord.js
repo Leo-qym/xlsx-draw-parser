@@ -1,4 +1,5 @@
 import { xlsxStore } from 'stores/xlsxStore';
+import { unique } from 'functions/utilities';
 import { INDIVIDUAL, PAIR } from 'types/todsConstants';
 
 export function createTournamentRecord({draws, tournamentRecord, allPersonIds, allPlayers, allParticipants }) {
@@ -63,19 +64,28 @@ function getParticipants({allPersonIds, allPlayers, allParticipants}) {
 }
 
 function getEvents({draws}) {
-  const eventTypes = draws.map(draw => `${draw.event}|${draw.drawFormat}`);
+  const eventTypes = unique(draws.map(draw => `${draw.event}|${draw.drawFormat}`));
   const events = eventTypes.reduce((events, type) => {
     const [event, format] = type.split('|');
     const eventDraws = draws
       .filter(draw => draw.event === event && draw.drawFormat === format)
     const drawId = eventDraws[0].drawId;
     const entries = eventDraws[0].entries;
+    const eventCategory = eventDraws[0].event;
+    const eventFormat = eventDraws[0].drawFormat;
+    const eventName = [eventCategory, eventFormat].join(' ');
     const structures = eventDraws
       .map(draw => draw.structures)
     const candidate = {
-      drawId,
-      entries,
-      structures
+      eventName,
+      eventId: `${drawId}-E`,
+      draws: [
+        {
+          drawId,
+          entries,
+          structures
+        }
+      ]
     };
     return events.concat(candidate);
   }, []);
