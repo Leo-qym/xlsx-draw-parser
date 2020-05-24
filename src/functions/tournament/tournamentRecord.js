@@ -2,14 +2,29 @@ import { xlsxStore } from 'stores/xlsxStore';
 import { unique } from 'functions/utilities';
 import { INDIVIDUAL, PAIR, QUALIFYING } from 'types/todsConstants';
 
-export function createTournamentRecord({draws, tournamentRecord, allPlayers, allParticipants }) {
-  const matchUps = draws.map(draw => draw.matchUps).flat();
- 
+export function createTournamentRecord({draws, tournamentData, allPlayers, allParticipants }) {
+
+  const { tournamentId } = generateTournamentId({tournamentData});
+  const { tournamentName, providerId, startDate, endDate, city } = tournamentData;
+
+  const tournamentAddresses = [ { city } ];
+  
+  let tournamentRecord = {
+    providerId,
+    tournamentId,
+    tournamentName,
+    tournamentAddresses,
+    startDate,
+    endDate
+  };
+  
   const { events } = getEvents({draws});
   Object.assign(tournamentRecord, { events });
 
   const { participants } = getParticipants({allPlayers, allParticipants});
   Object.assign(tournamentRecord, { participants });
+  
+  const matchUps = draws.map(draw => draw.matchUps).flat();
   
   xlsxStore.dispatch({
     type: 'set tournament record',
@@ -71,12 +86,15 @@ function getEvents({draws}) {
       .filter(draw => draw.event === event && draw.drawFormat === format)
     const drawId = eventDraws[0].drawId;
     const entries = getEventEntries({eventDraws});
+    const gender = eventDraws[0].gender;
     const eventCategory = eventDraws[0].event;
-    const eventFormat = eventDraws[0].drawFormat;
-    const eventName = [eventCategory, eventFormat].join(' ');
+    const eventType = eventDraws[0].drawFormat;
+    const eventName = [eventCategory, eventType].join(' ');
     const structures = eventDraws.map(draw => draw.structure);
     const candidate = {
+      gender,
       eventName,
+      eventType,
       eventId: `${drawId}-E`,
       draws: [
         {
@@ -106,4 +124,15 @@ function getEventEntries({eventDraws}) {
   });
   const entries = Object.keys(entriesMap).map(key => entriesMap[key]);
   return entries;
+}
+
+function generateTournamentId({tournamentData}={}) {
+  let tournamentId;
+  const { tournamentName, startDate='', categories=[], city='' } = tournamentData;
+  const categoryString = categories.join('');
+  if (tournamentName) {
+    const name = tournamentName.split(' ').join('_');
+    tournamentId = [name, city, categoryString, startDate].join('_');
+  }
+  return { tournamentId };
 }

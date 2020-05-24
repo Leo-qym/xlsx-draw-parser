@@ -17,7 +17,7 @@ export function spreadSheetParser(file_content) {
   const workbook = XLSX.read(file_content, { type: 'binary' });
  
   let draws = [];
-  let tournamentRecord = {};
+  let tournamentData = {};
   
   let allPlayers = {};
   let allParticipants = {};
@@ -74,8 +74,7 @@ export function spreadSheetParser(file_content) {
         }
 
         const tournamentInfo = extractInfo({profile, sheet, infoClass: 'tournamentInfo'})
-        const { tournamentId } = generateTournamentId({tournamentInfo});
-        Object.assign(tournamentRecord, tournamentInfo, { tournamentId });
+        Object.assign(tournamentData, tournamentInfo);
       } else {
         color = 'yellow'
         message = `%c sheetDefinition not found: ${sheetName}`;
@@ -88,20 +87,9 @@ export function spreadSheetParser(file_content) {
     });
     
     const providerId = profile && profile.providerId;
-    Object.assign(tournamentRecord, { providerId });
-    createTournamentRecord({draws, allPlayers, allParticipants, tournamentRecord});
+    Object.assign(tournamentData, { providerId });
+    createTournamentRecord({draws, allPlayers, allParticipants, tournamentData});
   }
-}
-
-function generateTournamentId({tournamentInfo}={}) {
-  let tournamentId;
-  const { tournamentName, startDate='', categories=[], city='' } = tournamentInfo;
-  const categoryString = categories.join('');
-  if (tournamentName) {
-    const name = tournamentName.split(' ').join('_');
-    tournamentId = [name, city, categoryString, startDate].join('_');
-  }
-  return { tournamentId };
 }
 
 function identifyWorkbook({sheetNames}) {
