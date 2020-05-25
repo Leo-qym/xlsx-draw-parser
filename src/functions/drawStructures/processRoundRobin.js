@@ -1,7 +1,9 @@
 import { generateRange } from 'functions/utilities';
-import { findRow } from 'functions/dataExtraction/sheetAccess.js';
+import { findRow } from 'functions/dataExtraction/sheetAccess';
+import { extractInfo } from 'functions/dataExtraction/extractInfo';
 import { getParticipantRows } from 'functions/drawStructures/getParticipantRows';
 import { findRowDefinition, getHeaderColumns } from 'functions/tournament/profileFx';
+import { extractRoundRobinParticipants } from 'functions/dataExtraction/extractRoundRobinParticipants';
 
 import { HEADER, FOOTER } from 'types/sheetElements';
 
@@ -31,12 +33,14 @@ export function processRoundRobin({profile, sheet, sheetName, sheetDefinition}) 
   });
   const avoidRows = [].concat(...headerAvoidRows, ...footerAvoidRows);
   const columns = getHeaderColumns({sheet, profile, headerRow});
+  
+  const drawInfo = extractInfo({profile, sheet, infoClass: 'drawInfo'});
+  const gender = drawInfo.gender;
+  
   const {rows, range } = getParticipantRows({sheet, profile, headerRow, footerRow, avoidRows, columns});
+  const { players, isDoubles } = extractRoundRobinParticipants({ profile, sheet, headerRow, columns, rows, range, gender });
 
-  console.log({headerRowDefinition, footerRowDefinition})
-  console.log({headerRows, footerRows})
-  console.log({avoidRows, columns})
-  console.log({rows, range})
+  console.log({rows, players, isDoubles});
   
   return { drawInfo: undefined };
 }

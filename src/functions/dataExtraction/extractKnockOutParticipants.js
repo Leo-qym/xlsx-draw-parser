@@ -3,7 +3,7 @@ import { getColumnMatchUps } from 'functions/drawStructures/columnMatches';
 import { getCellValue, numberValue } from 'functions/dataExtraction/sheetAccess';
 import { getRoundData, nameHash, lastFirstI } from 'functions/drawStructures/drawFx';
 
-export function extractDrawParticipants({ profile, sheet, headerRow, columns, rows, range, gender, finals, preround_rows}) {
+export function extractKnockOutParticipants({ profile, sheet, headerRow, columns, rows, range, gender, finals, preround_rows}) {
    let playoff3rd = [];
    let playoff3rd_rows = [];
    let hasharray = [];

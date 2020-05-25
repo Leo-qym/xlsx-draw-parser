@@ -1,12 +1,12 @@
 import { HEADER, FOOTER } from 'types/sheetElements';
 
-import { findRow } from 'functions/dataExtraction/sheetAccess.js';
+import { generateRange, hashId } from 'functions/utilities';
+import { findRow } from 'functions/dataExtraction/sheetAccess';
 import { extractInfo } from 'functions/dataExtraction/extractInfo';
 import { tournamentDraw } from 'functions/drawStructures/constructDraw';
-import { generateRange, hashId } from 'functions/utilities';
 import { getParticipantRows } from 'functions/drawStructures/getParticipantRows';
-import { extractDrawParticipants } from 'functions/dataExtraction/extractDrawParticipants';
 import { findRowDefinition, getHeaderColumns } from 'functions/tournament/profileFx';
+import { extractKnockOutParticipants } from 'functions/dataExtraction/extractKnockOutParticipants';
 
 export function processKnockOut({profile, sheet, sheetName, sheetDefinition}) {
   let message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
@@ -37,7 +37,7 @@ export function processKnockOut({profile, sheet, sheetName, sheetDefinition}) {
   const gender = drawInfo.gender;
 
   const {rows, range, finals, preround_rows} = getParticipantRows({sheet, profile, headerRow, footerRow, avoidRows, columns});
-  const { players, isDoubles } = extractDrawParticipants({ profile, sheet, headerRow, columns, rows, range, gender, finals, preround_rows });
+  const { players, isDoubles } = extractKnockOutParticipants({ profile, sheet, headerRow, columns, rows, range, gender, finals, preround_rows });
   const drawFormat = isDoubles ? 'DOUBLES' : 'SINGLES';
   
   const playerData = { players, rows, range, finals, preround_rows };
