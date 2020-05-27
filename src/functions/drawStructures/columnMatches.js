@@ -65,7 +65,8 @@ export function getColumnMatchUps({
          cellRow,
          result: result || '',
          winners: [drawPosition],
-         drawPositions: expectedDrawPositions,
+         drawPositions: [drawPosition],
+         // drawPositions: expectedDrawPositions,
          winningSide,
          losingSide
       }
