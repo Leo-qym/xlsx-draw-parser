@@ -67,13 +67,13 @@ export function getRoundData({sheet, columns, headerRow, profile, playerData, ro
      .filter(ref => !extraneousData({profile, sheet, ref}));
 
   let filtered_columns = round_columns.map(column => { 
-    let column_references = cellReferences.filter(ref => getCol(ref) === column)
+    let columnReferences = cellReferences.filter(ref => getCol(ref) === column)
       .filter(ref => {
          const cellValue = getCellValue(sheet[ref]);
          return scoreOrPlayer({ cellValue, players, matchOutcomes });
       });
-    return { column, column_references, cellReferences };
-  }).filter(f=>f.column_references.length);
+    return { column, columnReferences, cellReferences };
+  }).filter(f=>f.columnReferences.length);
   
   // work around for round robins with blank 'BYE' columns
   if (filtered_columns.length) {
@@ -81,9 +81,9 @@ export function getRoundData({sheet, columns, headerRow, profile, playerData, ro
      let end = round_columns.indexOf(filtered_columns[filtered_columns.length - 1].column);
      let column_range = round_columns.slice(start, end);
      rr_columns = column_range.map(column => { 
-      let column_references = cellReferences.filter(ref => ref[0] === column)
+      let columnReferences = cellReferences.filter(ref => ref[0] === column)
         .filter(ref => scoreOrPlayer({ cellValue: getCellValue(sheet[ref]), players, matchOutcomes }));
-      return { column, column_references };
+      return { column, columnReferences };
      });
   }
 

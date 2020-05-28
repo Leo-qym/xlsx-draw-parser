@@ -85,7 +85,7 @@ export function extractKnockOutParticipants({ profile, sheet, headerRow, columns
    preround.range = [Math.min(0, ...preround.rows), Math.max(0, ...preround.rows)];
    let pdata = getRoundData({sheet, columns, headerRow, playerData: { players: preround.players, range: preround.range }});
 
-   if (pdata[0] && pdata[0].column_references) {
+   if (pdata[0] && pdata[0].columnReferences) {
       // there should be only one column of relevant data
       preround.matchUps = getColumnMatchUps({
          sheet,

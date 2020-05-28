@@ -14,7 +14,7 @@ export function constructRoundRobin({ profile, sheet, columns, gender, qualifyin
  // combine all cell references that are in result columns
  let roundData = getRoundData({sheet, playerData, round_robin: true}) || [];
  let rr_columns = roundData.map(m=>m.column).slice(0, group_size);
- let result_references = [].concat(...roundData.map((round, index) => index < group_size ? round.column_references : []));
+ let result_references = [].concat(...roundData.map((round, index) => index < group_size ? round.columnReferences : []));
  player_rows.forEach((player_row, player_index) => {
     let player_result_referencess = result_references.filter(ref => +ref.slice(1) === +player_row);
     player_result_referencess.forEach(reference => {

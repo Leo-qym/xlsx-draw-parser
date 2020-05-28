@@ -15,10 +15,13 @@ export function getColumnMatchUps({
 }) {
    // eslint-disable-next-line 
    const scoreMatching = /[\d\(]+[\d\.\(\)\[\]\\ \:\-\,\/O]+(Ret)?(ret)?(RET)?[\.]*$/;
-   const roundColumnValues = round.column_references.map((reference, i) => {
+   const roundColumnValues = round.columnReferences.map((reference, i) => {
       const cellRow = getRow(reference);
       const cellValue = getCellValue(sheet[reference]);
+
+      // TODO: unclear why drawPosition is required here since it can be erroneous if value matches two players
       const drawPosition = getDrawPosition({ value: cellValue, players});
+
       const isScoreValue = cellValue.match(scoreMatching);
       const isMatchOutcome = matchOutcomes
          .map(ending => cellValue.toLowerCase().indexOf(ending.toLowerCase()) >= 0).reduce((a, b) => a || b, undefined);
@@ -49,6 +52,8 @@ export function getColumnMatchUps({
          if (drawPosition) {
             expectedIndex++;
             part.drawPosition = drawPosition;
+         } else {
+            delete part.drawPosition;
          }
       });
    });
