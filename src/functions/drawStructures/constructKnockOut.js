@@ -1,6 +1,6 @@
 import { getRoundData } from 'functions/drawStructures/drawFx';
 import { normalizeDiacritics } from 'normalize-text';
-import { getColumnMatchUps, getExpectedRoundMatchUps } from 'functions/drawStructures/columnMatches';
+import { getColumnMatchUps, getExpectedRoundMatchUps } from 'functions/drawStructures/columnMatchUps';
 import { chunkArray, instanceCount, unique, isPowerOf2, generateRange } from 'functions/utilities';
 import { constructMatchUps, constructPreroundMatches } from 'functions/drawStructures/matchConstruction';
 
@@ -54,8 +54,8 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
       
       const embeddedMatchUpsCount = embeddedMatchUps.length;
       if (embeddedMatchUpsCount) {
-         generateRange(0, embeddedMatchUpsCount).forEach(_ => {
-            const roundMatchUps = getExpectedRoundMatchUps({matchUps: embeddedMatchUps, expectedRowRanges, expectedGroupings});
+         generateRange(0, embeddedMatchUpsCount).forEach((_, i) => {
+            const roundMatchUps = getExpectedRoundMatchUps({matchUps: embeddedMatchUps, expectedRowRanges, expectedGroupings, logging: true});
             
             const winnerDrawPositions = [].concat(...roundMatchUps.map(matchUp => matchUp.drawPositions));
             const winnerRowNumbers = [].concat(...roundMatchUps.map(matchUp => matchUp.cellRow));
@@ -64,7 +64,9 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
             expectedGroupings = chunkArray(winnerDrawPositions, 2);
             expectedRowRanges = chunkArray(winnerRowNumbers, 2)
            
-            if (roundMatchUps.length) rounds.push(roundMatchUps);
+            if (roundMatchUps.length) {
+               rounds.push(roundMatchUps);
+            }
          })
       }
    });

@@ -53,22 +53,21 @@ export function getColumnMatchUps({
       const cellRow = grouping[0].cellRow;
       const drawPosition = grouping[0].drawPosition;
       const result = grouping.length === groupingLengthWithResult && normalizeScore(grouping[grouping.length - 1].cellValue);
-      const expectedDrawPositions = expectedGroupings.reduce((drawPositions, candidate) => {
-         return candidate.includes(drawPosition) ? candidate : drawPositions;
-      }, undefined);
-      const losingDrawPosition = expectedDrawPositions.reduce((losingDrawPosition, candidate) => {
-         return candidate !== drawPosition ? candidate : losingDrawPosition;
-      }, undefined);
+      // const expectedDrawPositions = expectedGroupings.reduce((drawPositions, candidate) => {
+      //    return candidate.includes(drawPosition) ? candidate : drawPositions;
+      // }, undefined);
+      // const losingDrawPosition = expectedDrawPositions.reduce((losingDrawPosition, candidate) => {
+      //    return candidate !== drawPosition ? candidate : losingDrawPosition;
+      // }, undefined);
       const winningSide = players.filter(player => +player.drawPosition === +drawPosition);
-      const losingSide = players.filter(player => +player.drawPosition === +losingDrawPosition);
+      // const losingSide = players.filter(player => +player.drawPosition === +losingDrawPosition);
       return {
          cellRow,
          result: result || '',
          winners: [drawPosition],
          drawPositions: [drawPosition],
-         // drawPositions: expectedDrawPositions,
          winningSide,
-         losingSide
+         // losingSide
       }
    });
 
@@ -88,10 +87,9 @@ export function getColumnMatchUps({
    const embeddedMatchUps = expectedRoundMatchUps.length ? unExpectedRoundMatchUps : [];
    
   return { roundMatchUps, embeddedMatchUps, allOutcomes };
-
 };
 
-export function getExpectedRoundMatchUps({matchUps, expectedRowRanges, expectedGroupings}) {
+export function getExpectedRoundMatchUps({matchUps, expectedRowRanges, expectedGroupings, logging}) {
    return expectedRowRanges.map(rowRange => {
       if (!rowRange.length || rowRange.length !== 2) return undefined;
       return matchUps.reduce((matchUp, candidate) => {

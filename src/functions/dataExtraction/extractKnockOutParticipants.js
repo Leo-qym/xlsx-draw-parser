@@ -1,5 +1,5 @@
 import { hashId } from 'functions/utilities';
-import { getColumnMatchUps } from 'functions/drawStructures/columnMatches';
+import { getColumnMatchUps } from 'functions/drawStructures/columnMatchUps';
 import { getCellValue, numberValue } from 'functions/dataExtraction/sheetAccess';
 import { getRoundData, nameHash, lastFirstI } from 'functions/drawStructures/drawFx';
 
