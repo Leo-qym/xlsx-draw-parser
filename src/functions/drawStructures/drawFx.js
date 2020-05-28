@@ -70,7 +70,9 @@ export function getRoundData({sheet, columns, headerRow, profile, playerData, ro
     let columnReferences = cellReferences.filter(ref => getCol(ref) === column)
       .filter(ref => {
          const cellValue = getCellValue(sheet[ref]);
-         return scoreOrPlayer({ cellValue, players, matchOutcomes });
+         const valid = scoreOrPlayer({ cellValue, players, matchOutcomes });
+         if (!valid && column === "K") console.log({cellValue});
+         return valid;
       });
     return { column, columnReferences, cellReferences };
   }).filter(f=>f.columnReferences.length);

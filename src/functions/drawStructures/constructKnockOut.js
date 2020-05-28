@@ -28,7 +28,7 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
 
    let expectOutcomes = false;
    let expectedRowRanges = [];
- 
+
    roundData.forEach((round, i) => {
       const {
          roundMatchUps, embeddedMatchUps, allOutcomes
