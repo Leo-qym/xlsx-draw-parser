@@ -15,7 +15,7 @@ export function getColumnMatchUps({
 }) {
    // eslint-disable-next-line 
    const scoreMatching = /[\d\(]+[\d\.\(\)\[\]\\ \:\-\,\/O]+(Ret)?(ret)?(RET)?[\.]*$/;
-   const roundColumnValues = round.column_references.map(reference => {
+   const roundColumnValues = round.column_references.map((reference, i) => {
       const cellRow = getRow(reference);
       const cellValue = getCellValue(sheet[reference]);
       const drawPosition = getDrawPosition({ value: cellValue, players});
@@ -40,6 +40,19 @@ export function getColumnMatchUps({
       return grouping;
    });
 
+   let expectedIndex = 0;
+   columnOutcomes.forEach(columnOutcome => {
+      const expectedDrawPositions = expectedGroupings[expectedIndex];
+      columnOutcome.forEach(part => {
+         const value = part.cellValue;
+         const drawPosition = getDrawPosition({ value, players, expectedDrawPositions});
+         if (drawPosition) {
+            expectedIndex++;
+            part.drawPosition = drawPosition;
+         }
+      });
+   });
+
    const finalDiscontinuity = roundColumnValues.slice(lastDisconiuity);
    if (finalDiscontinuity.length) columnOutcomes.push(finalDiscontinuity);
 
@@ -49,25 +62,18 @@ export function getColumnMatchUps({
    }, true);
    if (expectOutcomes) { columnOutcomes = columnOutcomes.filter(groupings => groupings.length === groupingLengthWithResult); }
 
-   const columnMatchUps = columnOutcomes.map(grouping => {
+   const columnMatchUps = columnOutcomes.map((grouping, i) => {
       const cellRow = grouping[0].cellRow;
       const drawPosition = grouping[0].drawPosition;
       const result = grouping.length === groupingLengthWithResult && normalizeScore(grouping[grouping.length - 1].cellValue);
-      // const expectedDrawPositions = expectedGroupings.reduce((drawPositions, candidate) => {
-      //    return candidate.includes(drawPosition) ? candidate : drawPositions;
-      // }, undefined);
-      // const losingDrawPosition = expectedDrawPositions.reduce((losingDrawPosition, candidate) => {
-      //    return candidate !== drawPosition ? candidate : losingDrawPosition;
-      // }, undefined);
       const winningSide = players.filter(player => +player.drawPosition === +drawPosition);
-      // const losingSide = players.filter(player => +player.drawPosition === +losingDrawPosition);
       return {
          cellRow,
          result: result || '',
          winners: [drawPosition],
+         winningDrawPosition: drawPosition,
          drawPositions: [drawPosition],
-         winningSide,
-         // losingSide
+         winningSide
       }
    });
 

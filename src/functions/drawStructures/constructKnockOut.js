@@ -28,7 +28,7 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
 
    let expectOutcomes = false;
    let expectedRowRanges = [];
-   
+ 
    roundData.forEach((round, i) => {
       const {
          roundMatchUps, embeddedMatchUps, allOutcomes
@@ -44,20 +44,20 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
       });
       rounds.push(roundMatchUps);
 
-      const winnerDrawPositions = [].concat(...roundMatchUps.map(matchUp => matchUp.drawPositions));
+      const winnerDrawPositions = roundMatchUps.map(matchUp => matchUp.winningDrawPosition);
       const winnerRowNumbers = [].concat(...roundMatchUps.map(matchUp => matchUp.cellRow));
       
       expectedMatchUps = expectedMatchUps / 2;
       expectedGroupings = chunkArray(winnerDrawPositions, 2);
       expectedRowRanges = chunkArray(winnerRowNumbers, 2)
       expectOutcomes = expectOutcomes || allOutcomes;
-      
+
       const embeddedMatchUpsCount = embeddedMatchUps.length;
       if (embeddedMatchUpsCount) {
          generateRange(0, embeddedMatchUpsCount).forEach((_, i) => {
             const roundMatchUps = getExpectedRoundMatchUps({matchUps: embeddedMatchUps, expectedRowRanges, expectedGroupings, logging: true});
             
-            const winnerDrawPositions = [].concat(...roundMatchUps.map(matchUp => matchUp.drawPositions));
+            const winnerDrawPositions = roundMatchUps.map(matchUp => matchUp.winningDrawPosition);
             const winnerRowNumbers = [].concat(...roundMatchUps.map(matchUp => matchUp.cellRow));
             
             expectedMatchUps = expectedMatchUps / 2;
@@ -85,8 +85,6 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
   // merge all rounds into list of matchUps
   matchUps = [].concat(...roundMatchUps).filter(f=>f.losingSide && f.result);
 
-  // add player names to matchUps
-  matchUps.forEach(match => match.winners = players.filter(f=>+f.drawPosition === +match.winners[0]));
   if (gender) { matchUps.forEach(match => match.gender = gender); }
 
   preround = (playerData.preround && playerData.preround.matchUps) ? constructPreroundMatches(rounds, playerData.preround, players, gender) : [];
@@ -95,13 +93,13 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
 }
 
 function addEntryRound(rounds, players) {
-  let winners = unique([].concat(...rounds.map(matchUps => [].concat(...matchUps.map(match => match.winners).filter(f=>f)))));
-  let notWinner = (drawPosition) => winners.indexOf(drawPosition) < 0;
-  let first_round_losers = players
+  let winnerDrawPositions = unique([].concat(...rounds.map(matchUps => matchUps.map(match => match.winningDrawPosition).filter(f=>f))));
+  let notWinner = drawPosition => winnerDrawPositions.indexOf(drawPosition) < 0;
+  let firstRoundLosers = players
      .filter(player => notWinner(player.drawPosition))
      .map(m=>m.drawPosition)
      .filter((item, i, s) => s.lastIndexOf(item) === i)
      .map(m => ({ players: [m] }) );
-  rounds.push(first_round_losers);
+  rounds.push(firstRoundLosers);
   return rounds;
 };

@@ -38,24 +38,27 @@ export function constructMatchUps({ rounds=[], players, isDoubles }) {
          let round_matches = [];
          let roundWinners = [];
          round.forEach(match => {
-            let drawPosition = match.winners ? match.winners[0] : match.bye ? match.bye[0] : match.players && match.players[0];
+            let drawPosition = match.winningDrawPosition ? match.winningDrawPosition : match.bye ? match.bye[0] : match.players && match.players[0];
             roundWinners.push(drawPosition);
             round_matches.push(match);
          });
          let previousRoundWinners = rounds[roundIndex + 1].map(match => {
-            return match.winners ? match.winners[0] : match.bye ? match.bye[0] : match.players && match.players[0];
+            return match.winningDrawPosition ? match.winningDrawPosition : match.bye ? match.bye[0] : match.players && match.players[0];
          });
          let eliminatedDrawPositions = previousRoundWinners.filter(player => roundWinners.indexOf(player) < 0);
 
          const finishingRound = roundIndex + 1;
          const roundName = mainDrawRoundNames[finishingRound - 1];
          round_matches.forEach((match, matchIndex) => {
+            const losingDrawPosition = +eliminatedDrawPositions[matchIndex];
+            const losingSide = players.filter(f=>+f.drawPosition === losingDrawPosition);
+            match.drawPositions = [match.winningDrawPosition, losingDrawPosition];
             match.matchType = matchType;
             match.roundNumber = rounds.length - roundIndex - 1;
             match.finishingRound = finishingRound;
             match.roundPosition = matchIndex + 1;
             match.roundName = stage === MAIN ? roundName : `Q${roundIndex || ''}`;
-            match.losingSide = players.filter(f=>+f.drawPosition === +eliminatedDrawPositions[matchIndex]);
+            match.losingSide = losingSide;
          });
      }
   });
