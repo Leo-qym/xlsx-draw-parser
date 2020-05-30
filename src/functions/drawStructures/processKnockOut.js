@@ -71,8 +71,11 @@ export function processKnockOut({profile, sheet, sheetName, sheetDefinition}) {
     };
   });
 
+  const structureIdFodder = `${fodder}${stage}`;
+  const structureId = `${hashId(structureIdFodder)}-S`;
   const structure = { 
     stage,
+    structureId,
     stageSequence: 1,
     seedAssignments,
     positionAssignments,
@@ -104,15 +107,27 @@ function getEntries({matchUps}) {
   const seedAssignments = Object.keys(participantsMap)
     .map(participantId => ({ participantId, seedNumber: participantsMap[participantId].seedNumber }))
     .sort((a, b) => a.seedNumber - b.seedNumber);
-    
+   
   const positionAssignments = Object.keys(participantsMap)
-    .map(participantId => ({ participantId, drawPosition: participantsMap[participantId].drawPosition }))
+    .map(participantId => ({
+      participantId,
+      drawPosition: participantsMap[participantId].drawPosition
+    }))
     .sort((a, b) => a.drawPosition - b.drawPosition);
-    
-  const entries = Object.keys(participantsMap)
-    .map(participantId => ({ participantId }));
+
+  const entries = Object.keys(participantsMap).map(eventEntry);
   
   return { playersMap, participantsMap, entries, seedAssignments, positionAssignments };
+
+  function eventEntry(participantId) {
+    const playerParticipant = playersMap[participantId];
+    const categoryRanking = playerParticipant && playerParticipant.rank;
+    const entry = {
+      participantId,
+      categoryRanking
+    }
+    return entry;
+  }
 }
 
 function getSideParticipant(side, i) {

@@ -1,8 +1,8 @@
 import React, { forwardRef } from 'react';
 
+import { matchUpsIntegrity } from 'functions/integrityCheck';
 import { Clear, Search, ViewColumn } from '@material-ui/icons';
 import { Paper } from '@material-ui/core';
-
 import MaterialTable from 'material-table';
 
 function renderSide(rowData, attribute) {
@@ -72,7 +72,9 @@ const localization = {
 
 export function MatchUpsTable(props) {
     const { matchUps } = props;
-    const components = { Container: props => <Paper {...props} elevation={0}/> }
+    const components = { Container: props => <Paper {...props} elevation={0}/> };
+
+    matchUpsIntegrity({matchUps});
 
     const title = `Matches (${matchUps.length})`;
     

@@ -68,10 +68,11 @@ function getParticipants({allPlayers, allParticipants}) {
       participantId,
       participantType: INDIVIDUAL,
       name: player.last_name,
-      preferredGivenName: player.first_name,
       person: {
         personId: player.personId,
-        gender: player.gender
+        gender: player.gender,
+        preferredFamilyName: player.last_name,
+        preferredGivenName: player.first_name
       }
     }
     return participant;
@@ -99,6 +100,10 @@ function getEvents({draws}) {
       draws: [
         {
           drawId: `${drawId}-D`,
+          entryProfile: {
+
+          },
+          links: [],
           entries,
           structures
         }
@@ -114,8 +119,7 @@ function getEventEntries({eventDraws}) {
   let entriesMap = {};
   eventDraws.map(draw => {
     const entryStage = draw.structure.stage;
-    const participantIds = draw.entries.map(entry => entry.participantId);
-    return participantIds.map(participantId => ({ participantId, entryStage }));
+    return draw.entries.map(entry => Object.assign(entry, { entryStage }));
   }).flat().forEach(entry => {
     const participantId = entry.participantId;
     if (!entriesMap[participantId] || entry.entryStage === QUALIFYING) {
