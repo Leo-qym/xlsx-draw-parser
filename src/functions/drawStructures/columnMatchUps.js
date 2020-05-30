@@ -1,6 +1,7 @@
 import { unique } from 'functions/utilities';
-import { getDrawPosition } from 'functions/drawStructures/drawFx';
+import { tidyScore } from 'functions/scoreParser';
 import { normalizeScore } from 'functions/cleanScore';
+import { getDrawPosition } from 'functions/drawStructures/drawFx';
 import { getRow, getCellValue } from 'functions/dataExtraction/sheetAccess';
 
 export function getColumnMatchUps({
@@ -69,8 +70,9 @@ export function getColumnMatchUps({
 
    const columnMatchUps = columnOutcomes.map((grouping, i) => {
       const cellRow = grouping[0].cellRow;
+      const rawResult = grouping[grouping.length - 1].cellValue;
       const drawPosition = grouping[0].drawPosition;
-      const result = grouping.length === groupingLengthWithResult && normalizeScore(grouping[grouping.length - 1].cellValue);
+      const result = grouping.length === groupingLengthWithResult && normalizeScore(tidyScore(rawResult));
       const winningSide = players.filter(player => +player.drawPosition === +drawPosition);
       return {
          cellRow,
@@ -104,6 +106,7 @@ export function getExpectedRoundMatchUps({matchUps, expectedRowRanges, expectedG
    return expectedRowRanges.map(rowRange => {
       if (!rowRange.length || rowRange.length !== 2) return undefined;
       return matchUps.reduce((matchUp, candidate) => {
+         if (!candidate.winningSide || !candidate.winningSide.length) return matchUp;
          const drawPosition = candidate.winningSide[0].drawPosition;
          // candidate needs to be in the expected row range
          const inRange = candidate.cellRow >= rowRange[0] && candidate.cellRow < rowRange[1];

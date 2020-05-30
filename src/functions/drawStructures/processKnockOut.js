@@ -117,7 +117,7 @@ function getEntries({matchUps}) {
 
 function getSideParticipant(side, i) {
   const isBye = !side || side.reduce((p, c) => c.isBye, undefined);
-  if (!isBye) {
+  if (!isBye && side[0]) {
     const participantIds = side.map(player => player.participantId);
     const participantId = participantIds.sort().join('|');
     const drawPosition = side[0].drawPosition;

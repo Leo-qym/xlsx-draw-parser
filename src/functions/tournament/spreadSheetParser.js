@@ -90,6 +90,15 @@ export function spreadSheetParser(file_content) {
     const providerId = profile && profile.providerId;
     Object.assign(tournamentData, { providerId });
     createTournamentRecord({draws, allPlayers, allParticipants, tournamentData});
+  } else {
+    xlsxStore.dispatch({
+      type: 'toaster state',
+      payload: {
+        severity: 'error',
+        message: `Cannot Identify Workbook`,
+        cancelLoading: true
+      }
+    });
   }
 }
 

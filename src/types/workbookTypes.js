@@ -18,8 +18,8 @@ export const workbookTypes = [
       skipExpressions: ['[0-9,/, ]+pont', 'umpire'],
       matchOutcomes: [
         'ret.', 'RET', 'DEF.', 'Def.', 'def.', 'BYE', 'w.o',
-        'w.o.', 'W.O', 'W.O.', 'wo.', 'WO', 'Abandoned',
-        'jn betegség', 'jn.'
+        'w.o.', 'W.O', 'W.O.', 'wo.', 'WO', 'Abandoned', 'fa.',
+        'jn betegség', 'jn.', 'j n.', 'j.n.', 'jn beteg', 'jn sérülés'
       ],
       doubles: {
         drawPosition: {

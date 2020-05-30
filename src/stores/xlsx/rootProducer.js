@@ -4,6 +4,9 @@ const setToasterState = (state, action) => produce(state, draftState => {
   if (action.payload) {
     draftState.toasterState.visible = true;
     Object.assign(draftState.toasterState, action.payload);
+    if (action.payload.cancelLoading) {
+      draftState.loadingState = undefined;
+    }
   } else {
     draftState.toasterState.visible = null;
     draftState.toasterState.message = '';
