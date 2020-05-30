@@ -38,7 +38,6 @@ export function spreadSheetParser(file_content) {
     }
 
     const sheetsToProcess = sheetNames
-      .filter(sheet => workbookType.validSheet(sheet))
       .filter(sheet => !sheetFilter || sheet.toLowerCase().includes(sheetFilter.toLowerCase()));
     
     console.clear();
@@ -104,9 +103,8 @@ export function spreadSheetParser(file_content) {
 
 function identifyWorkbook({sheetNames}) {
   return workbookTypes.reduce((type, currentType) => {
-    const containsValidSheet = sheetNames.reduce((result, sheet) => currentType.validSheet(sheet) || result, false);
     const requiredSheetTest = currentType.mustContainSheetNames.map(sheetName => sheetNames.includes(sheetName));
     const containsRequiredSheets = !requiredSheetTest.includes(false);
-    return containsValidSheet && containsRequiredSheets ? currentType : type;
+    return containsRequiredSheets ? currentType : type;
   }, undefined);
 }

@@ -5,13 +5,6 @@ export const workbookTypes = [
   {
     organization: 'MTSZ', 
     mustContainSheetNames: ['Altalanos'],
-    validSheet:  sheetName => {
-      const knockout = /^[FL]{1}[1-8]{2}/.test(sheetName);
-      const roundRobin = /^[1-8.]*cs*/.test(sheetName);
-      const rrPlayoff = /^[1-8]{1}\.*nap/.test(sheetName);
-      const tournamentInfo = /^altalanos/.test(sheetName.toLowerCase());
-      return knockout || (roundRobin || rrPlayoff || tournamentInfo);
-    },
     profile: {
       providerId: 'MTSZ_07982e2f-eb41-42b2-9b75-da3054fe70a8',
       skipWords: ['umpire', '0'],
@@ -164,10 +157,10 @@ export const workbookTypes = [
         { attribute: 'categories', searchText: 'Versenyszám 1', rowOffset: 1, columnOffsets: [0,1,2,3,4] },
       ],
       drawInfo: [
-        { attribute: 'event', searchText: 'Versenyszám', rowOffset: 0, columnOffset: 4 },
         { attribute: 'event', searchText: 'Versenyszám', rowOffset: 0, columnOffset: 5 },
-        { attribute: 'gender', searchText: 'Versenyszám', rowOffset: 0, columnOffset: 4, postProcessor: 'genderParser' },
+        { attribute: 'event', searchText: 'Versenyszám', rowOffset: 0, columnOffset: 4 },
         { attribute: 'gender', searchText: 'Versenyszám', rowOffset: 0, columnOffset: 5, postProcessor: 'genderParser' },
+        { attribute: 'gender', searchText: 'Versenyszám', rowOffset: 0, columnOffset: 4, postProcessor: 'genderParser' },
         { attribute: 'dates', searchText: 'Dátum', rowOffset: 1, postProcessor: 'dateParser' },
         { attribute: 'city', searchText: 'Város', rowOffset: 1 },
         { attribute: 'category', searchText: 'Kategória', rowOffset: 1 },
@@ -195,14 +188,6 @@ export const workbookTypes = [
   {
     organization: 'HTS', 
     mustContainSheetNames: ['Pocetna', 'Rang-lista', 'Izvjestaj'],
-    validSheet:  sheetName => {
-      const nameLength = sheetName.length;
-      const Singles = sheetName.length && sheetName.slice(0,2) === 'Si';
-      const Doubles = sheetName.length && sheetName.slice(0,2) === 'Do';
-      const validDrawSize = ['RR', '4', '8', '12', '16', '24', '32', '48', '64']
-        .includes(sheetName.slice(nameLength - 2, nameLength));
-      return (Singles || Doubles) && validDrawSize;
-    },
     profile: {
       skipWords: ['umpire'],
       matchOutcomes: [
