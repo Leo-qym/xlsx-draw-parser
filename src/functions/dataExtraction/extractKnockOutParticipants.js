@@ -1,6 +1,6 @@
 import { hashId } from 'functions/utilities';
-import { getColumnMatchUps } from 'functions/drawStructures/columnMatchUps';
-import { getCellValue, numberValue } from 'functions/dataExtraction/sheetAccess';
+import { getColumnMatchUps } from 'functions/drawStructures/knockOut/columnMatchUps';
+import { getCellValue, numberValue, extractNameField } from 'functions/dataExtraction/sheetAccess';
 import { getRoundData, nameHash, lastFirstI } from 'functions/drawStructures/drawFx';
 
 export function extractKnockOutParticipants({ profile, sheet, headerRow, columns, rows, range, gender, finals, preround_rows}) {
@@ -105,8 +105,8 @@ export function extractKnockOutParticipants({ profile, sheet, headerRow, columns
         player.seed = numberValue(sheet, `${columns.seed}${seedRow}`);
       }
 
-      let firstName = getCellValue(sheet[`${columns.firstName}${row}`]);
-      let lastName = getCellValue(sheet[`${columns.lastName}${row}`]);
+      let firstName = extractNameField(sheet[`${columns.firstName}${row}`]);
+      let lastName = extractNameField(sheet[`${columns.lastName}${row}`]);
       let fullName = firstName && lastName ? `${lastName}, ${firstName}` : getCellValue(sheet[`${columns.players}${row}`]);
 
       if (extract_seed.test(fullName)) {

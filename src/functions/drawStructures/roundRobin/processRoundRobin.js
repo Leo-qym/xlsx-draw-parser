@@ -9,7 +9,7 @@ import { HEADER, FOOTER } from 'types/sheetElements';
 
 export function processRoundRobin({profile, sheet, sheetName, sheetDefinition}) {
   const message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
-  console.log(message, `color: cyan`)
+  console.log(message, `color: lightgreen`)
   
   const rowDefinitions = profile.rowDefinitions;
   const headerRowDefinition = findRowDefinition({ rowDefinitions, rowIds: sheetDefinition.rowIds, type: HEADER });

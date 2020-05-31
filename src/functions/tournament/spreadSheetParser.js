@@ -4,14 +4,16 @@ import { xlsxStore } from 'stores/xlsxStore';
 import { extractInfo } from 'functions/dataExtraction/extractInfo';
 import { workbookTypes } from 'types/workbookTypes';
 import { identifySheet } from 'functions/tournament/profileFx';
-import { processKnockOut } from 'functions/drawStructures/processKnockOut';
-import { processRoundRobin } from 'functions/drawStructures/processRoundRobin';
+import { processKnockOut } from 'functions/drawStructures/knockOut/processKnockOut';
+import { processRoundRobin } from 'functions/drawStructures/roundRobin/processRoundRobin';
 
 import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../../types/sheetTypes';
 import { createTournamentRecord } from './tournamentRecord';
 
 export function spreadSheetParser(file_content) {
+  console.clear();
   xlsxStore.dispatch({type: 'loading state', payload: true});
+
   const filterValueStorage = 'xlsxSheetFilter';
   const sheetFilter = localStorage.getItem(filterValueStorage)
   const workbook = XLSX.read(file_content, { type: 'binary' });
@@ -40,7 +42,6 @@ export function spreadSheetParser(file_content) {
     const sheetsToProcess = sheetNames
       .filter(sheet => !sheetFilter || sheet.toLowerCase().includes(sheetFilter.toLowerCase()));
     
-    console.clear();
     console.log('%c Processing sheets...', 'color: lightgreen', sheetsToProcess);
 
     let drawInfo, playersMap, participantsMap;

@@ -7,7 +7,7 @@ export const workbookTypes = [
     mustContainSheetNames: ['Altalanos'],
     profile: {
       providerId: 'MTSZ_07982e2f-eb41-42b2-9b75-da3054fe70a8',
-      skipWords: ['umpire', '0'],
+      skipWords: ['umpire', '0', 'Győztes'],
       skipExpressions: ['[0-9,/, ]+pont', 'umpire'],
       matchOutcomes: [
         'ret.', 'RET', 'DEF.', 'Def.', 'def.', 'BYE', 'w.o',

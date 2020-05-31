@@ -1,6 +1,6 @@
 import { getRoundData } from 'functions/drawStructures/drawFx';
 import { normalizeDiacritics } from 'normalize-text';
-import { getColumnMatchUps, getExpectedRoundMatchUps } from 'functions/drawStructures/columnMatchUps';
+import { getColumnMatchUps, getExpectedRoundMatchUps } from 'functions/drawStructures/knockOut/columnMatchUps';
 import { chunkArray, instanceCount, unique, isPowerOf2, generateRange } from 'functions/utilities';
 import { constructMatchUps, constructPreroundMatches } from 'functions/drawStructures/matchConstruction';
 

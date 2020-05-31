@@ -93,7 +93,9 @@ export function getColumnMatchUps({
          return !found && notFound;
       }, true);
       return notFound;
-   });
+   })
+   
+   console.log({roundColumnValues, columnMatchUps, unExpectedRoundMatchUps})
 
    // the first round matchUp expectedRowRanges are not defined, so are always unexpected
    const roundMatchUps = expectedRoundMatchUps.length ? expectedRoundMatchUps : unExpectedRoundMatchUps;

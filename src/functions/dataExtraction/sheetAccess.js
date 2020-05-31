@@ -1,4 +1,4 @@
-import { normalizeDiacritics } from 'normalize-text'
+import { normalizeDiacritics, normalizeWhiteSpaces } from 'normalize-text'
 import { unique, instanceCount } from 'functions/utilities';
 
 export function numberValue(sheet, reference) {
@@ -9,9 +9,19 @@ export function cellsContaining({sheet, term}) {
   return references.filter(ref => (sheet[ref].v + '').toLowerCase().indexOf(normalizeDiacritics(term).toLowerCase()) >= 0);
 };
 
+export function onlyNameChars(value) {
+  return normalizeWhiteSpaces(value.replace(/[^A-Za-z\-]/g, ' '));
+}
+
+export function extractNameField(cellRef) {
+  const value = getCellValue(cellRef);
+  return onlyNameChars(value);
+}
+
 export function getCellValue(cell) {
   let val = cell ? cell.v + '' : '';
   val = (typeof val === 'string') ? val.trim() : val;
+  val = normalizeWhiteSpaces(val);
   val = val.indexOf(',,') >= 0 ? val.replace(',,', ',') : val;
   val = val.indexOf(',') >= 0 ? val.split(',').map(v => v.trim()).join(', ') : val;
   return normalizeDiacritics(val);

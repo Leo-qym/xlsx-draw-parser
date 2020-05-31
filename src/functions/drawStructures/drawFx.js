@@ -1,15 +1,25 @@
 import { normalizeDiacritics } from 'normalize-text'
-import { getCellValue, getCol, getRow } from 'functions/dataExtraction/sheetAccess';
+import { getCellValue, getCol, getRow, onlyNameChars } from 'functions/dataExtraction/sheetAccess';
 import { letterValue, unique } from 'functions/utilities';
 
 export function getDrawPosition({value, players, idx = 0, expectedDrawPositions=[]}) {
+  value = onlyNameChars(value);
   // idx used in instances where there are multiple BYEs, such that they each have a unique drawPosition
   
   const matchingPlayers = players
     .filter(player => {
-      const fullNameMatch = player.full_name && normalizeDiacritics(player.full_name) === normalizeDiacritics(value)
-      const lastNameMatch = player.last_name && normalizeDiacritics(player.last_name) === normalizeDiacritics(value)
-      return fullNameMatch || lastNameMatch;
+      const fullNameMatch = player.full_name && normalizeDiacritics(player.full_name) === normalizeDiacritics(value);
+      const lastNameMatch = player.last_name && normalizeDiacritics(player.last_name) === normalizeDiacritics(value);
+     
+      // now handle situation where first initial has been added to differentiate players
+      const splitSpaceLast = value.trim().split(' ')[0];
+      const splitLastMatch = player.last_name && normalizeDiacritics(player.last_name) === normalizeDiacritics(splitSpaceLast);
+
+      const splitSpaceFirst = (value.trim().split(' ')[1] || '')[0];
+      const firstInitial = player.first_name && player.first_name[0];
+      const splitFirstInitialMatch = firstInitial && splitSpaceFirst && normalizeDiacritics(firstInitial) === normalizeDiacritics(splitSpaceFirst);
+
+      return fullNameMatch || lastNameMatch || (splitLastMatch && splitFirstInitialMatch);
     });
  
   // if more than one matching player take the player whose drawPosition matchUps the expected drawPosition

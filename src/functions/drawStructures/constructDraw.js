@@ -1,5 +1,5 @@
-import { constructRoundRobin } from "./constructRoundRobin";
-import { constructKnockOut } from "./constructKnockOut";
+import { constructRoundRobin } from "./roundRobin/constructRoundRobin";
+import { constructKnockOut } from "./knockOut/constructKnockOut";
 
 export function tournamentDraw({profile, sheet, columns, headerRow, gender, playerData, qualifying}) {
   let stage, isDoubles, matchUps = [], preround = [];

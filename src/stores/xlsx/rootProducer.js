@@ -6,6 +6,9 @@ const setToasterState = (state, action) => produce(state, draftState => {
     Object.assign(draftState.toasterState, action.payload);
     if (action.payload.cancelLoading) {
       draftState.loadingState = undefined;
+      draftState.tournamentRecord = {};
+      draftState.originalDraws = [];
+      draftState.matchUps = [];
     }
   } else {
     draftState.toasterState.visible = null;
@@ -15,6 +18,11 @@ const setToasterState = (state, action) => produce(state, draftState => {
 
 const setLoadingState = (state, action) => produce(state, draftState => {
   draftState.loadingState = action.payload;
+  if (!action.payload) {
+    draftState.tournamentRecord = {};
+    draftState.originalDraws = [];
+    draftState.matchUps = [];
+  }
 });
 
 const setTournamentRecord = (state, action) => produce(state, draftState => {
