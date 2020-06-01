@@ -8,8 +8,12 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
    const matchOutcomes = profile.matchOutcomes.map(normalizeDiacritics);
    const roundData = getRoundData({profile, sheet, columns, playerData, headerRow, matchOutcomes});
    const players = playerData.players;
-   const allDrawPositions = players.map(p=>p.drawPosition);
-   const drawPositions = unique(allDrawPositions);
+   const allDrawPositions = players.map(p=>p.drawPosition).filter(removeUndefined);
+   const uniqueDrawPositions = unique(allDrawPositions);
+   const maxUniqueDrawPosition = Math.max(...uniqueDrawPositions);
+   const maxIsOdd = maxUniqueDrawPosition % 2;
+   const maxDrawPosition = maxUniqueDrawPosition + (maxIsOdd ? 1 : 0);
+   const drawPositions = generateRange(1, maxDrawPosition + 1);
 
    // TODO: this may be insufficient for TP or HTS Doubles Draws
    const isDoubles = Math.max(...Object.values(instanceCount(allDrawPositions))) === 2;
@@ -103,3 +107,5 @@ function addEntryRound(rounds, players) {
   rounds.push(firstRoundLosers);
   return rounds;
 };
+
+function removeUndefined(entity) { return entity; }

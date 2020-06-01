@@ -93,6 +93,8 @@ export function getColumnMatchUps({
 
    const expectedRoundMatchUps = getExpectedRoundMatchUps({ matchUps: columnMatchUps, expectedRowRanges, expectedGroupings });
 
+   console.log({expectOutcomes, expectedGroupings, roundColumnValues, columnOutcomes});
+
    const unExpectedRoundMatchUps = columnMatchUps.filter(matchUp => {
       let notFound = expectedRowRanges.reduce((notFound, rowRange) => {
          if (!rowRange.length || rowRange.length !== 2) return notFound;

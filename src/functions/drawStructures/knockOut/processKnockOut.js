@@ -3,7 +3,7 @@ import { HEADER, FOOTER } from 'types/sheetElements';
 import { generateRange, hashId } from 'functions/utilities';
 import { findRow } from 'functions/dataExtraction/sheetAccess';
 import { extractInfo } from 'functions/dataExtraction/extractInfo';
-import { tournamentDraw } from 'functions/drawStructures/constructDraw';
+import { constructKnockOut } from "functions/drawStructures/knockOut/constructKnockOut";
 import { getParticipantRows } from 'functions/drawStructures/getParticipantRows';
 import { findRowDefinition, getHeaderColumns } from 'functions/tournament/profileFx';
 import { extractKnockOutParticipants } from 'functions/dataExtraction/extractKnockOutParticipants';
@@ -41,7 +41,7 @@ export function processKnockOut({profile, sheet, sheetName, sheetDefinition}) {
   const drawFormat = isDoubles ? 'DOUBLES' : 'SINGLES';
   
   const playerData = { players, rows, range, finals, preround_rows };
-  const { matchUps, stage } = tournamentDraw({profile, sheet, columns, headerRow, gender, playerData}) 
+  const { matchUps, stage } = constructKnockOut({profile, sheet, columns, headerRow, gender, playerData}) 
   const {
     entries,
     playersMap,

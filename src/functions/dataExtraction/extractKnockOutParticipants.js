@@ -8,14 +8,36 @@ export function extractKnockOutParticipants({ profile, sheet, headerRow, columns
    let playoff3rd_rows = [];
    let hasharray = [];
 
-   let isDoubles = false;
-   let expectedDrawPosition = 1;
-   
    const extract_seed = /\[(\d+)(\/\d+)?\]/;
    const rowOffset = profile.doubles.drawPosition.rowOffset;
 
-   let potentialPartner;
+   let isDoubles = false;
+
+   // handle situation where doubles partners DON'T have drawPositions
    let doublesPartners = [];
+   let expectedDrawPosition = 1;
+   let positionedPlayers = [];
+   let positionedPartners = [];
+   let positionsAreOrdered = true;
+   rows.forEach(row => {
+      const drawPosition = numberValue(sheet, `${columns.position}${row}`);
+      const player = extractPlayer({row, drawPosition, isDoubles});
+      const playerHasName = player && player.full_name;
+      const isExpected = drawPosition === expectedDrawPosition;
+      const isPrevious = drawPosition === expectedDrawPosition - 1;
+      if (isExpected) expectedDrawPosition++;
+
+      positionsAreOrdered = (!drawPosition || isExpected || isPrevious) && positionsAreOrdered;
+      if (isExpected && playerHasName) positionedPlayers.push(player);
+      if (!drawPosition && playerHasName) positionedPartners.push(player);
+      if (isPrevious && playerHasName) positionedPartners.push(player);
+   });
+
+   isDoubles = positionsAreOrdered && positionedPlayers.length === positionedPartners.length;
+
+   // handle situation where doubles partners DO have drawPositions
+   let potentialPartner;
+   expectedDrawPosition = 1;
    rows.forEach(row => {
       let drawPosition = numberValue(sheet, `${columns.position}${row}`);
       let player = extractPlayer({row, drawPosition, isDoubles});

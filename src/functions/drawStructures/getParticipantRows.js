@@ -1,6 +1,6 @@
 import { maxInstance } from 'functions/utilities';
 import { validRanking } from 'functions/validators.js';
-import { getRow, getCol, cellsContaining, getCellValue } from 'functions/dataExtraction/sheetAccess.js';
+import { getRow, getCol, cellsContaining, numberValue, getCellValue } from 'functions/dataExtraction/sheetAccess.js';
 
 export function getParticipantRows({sheet, profile, headerRow, footerRow, avoidRows, columns}) {
   if (!profile) return { rows: [], preround_rows: [] };
@@ -54,6 +54,15 @@ export function getParticipantRows({sheet, profile, headerRow, footerRow, avoidR
   let seeds = filteredKeys.filter(key => targetColumn(key, 'seed')).filter(isNumericValue).map(getRow);
   let drawPositions = filteredKeys.filter(key => targetColumn(key, 'position')).map(getRow);
   let rankings = filteredKeys.filter(key => targetColumn(key, 'rank') && validRanking(getCellValue(sheet[key]))).map(getRow);
+
+  let expectedDrawPosition = 1;
+  const drawPositionsAreOrdered = drawPositions.reduce((areOrdered, row) => {
+      let drawPosition = numberValue(sheet, `${columns.position}${row}`);
+      let isExpected = drawPosition === expectedDrawPosition;
+      if (isExpected) expectedDrawPosition++;
+      return (!drawPosition || isExpected) && areOrdered;
+  }, true);
+  const orderedStartRow = drawPositions.length && drawPositionsAreOrdered && drawPositions[0];
     
   let finals;
   
@@ -109,7 +118,7 @@ export function getParticipantRows({sheet, profile, headerRow, footerRow, avoidR
   draw_rows = draw_rows || allRows;
 
   const startRows = sources.map(source => source[0]).filter(f=>f);
-  const startRow = parseInt(maxInstance(startRows));
+  const startRow = orderedStartRow || parseInt(maxInstance(startRows));
   const endRow = draw_rows[draw_rows.length - 1];
   const range = [startRow, endRow];
 
