@@ -10,6 +10,7 @@ export function cellsContaining({sheet, term}) {
 };
 
 export function onlyNameChars(value) {
+  // eslint-disable-next-line no-useless-escape
   return normalizeWhiteSpaces(value.replace(/[^A-Za-z\-]/g, ' '));
 }
 

@@ -11,8 +11,10 @@
 
 # production
 /build
+/xlsParser
 
 # misc
+*.gz
 .DS_Store
 .env.local
 .env.development.local
