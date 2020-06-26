@@ -49,11 +49,16 @@ function getParticipants({allPlayers, allParticipants}) {
     const participantIds = pair.participantIds;
     const players = participantIds.map(participantId => allPlayers[participantId]);
     const name = players.map(player => player.last_name).join('/');
+
+    const individualParticipants = participantIds.map(participantId => {
+      const participant = { participantId };
+      return participant;
+    });
     const participant = {
       name,
       participantId,
       participantType: PAIR,
-      participantIds 
+      individualParticipants
     };
     return participant;
   }
@@ -91,7 +96,8 @@ function getEvents({draws}) {
     const eventCategory = eventDraws[0].event;
     const eventType = eventDraws[0].drawFormat;
     const eventName = [eventCategory, eventType].join(' ');
-    const structures = eventDraws.map(draw => draw.structure);
+    const structures = eventDraws.map(draw => draw.structure)
+      .filter(structure => structure.matchUps && structure.matchUps.length);
     const candidate = {
       gender,
       eventName,
