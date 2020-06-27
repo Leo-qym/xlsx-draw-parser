@@ -100,6 +100,7 @@ function getEvents({draws}) {
       .filter(structure => structure.matchUps && structure.matchUps.length);
     const candidate = {
       gender,
+      entries,
       eventName,
       eventType,
       eventId: `${drawId}-E`,
