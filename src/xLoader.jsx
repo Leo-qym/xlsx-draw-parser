@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
-import { setDev } from 'config/setDev';
 import { useSelector } from 'react-redux'
+
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
+
+import { setDev } from 'config/setDev';
 
 import { LinearProgress } from '@material-ui/core';
 import { AppBar, Fab, Toolbar } from '@material-ui/core/';
@@ -17,6 +21,26 @@ import { TournamentView } from 'components/buttons/tournamentView';
 import './App.css';
 
 setDev();
+
+i18n
+  .use(initReactI18next)
+  .init({
+    resources: {
+      en: {
+        translation: {
+          "Spreadsheet Draw Parser": "Spreadsheet Draw Parser",
+          "Upload XLS and XLSM": "Upload .XLS and .XLSM",
+          "Export ITF TODS": "Export ITF TODS"
+        }
+      }
+    },
+    lng: "en",
+    fallbackLng: "en",
+
+    interpolation: {
+      escapeValue: false
+    }
+  });
 
 const useStyles = makeStyles((theme) => ({
   spacer: { flexGrow: 1 },

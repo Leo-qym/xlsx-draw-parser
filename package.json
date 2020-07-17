@@ -14,6 +14,8 @@
     "@types/node": "^13.13.4",
     "@types/react": "^16.9.34",
     "@types/react-dom": "^16.9.7",
+    "axios": "^0.19.2",
+    "i18next": "^19.6.2",
     "immer": "^6.0.3",
     "material-table": "^1.57.2",
     "normalize-text": "^2.0.1",
