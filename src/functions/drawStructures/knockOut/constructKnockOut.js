@@ -32,6 +32,14 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
 
    let expectOutcomes = false;
    let expectedRowRanges = [];
+   let playerRows = uniqueDrawPositions.map(drawPosition => {
+      const rows = players
+         .filter(player => player.drawPosition === drawPosition)
+         .map(player => player.row).filter(p=>p);
+      return Math.min(...rows);
+   });
+   expectedRowRanges = chunkArray(playerRows, 2);
+   console.log({players, playerRows, expectedRowRanges});
 
    roundData.forEach((round, i) => {
       const {

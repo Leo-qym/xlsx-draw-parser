@@ -66,6 +66,7 @@ export function getColumnMatchUps({
    const allOutcomes = columnOutcomes.reduce((allOutcomes, grouping) => {
       return grouping.length === groupingLengthWithResult && allOutcomes;
    }, true);
+
    if (expectOutcomes) { columnOutcomes = columnOutcomes.filter(groupings => groupings.length === groupingLengthWithResult); }
 
    // still a problem if a winning name is unable to be determined...
@@ -93,8 +94,6 @@ export function getColumnMatchUps({
 
    const expectedRoundMatchUps = getExpectedRoundMatchUps({ matchUps: columnMatchUps, expectedRowRanges, expectedGroupings });
 
-   console.log({expectOutcomes, expectedGroupings, roundColumnValues, columnOutcomes});
-
    const unExpectedRoundMatchUps = columnMatchUps.filter(matchUp => {
       let notFound = expectedRowRanges.reduce((notFound, rowRange) => {
          if (!rowRange.length || rowRange.length !== 2) return notFound;
@@ -102,7 +101,18 @@ export function getColumnMatchUps({
          return !found && notFound;
       }, true);
       return notFound;
-   })
+   });
+
+   const doubleByeMatchUps = expectedGroupings.map(grouping => {
+      const isDoubleBye = grouping.reduce((isDoubelBye, drawPosition) => {
+         const matchUpPlayers = players.filter(player => grouping.includes(player.drawPosition));
+         return matchUpPlayers.reduce((isBye, player) => player.isBye && isBye, true);
+      }, true);
+      return { grouping, isDoubleBye };
+   });
+   console.log({doubleByeMatchUps});
+
+   // console.log({expectedRoundMatchUps, unExpectedRoundMatchUps});
    
    // the first round matchUp expectedRowRanges are not defined, so are always unexpected
    const roundMatchUps = expectedRoundMatchUps.length ? expectedRoundMatchUps : unExpectedRoundMatchUps;
@@ -114,7 +124,7 @@ export function getColumnMatchUps({
 export function getExpectedRoundMatchUps({matchUps, expectedRowRanges, expectedGroupings, logging}) {
    return expectedRowRanges.map(rowRange => {
       if (!rowRange.length || rowRange.length !== 2) return undefined;
-      return matchUps.reduce((matchUp, candidate) => {
+      const matchUp = matchUps.reduce((matchUp, candidate) => {
          if (!candidate.winningSide || !candidate.winningSide.length) return matchUp;
          const drawPosition = candidate.winningSide[0].drawPosition;
          // candidate needs to be in the expected row range
@@ -123,6 +133,7 @@ export function getExpectedRoundMatchUps({matchUps, expectedRowRanges, expectedG
          const expectedDrawPosition = checkGrouping({drawPosition, expectedGroupings});
          return inRange && expectedDrawPosition ? candidate : matchUp;
       }, undefined);
+      return matchUp;
    }).filter(removeUndefined);
 }
 

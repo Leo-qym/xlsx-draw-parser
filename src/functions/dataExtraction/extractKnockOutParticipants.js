@@ -65,8 +65,8 @@ export function extractKnockOutParticipants({ profile, sheet, headerRow, columns
 
       let player = extractPlayer({row, drawPosition, isDoubles});
 
-      const isBye = ['bye,', 'bye', 'byebye'].indexOf(player.hash) >= 0;
-      const notBye = ['', 'bye', 'byebye'].indexOf(player.hash) < 0;
+      const isBye = ['bye,', 'bye', 'byebye'].indexOf(player.hash) >= 0 || (player.hash === '' && drawPosition);
+      const notBye = ['bye', 'byebye'].indexOf(player.hash) < 0;
       const newPlayer = hasharray.indexOf(player.hash) < 0;
       const hasName = player.first_name && player.last_name;
       
@@ -121,7 +121,7 @@ export function extractKnockOutParticipants({ profile, sheet, headerRow, columns
    return { players, rows, playoff3rd, playoff3rd_rows, range, finals, preround, isDoubles };
 
    function extractPlayer({row, drawPosition, isDoubles}) {
-      let player = { drawPosition };
+      let player = { drawPosition, row };
       if (columns.seed) {
         const seedRow = isDoubles ? row + rowOffset : row;
         player.seed = numberValue(sheet, `${columns.seed}${seedRow}`);
