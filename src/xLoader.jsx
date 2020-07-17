@@ -28,6 +28,7 @@ i18n
     resources: {
       en: {
         translation: {
+          "name": "English",
           "Spreadsheet Draw Parser": "Spreadsheet Draw Parser",
           "Upload XLS and XLSM": "Upload .XLS and .XLSM",
           "Export ITF TODS": "Export ITF TODS"
