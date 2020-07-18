@@ -11,7 +11,8 @@
       "buttons": {
         "OK": "OK",
         "Close": "Close",
-        "Cancel": "Cancel"
+        "Cancel": "Cancel",
+        "Save": "Save"
       }
     }
   }

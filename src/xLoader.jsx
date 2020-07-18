@@ -9,6 +9,7 @@ import { KeyboardArrowUp } from '@material-ui/icons';
 import { ScrollTop } from 'components/buttons/scrollTop';
 import { LoadButton } from 'components/buttons/loadButton';
 import { AppToaster } from 'components/dialogs/AppToaster';
+import { IdiomButton } from 'components/buttons/idiomButton';
 import { ResultsContent } from 'components/panels/resultsContent';
 import { DownloadButton } from 'components/buttons/downloadButton';
 import { TournamentView } from 'components/buttons/tournamentView';
@@ -46,6 +47,7 @@ export default function App(props) {
           <Typography variant='h6' className={classes.spacer} align='center'>
             {tournamentName || ''}
           </Typography>
+          <IdiomButton />
           <LoadButton />
         </Toolbar>
       </AppBar>

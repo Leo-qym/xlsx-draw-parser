@@ -1,14 +1,19 @@
 import i18n from "i18next";
 import Cookies from "js-cookie";
-import { changeIdiom } from 'config/changeIdiom';
 import { xlsxStore } from 'stores/xlsxStore';
+import { changeIdiom, checkIdiomUpdate } from 'services/changeIdiom';
+import { idiomsAvailable } from 'services/communications/idiomService';
+import { selectIdiom } from 'components/dialogs/idiomSelector';
 
 export function setDev() {
     window.dev = {};
     addDev({i18n});
     addDev({Cookies});
     addDev({xlsxStore});
+    addDev({selectIdiom});
     addDev({changeIdiom});
+    addDev({idiomsAvailable});
+    addDev({checkIdiomUpdate});
 }
 
 let ad_errors = 0;
