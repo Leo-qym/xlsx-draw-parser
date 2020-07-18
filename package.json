@@ -1,7 +1,7 @@
 {
   "name": "xlsx-draws",
   "version": "0.1.0",
-  "homepage": ".",
+  "homepage": "xlsx-draws",
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.9.12",
