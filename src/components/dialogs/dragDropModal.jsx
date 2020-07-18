@@ -3,6 +3,7 @@ import React from 'react';
 import 'react-dropzone-uploader/dist/styles.css'
 import Dropzone from 'react-dropzone-uploader'
 
+import { useTranslation } from "react-i18next";
 import { dialogModal } from '../modals/dialogModal';
 
 export function dropModal({callback, dropzoneText, dropzoneReject, accept} = {}) {
@@ -28,6 +29,7 @@ export function dropModal({callback, dropzoneText, dropzoneReject, accept} = {})
 }
 
 const DropAccept = ({callback, dropzoneText, dropzoneReject, accept}={}) => {
+    const { t } = useTranslation();
     const handleChangeStatus = ({ meta, file }, status) => {
         if (status === 'done') {
             if (callback && typeof callback === 'function') callback(file);
@@ -38,8 +40,8 @@ const DropAccept = ({callback, dropzoneText, dropzoneReject, accept}={}) => {
 
     const getInputLabel = (files, extra) => extra.reject ? { color: 'red' } : {};
     const getInputContent = (files, extra) => {
-        let willreject = dropzoneReject || 'XLS files only';
-        let acceptable = dropzoneText || 'Drag and Drop';
+        let willreject = dropzoneReject || t('XLS files only');
+        let acceptable = dropzoneText || t('Drag and Drop');
         return extra.reject ? willreject : acceptable ;
     }
   

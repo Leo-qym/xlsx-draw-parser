@@ -1,12 +1,14 @@
 import i18n from "i18next";
-import { change } from 'functions/dev';
+import Cookies from "js-cookie";
+import { changeIdiom } from 'config/changeIdiom';
 import { xlsxStore } from 'stores/xlsxStore';
 
 export function setDev() {
     window.dev = {};
     addDev({i18n});
-    addDev({change});
+    addDev({Cookies});
     addDev({xlsxStore});
+    addDev({changeIdiom});
 }
 
 let ad_errors = 0;

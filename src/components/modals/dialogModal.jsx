@@ -5,6 +5,7 @@ import { Button, Dialog, DialogTitle, DialogActions, DialogContent } from '@mate
 import CircularProgress from '@material-ui/core/CircularProgress'
 import { makeStyles } from '@material-ui/core';
 import { TextField } from '@material-ui/core';
+import { useTranslation } from "react-i18next";
 // import { InputAdornment } from '@material-ui/core';
 // import Clear from '@material-ui/icons/Clear';
 
@@ -43,12 +44,14 @@ export const dialogModal = function() {
    };
 
    fx.confirm = ({query, okAction, cancelAction}) => {
+
+      // label must be t() value for translations
       let buttons = [
          { label: 'OK', intent: 'success', loading: false, onClick: okAction },
          { label: 'Close', intent: 'primary', onClick: cancelAction }
       ];
       let content = <h2 className='bp3-heading'> {query} </h2>;
-      fx.open({ icon: 'help', title: 'Acrtion', content, buttons })
+      fx.open({ icon: 'help', title: 'Action', content, buttons })
    };
 
    fx.open = ({icon, title, content, buttons, escapeClose, outsideClickClose, heading, onRender}={}) => {
@@ -71,16 +74,18 @@ export const dialogModal = function() {
    }
 
    function TmxButton(i) {
+      const { t } = useTranslation();
+
       return (
          <Button
-            key={i.label}
+            key={t(`buttons.${i.label}`)}
             icon={i && i.icon}
             href={i && i.href}
             intent={(i && i.intent) || ''}
             className={(i && i.className) || ''}
             onClick={clickAction}
          >
-            {!i.loading && i.label}
+            {!i.loading && t(`buttons.${i.label}`)}
             {i.loading && <SpinnerAdornment />}
          </Button>
       )
@@ -114,9 +119,13 @@ export const dialogModal = function() {
 
    function TmxDialog(props) {
       const classes = useStyles();
+      const { t } = useTranslation();
+
       const filterValueStorage = 'xlsxSheetFilter';
       const filterChanged = evt => localStorage.setItem(filterValueStorage, evt.target.value);
+
       useEffect(() => { if (props.onRender) props.onRender(); });
+
       return (
          <Dialog
             open={true}
@@ -131,8 +140,8 @@ export const dialogModal = function() {
                    onChange={filterChanged}
                    defaultValue={localStorage.getItem(filterValueStorage)}
                    className={classes.sheetFilter}
-                   placeholder="Sheet Filter"
-                   label="Sheet Filter"
+                   placeholder={t("Sheet Filter")}
+                   label={t("Sheet Filter")}
                />
             </DialogTitle>
             <DialogContent>

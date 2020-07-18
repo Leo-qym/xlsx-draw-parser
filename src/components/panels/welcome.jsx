@@ -21,9 +21,6 @@ export function Welcome() {
       <Typography variant="h4" component="h2" gutterBottom>
         {t('Export ITF TODS')}
       </Typography>
-      <Typography variant="h4" component="h2" gutterBottom>
-        {t('name')}
-      </Typography>
       <LogoTODS />
     </Box>
 </div>

@@ -1,0 +1,18 @@
+{
+  "en": {
+    "translation": {
+      "Idiom": "English",
+      "Spreadsheet Draw Parser": "Spreadsheet Draw Parser",
+      "Upload XLS and XLSM": "Upload .XLS and .XLSM",
+      "Export ITF TODS": "Export ITF TODS",
+      "Sheet Filter": "Sheet Filter",
+      "Drag and Drop": "Drag and Drop",
+      "XLS files only": "XLS files only",
+      "buttons": {
+        "OK": "OK",
+        "Close": "Close",
+        "Cancel": "Cancel"
+      }
+    }
+  }
+}
