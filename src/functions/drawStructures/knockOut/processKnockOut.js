@@ -1,5 +1,6 @@
 import { HEADER, FOOTER } from 'types/sheetElements';
 
+import { getEntries } from '../getEntries';
 import { generateRange, hashId } from 'functions/utilities';
 import { findRow } from 'functions/dataExtraction/sheetAccess';
 import { extractInfo } from 'functions/dataExtraction/extractInfo';
@@ -86,9 +87,12 @@ export function processKnockOut({profile, sheet, sheetName, sheetDefinition}) {
   Object.assign(drawInfo, { drawId, stage, matchUps, structure, entries });
   matchUps.forEach(matchUp => matchUp.event = drawInfo.event);
 
+  console.log({drawInfo});
+
   return { drawInfo, playersMap, participantsMap };
 }
 
+/*
 function getEntries({matchUps}) {
   const matchUpSides = matchUps
     .map(matchUp => [matchUp.winningSide, matchUp.losingSide])
@@ -141,3 +145,5 @@ function getSideParticipant(side, i) {
     return participant;
   }
 }
+
+*/

@@ -64,7 +64,7 @@ export function spreadSheetParser(file_content) {
         draws.push(drawInfo);
       } else if (processSheet && sheetDefinition.type === ROUND_ROBIN) {
         ({ drawInfo, playersMap, participantsMap } = processRoundRobin({profile, sheet, sheetName, sheetDefinition}));
-        console.log({drawInfo});
+        draws.push(drawInfo);
       } else if (processSheet && sheetDefinition.type === PARTICIPANTS) {
         message = `%c sheetDefinition for ${sheetName} is ${sheetDefinition.type}`;
         console.log(message, `color: ${color}`)
@@ -84,7 +84,6 @@ export function spreadSheetParser(file_content) {
 
       Object.assign(allPlayers, playersMap || {});
       Object.assign(allParticipants, participantsMap || {});
-      
     });
     
     const providerId = profile && profile.providerId;

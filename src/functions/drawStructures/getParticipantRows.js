@@ -1,6 +1,6 @@
 import { maxInstance } from 'functions/utilities';
-import { validRanking } from 'functions/validators.js';
-import { getRow, getCol, cellsContaining, numberValue, getCellValue } from 'functions/dataExtraction/sheetAccess.js';
+import { validRanking } from 'functions/validators';
+import { getRow, getCol, cellsContaining, numberValue, getCellValue } from 'functions/dataExtraction/sheetAccess';
 
 export function getParticipantRows({sheet, profile, headerRow, footerRow, avoidRows, columns}) {
   if (!profile) return { rows: [], preround_rows: [] };
