@@ -1,0 +1,16 @@
+{
+  "Idiom": "Serbian",
+  "Spreadsheet Draw Parser": "This is Serbian",
+  "Upload XLS and XLSM": "Töltse fel az XLS és az XLSM fájlokat",
+  "Export ITF TODS": "Exportál ITF TODS",
+  "Sheet Filter": "Lapos Szűrő",
+  "Drag and Drop": "Húzza és vidd",
+  "XLS files only": "XLS files only",
+  "Select Language": "Select Language",
+  "buttons": {
+    "OK": "Rendben",
+    "Close": "Bezárás",
+    "Cancel": "Megszünteti",
+    "Save": "Save"
+  }
+}

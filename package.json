@@ -16,6 +16,7 @@
     "@types/react-dom": "^16.9.7",
     "axios": "^0.19.2",
     "i18next": "^19.6.2",
+    "i18next-http-backend": "^1.0.17",
     "immer": "^6.0.3",
     "js-cookie": "^2.2.1",
     "material-table": "^1.57.2",
