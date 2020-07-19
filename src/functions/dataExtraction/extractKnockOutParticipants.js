@@ -72,6 +72,7 @@ export function extractKnockOutParticipants({ profile, sheet, headerRow, columns
       
       if (isBye) {
          player.isBye = true;
+         player.full_name = 'BYE';
          players.push(player);
          expectedDrawPosition = drawPosition + 1;
       } else if ( notBye && newPlayer && hasName) {
@@ -80,6 +81,7 @@ export function extractKnockOutParticipants({ profile, sheet, headerRow, columns
          expectedDrawPosition = drawPosition + 1;
       } else if (drawPosition === expectedDrawPosition) {
          player.isBye = true;
+         player.full_name = 'BYE';
          players.push(player);
          expectedDrawPosition = drawPosition + 1;
       } else {

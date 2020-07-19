@@ -90,6 +90,7 @@ function getEvents({draws}) {
     const [event, format] = type.split('|');
     const eventDraws = draws
       .filter(draw => draw.event === event && draw.drawFormat === format)
+    if (!eventDraws.length) return events;
     const drawId = eventDraws[0].drawId;
     const entries = getEventEntries({eventDraws});
     const gender = eventDraws[0].gender;

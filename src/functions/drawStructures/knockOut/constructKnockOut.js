@@ -39,7 +39,7 @@ export function constructKnockOut({ profile, sheet, columns, headerRow, gender, 
       return Math.min(...rows);
    });
    expectedRowRanges = chunkArray(playerRows, 2);
-   console.log({players, playerRows, expectedRowRanges});
+   // console.log({players, playerRows, expectedRowRanges});
 
    roundData.forEach((round, i) => {
       const {
