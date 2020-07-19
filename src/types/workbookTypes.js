@@ -12,7 +12,8 @@ export const workbookTypes = [
       matchOutcomes: [
         'ret.', 'RET', 'DEF.', 'Def.', 'def.', 'BYE', 'w.o',
         'w.o.', 'W.O', 'W.O.', 'wo.', 'WO', 'Abandoned', 'fa.',
-        'jn betegség', 'jn.', 'j n.', 'j.n.', 'jn beteg', 'jn sérülés'
+        'jn betegség', 'jn.', 'j n.', 'j.n.', 'jn beteg', 'jn sérülés',
+        'feladta', 'megserult'
       ],
       doubles: {
         drawPosition: {

@@ -5,6 +5,9 @@ import { changeIdiom, checkIdiomUpdate } from 'services/changeIdiom';
 import { idiomsAvailable } from 'services/communications/idiomService';
 import { selectIdiom } from 'components/dialogs/idiomSelector';
 
+import { tidyScore } from 'functions/scoreParser';
+import { normalizeScore } from 'functions/cleanScore';
+
 export function setDev() {
     window.dev = {};
     addDev({i18n});
@@ -14,6 +17,9 @@ export function setDev() {
     addDev({changeIdiom});
     addDev({idiomsAvailable});
     addDev({checkIdiomUpdate});
+
+    addDev({tidyScore});
+    addDev({normalizeScore});
 }
 
 let ad_errors = 0;

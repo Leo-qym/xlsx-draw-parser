@@ -81,7 +81,7 @@ export function getRoundData({sheet, columns, headerRow, profile, playerData, ro
       .filter(ref => {
          const cellValue = getCellValue(sheet[ref]);
          const valid = scoreOrPlayer({ cellValue, players, matchOutcomes });
-         if (!valid && column === "K") console.log({cellValue});
+         // if (!valid && column === "K") console.log({cellValue});
          return valid;
       });
     return { column, columnReferences, cellReferences };

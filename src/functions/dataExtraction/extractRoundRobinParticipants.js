@@ -1,3 +1,5 @@
+import { tidyScore } from 'functions/scoreParser';
+import { normalizeScore } from 'functions/cleanScore';
 import { hashId, generateRange } from 'functions/utilities';
 import { nameHash, lastFirstI } from 'functions/drawStructures/drawFx';
 import { getRow, getCellValue, numberValue } from 'functions/dataExtraction/sheetAccess';
@@ -75,12 +77,16 @@ export function extractRoundRobinParticipants({ profile, sheet, columns, rows, r
       const vs = rowValues.indexOf('vs.');
       const side1 = playerByLastName({lastName: rowValues[vs - 1]});
       const side2 = playerByLastName({lastName: rowValues[vs + 1]});
+      if (!side1 || !side2) {
+        console.log({rowValues});
+        return undefined;
+      }
       const result = rowValues[vs + 2];
-      const winnerIndex = getWinnerIndex(result);
+      const { winnerIndex, score } = getWinnerIndex(result) || {};
       const winningSide = winnerIndex ? [side2] : [side1];
       const losingSide = winnerIndex ? [side1] : [side2];
       const matchUp = {
-        result,
+        result: score,
         gender,
         losingSide,
         winningSide,
@@ -89,13 +95,14 @@ export function extractRoundRobinParticipants({ profile, sheet, columns, rows, r
         drawPositions: [side1.drawPosition, side2.drawPosition],
       };
       return matchUp;
-    })
+    }).filter(f=>f);
     return playoffMatchUps;
   }
 
   function playerByLastName({lastName}) {
+    const last = lastName.split(' ')[0];
     return players.reduce((player, candidate) => {
-      return candidate.last_name === lastName ? candidate : player;
+      return candidate.last_name === last ? candidate : player;
     }, undefined);
   }
 
@@ -120,11 +127,11 @@ export function extractRoundRobinParticipants({ profile, sheet, columns, rows, r
 
     const matchUps = opponents.map((opponent, i) => {
       const result = results[i];
-      const winnerIndex = result && getWinnerIndex(result);
+      const { winnerIndex, score } = (result && getWinnerIndex(result)) || {};
       const winningSide = winnerIndex ? [opponent] : [participant];
       const losingSide = winnerIndex ? [participant] : [opponent];
       const matchUp = {
-        result,
+        result: score,
         gender,
         losingSide,
         winningSide,
@@ -138,16 +145,25 @@ export function extractRoundRobinParticipants({ profile, sheet, columns, rows, r
     return { matchUps };
   }
 
-  function getWinnerIndex(score) {
-    if (score === 'jn') return 0;
-    if (score === 'megsérült') return 1;
-    if (score === 'feladta') return 1;
-    const sets = score.split(' ');
+  function getWinnerIndex(result) {
+    if (result.indexOf('jn') === 0) {
+      return { winnerIndex: 0, score: 'W.O.' };
+    }
+    if (result === 'megsérült') {
+      return { winnerIndex: 1, score: 'W.O.' };
+    }
+    if (result === 'feladta') {
+      return { winnerIndex: 1, score: 'W.O.' };
+    }
+    let score = normalizeScore(tidyScore(result));
+    let testScore = normalizeScore(score.replace(/\([0-9]+\)/g, ''));
+    const sets = testScore.split(' ');
     const wins = sets.map(set => {
-      let sideScores = set.split('/').map(s=>parseInt(s));
+      let sideScores = set.split('-').map(s=>parseInt(s));
       return sideScores[0] > sideScores[1] ? 1 : 0;
     }).reduce((a, b) => a + b);
-    return wins > (sets.length / 2) ? 0 : 1;
+    let winnerIndex = wins > (sets.length / 2) ? 0 : 1;
+    return { winnerIndex, score };
   }
 
   function extractPlayer({row, drawPosition, isDoubles}) {
