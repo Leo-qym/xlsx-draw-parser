@@ -67,7 +67,7 @@ export function processRoundRobin({profile, sheet, sheetName, sheetDefinition}) 
       matchUpId,
       drawPositions,
       score: matchUp.result,
-      roundName: 'RR',
+      roundName: matchUp.roundName,
       winningSide
     };
   });
@@ -85,7 +85,7 @@ export function processRoundRobin({profile, sheet, sheetName, sheetDefinition}) 
   };
  
   Object.assign(drawInfo, { drawId, stage, matchUps, structure, entries });
-  console.log({drawInfo});
+  matchUps.forEach(matchUp => matchUp.event = drawInfo.event);
 
   return { drawInfo, playersMap, participantsMap };
 }

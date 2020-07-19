@@ -87,8 +87,6 @@ export function processKnockOut({profile, sheet, sheetName, sheetDefinition}) {
   Object.assign(drawInfo, { drawId, stage, matchUps, structure, entries });
   matchUps.forEach(matchUp => matchUp.event = drawInfo.event);
 
-  console.log({drawInfo});
-
   return { drawInfo, playersMap, participantsMap };
 }
 

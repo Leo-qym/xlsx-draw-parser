@@ -14,10 +14,10 @@ export function extractRoundRobinParticipants({ profile, sheet, columns, rows, r
   let players = [];
   let playerRows = [];
   let resultRows = [];
-  let playoffRows = [];
   let drawPositions = [];
   let playerLastNames = [];
   let groupMemberCount = {};
+  let playoffRowValues = [];
   let bracketHeaderRows = [];
   const extract_seed = /\[(\d+)(\/\d+)?\]/;
   const rowOffset = profile.doubles.drawPosition.rowOffset;
@@ -43,7 +43,7 @@ export function extractRoundRobinParticipants({ profile, sheet, columns, rows, r
       } else {
         const inRow = key => getRow(key) === row;
         const rowKeys = Object.keys(sheet).filter(inRow).filter(isSingleAlpha);
-        const rowValues = rowKeys.map(getValue);
+        const rowValues = rowKeys.map(getValue).filter(f=>f);
 
         const rowValuesIncludePlayers = rowValues.reduce((includePlayers, value) => {
           return playerLastNames.includes(value) ? true : includePlayers;
@@ -53,7 +53,9 @@ export function extractRoundRobinParticipants({ profile, sheet, columns, rows, r
         }, false);
 
         if (rowValuesIncludePlayers) bracketHeaderRows.push(row);
-        if (rowIsPlayoff) playoffRows.push(row);
+        if (rowIsPlayoff && rowValues.length > 4) {
+          playoffRowValues.push(rowValues);
+        }
       }
     }
   });
@@ -62,7 +64,40 @@ export function extractRoundRobinParticipants({ profile, sheet, columns, rows, r
     return extractMatchUps({bracketHeaderRows, groupMemberCount, row, players}).matchUps;
   }).flat(Infinity);
 
+  let playoffMatchUps = getPlayoffMatchUps({playoffRowValues});
+
+  matchUps = matchUps.concat(playoffMatchUps);
+
   return { players, matchUps, isDoubles };
+
+  function getPlayoffMatchUps({playoffRowValues}) {
+    let playoffMatchUps = playoffRowValues.map(rowValues => {
+      const vs = rowValues.indexOf('vs.');
+      const side1 = playerByLastName({lastName: rowValues[vs - 1]});
+      const side2 = playerByLastName({lastName: rowValues[vs + 1]});
+      const result = rowValues[vs + 2];
+      const winnerIndex = getWinnerIndex(result);
+      const winningSide = winnerIndex ? [side2] : [side1];
+      const losingSide = winnerIndex ? [side1] : [side2];
+      const matchUp = {
+        result,
+        gender,
+        losingSide,
+        winningSide,
+        roundName: 'Playoff',
+        matchType: SINGLES,
+        drawPositions: [side1.drawPosition, side2.drawPosition],
+      };
+      return matchUp;
+    })
+    return playoffMatchUps;
+  }
+
+  function playerByLastName({lastName}) {
+    return players.reduce((player, candidate) => {
+      return candidate.last_name === lastName ? candidate : player;
+    }, undefined);
+  }
 
   function extractMatchUps({bracketHeaderRows, groupMemberCount, row, players}) {
     const groupNumber = bracketHeaderRows.reduce((groupNumber, headerRow, i) => {
@@ -71,14 +106,14 @@ export function extractRoundRobinParticipants({ profile, sheet, columns, rows, r
     const previousGroupMemberCount = generateRange(1, groupNumber).reduce((count, groupNumber) => {
       return count + groupMemberCount[groupNumber];
     }, 0);
-    
+
     const inRow = key => getRow(key) === row;
     const rowKeys = Object.keys(sheet).filter(inRow).filter(isSingleAlpha);
     const rowValues = rowKeys.map(getValue);
     const drawPosition = rowValues[0];
     const results = rowValues.slice(2);
     const participant = players.reduce((player, candidate) => candidate.drawPosition === drawPosition ? candidate : player, undefined);
-
+    
     const opponents = players
       .filter(player => player.drawPosition !== drawPosition)
       .slice(previousGroupMemberCount);
@@ -90,9 +125,11 @@ export function extractRoundRobinParticipants({ profile, sheet, columns, rows, r
       const losingSide = winnerIndex ? [participant] : [opponent];
       const matchUp = {
         result,
+        gender,
         losingSide,
         winningSide,
         groupNumber,
+        roundName: 'RR',
         matchType: SINGLES,
         drawPositions: [drawPosition, opponent.drawPosition],
       };
