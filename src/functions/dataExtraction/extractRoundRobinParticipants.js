@@ -1,21 +1,28 @@
-import { hashId } from 'functions/utilities';
+import { hashId, generateRange } from 'functions/utilities';
 import { nameHash, lastFirstI } from 'functions/drawStructures/drawFx';
 import { getRow, getCellValue, numberValue } from 'functions/dataExtraction/sheetAccess';
 import { SINGLES } from 'types/todsConstants';
 
 export function extractRoundRobinParticipants({ profile, sheet, columns, rows, range, gender, finals, preround_rows}) {
+  const getValue = key => getCellValue(sheet[key]);
+  const isNumeric = value => /^\d+(a)?$/.test(value);
+  const isSingleAlpha = key => key && key.length > 1 && isNumeric(key[1]);
   
-  let players = [];
   let isDoubles = false;
   let lastDrawPositionCharCode;
 
+  let players = [];
   let playerRows = [];
   let resultRows = [];
+  let playoffRows = [];
   let drawPositions = [];
+  let playerLastNames = [];
+  let groupMemberCount = {};
+  let bracketHeaderRows = [];
   const extract_seed = /\[(\d+)(\/\d+)?\]/;
   const rowOffset = profile.doubles.drawPosition.rowOffset;
   const drawPositionIsNumber = false;
- 
+
   rows.forEach(row => {
     const drawPosition = drawPositionIsNumber ? numberValue(sheet, `${columns.position}${row}`) : getCellValue(sheet[`${columns.position}${row}`]);
     const dpcc = drawPosition.charCodeAt();
@@ -25,30 +32,57 @@ export function extractRoundRobinParticipants({ profile, sheet, columns, rows, r
       drawPositions.push(drawPosition);
       players.push(player);
       playerRows.push(row);
+      playerLastNames.push(player.last_name.toUpperCase());
     } else if (drawPosition) {
       if (drawPositions.includes(drawPosition)) {
         resultRows.push(row);
+        const playerGroup = bracketHeaderRows.length;
+        if (playerGroup) {
+          groupMemberCount[playerGroup] = (groupMemberCount[playerGroup] || 0) + 1;
+        }
+      } else {
+        const inRow = key => getRow(key) === row;
+        const rowKeys = Object.keys(sheet).filter(inRow).filter(isSingleAlpha);
+        const rowValues = rowKeys.map(getValue);
+
+        const rowValuesIncludePlayers = rowValues.reduce((includePlayers, value) => {
+          return playerLastNames.includes(value) ? true : includePlayers;
+        }, false);
+        const rowIsPlayoff = rowValues.reduce((rowIsPlayoff, value) => {
+          return value === 'vs.' ? true : rowIsPlayoff;
+        }, false);
+
+        if (rowValuesIncludePlayers) bracketHeaderRows.push(row);
+        if (rowIsPlayoff) playoffRows.push(row);
       }
     }
   });
 
   let matchUps = resultRows.map(row => {
-    return extractMatchUps({row, players}).matchUps;
+    return extractMatchUps({bracketHeaderRows, groupMemberCount, row, players}).matchUps;
   }).flat(Infinity);
 
   return { players, matchUps, isDoubles };
 
-  function extractMatchUps({row, players}) {
-    const getValue = key => getCellValue(sheet[key]);
+  function extractMatchUps({bracketHeaderRows, groupMemberCount, row, players}) {
+    const groupNumber = bracketHeaderRows.reduce((groupNumber, headerRow, i) => {
+      return row > headerRow ? i + 1 : groupNumber;
+    }, undefined);
+    const previousGroupMemberCount = generateRange(1, groupNumber).reduce((count, groupNumber) => {
+      return count + groupMemberCount[groupNumber];
+    }, 0);
+    
     const inRow = key => getRow(key) === row;
-    const isNumeric = value => /^\d+(a)?$/.test(value);
-    const isSingleAlpha = key => key && key.length > 1 && isNumeric(key[1]);
     const rowKeys = Object.keys(sheet).filter(inRow).filter(isSingleAlpha);
     const rowValues = rowKeys.map(getValue);
     const drawPosition = rowValues[0];
     const results = rowValues.slice(2);
     const participant = players.reduce((player, candidate) => candidate.drawPosition === drawPosition ? candidate : player, undefined);
-    const opponents = players.filter(player => player.drawPosition !== drawPosition);
+
+    const opponents = players
+      .filter(player => player.drawPosition !== drawPosition)
+      .slice(previousGroupMemberCount);
+
     const matchUps = opponents.map((opponent, i) => {
       const result = results[i];
       const winnerIndex = result && getWinnerIndex(result);
@@ -58,6 +92,7 @@ export function extractRoundRobinParticipants({ profile, sheet, columns, rows, r
         result,
         losingSide,
         winningSide,
+        groupNumber,
         matchType: SINGLES,
         drawPositions: [drawPosition, opponent.drawPosition],
       };
