@@ -12,7 +12,8 @@
         "OK": "OK",
         "Close": "Close",
         "Cancel": "Cancel",
-        "Save": "Save"
+        "Save": "Save",
+        "Load": "Load"
       }
     }
   }
